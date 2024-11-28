@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/naki/nsuns4/weapons/ntxr000"
+	"$lightwarptexture" "models/naki/shading/lightwarp"
+}
