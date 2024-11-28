@@ -1023,8 +1023,8 @@ function SWEP:Reload()
     if CurTime() < self.NextSpecialMove then return end
     self.NextSpecialMove = CurTime() + cooldownTime
 
-	self:DoAnimation("anim_kiba")
-    timer.Simple(0.4, function()
+	self:DoAnimation("slashdown")
+    timer.Simple(0.3, function()
 	
 		self:DoCombo( AttackHit1, 11, 350, 0, 0.16, "anim_kiba", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true, true)
 		ParticleEffect("[0]_chakra_charge_groundhit",ply:GetPos() + ply:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)

@@ -1045,19 +1045,21 @@ function SWEP:Reload()
 	ply:SetAnimation(PLAYER_ATTACK1)
 
 		
-	timer.Simple(0.7, function()
+	timer.Simple(0.3, function()
 
 		self:DoCombo( AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true, true)
 
-		if attachment then
-			ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
-		end
+		-- if attachment then
+		-- 	ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
+		-- end
 
+
+		-- timer.Simple(3, function()
+		-- 	ply:StopParticles()	
+		-- end)
+		
 		ply:SetHealth(ply:GetMaxHealth())
 
-		timer.Simple(3, function()
-			ply:StopParticles()	
-		end)
     end)
 
 end

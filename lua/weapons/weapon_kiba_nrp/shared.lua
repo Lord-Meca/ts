@@ -1008,13 +1008,6 @@ function SWEP:Reload()
 	self:SetHoldType("slashdown")
 	ply:SetAnimation(PLAYER_ATTACK1)	
 
-	local particleName = "[8]_lightning_armor"
-	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")	
-
-	if attachment then
-		ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
-	end
-
     timer.Simple(0.4, function()
 	
 		ply:EmitSound("ambient/levels/labs/electric_explosion1.wav")
