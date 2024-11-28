@@ -1075,7 +1075,7 @@ function SWEP:Reload()
 	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Hand")
 
 
-    timer.Simple(0.7, function()
+    timer.Simple(0.3, function()
 
 		self:DoCombo( AttackHit1, 11, 280, 0, 0.16, "weapon_art", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true)
 		ply:EmitSound("ambient/explosions/explode_4.wav")
