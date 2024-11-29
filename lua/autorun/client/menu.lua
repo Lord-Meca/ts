@@ -6,7 +6,8 @@ local QM_entity_names = {
 	"weapon_kubikiribocho_nrp",
 	"weapon_kabutowari_nrp",
 	"weapon_samehada_nrp",
-	"weapon_shibuki_nrp"
+	"weapon_shibuki_nrp",
+	"salamander_invoke"
 }
 local QM_hud_names = {
     "Mains",
@@ -15,12 +16,13 @@ local QM_hud_names = {
 	"Kubikiribocho",
 	"Kabutowari",
 	"Samehada",
-	"Shibuki"
+	"Shibuki",
+	"Salamandre"
 }
 local QM_OpenKey = KEY_X
 
 function QM_Hover_Handler(i, mustPaint)
-    local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
+    local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
     
     local baseSize = 100
     local hoverSize = 150  
@@ -41,7 +43,7 @@ function QM_Hover_Handler(i, mustPaint)
 end
 
 function RefreshRingHud()
-    for i = 1, 7 do
+    for i = 1, 8 do
         QM_RingHud_Items[i]:SetText(QM_hud_names[i])
    
         QM_RingHud_Items[i].OnMousePressed = function()
@@ -66,8 +68,8 @@ end
 
 function CreateRingHud()
 	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 200  
-	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png"}
-	for i=1, 7 do
+	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png"}
+	for i=1, 8 do
 		local QM_HudButton = vgui.Create("DButton")
 		QM_HudButton:SetPos(startX, startY + (i-1) * 85)  
 		QM_HudButton:SetSize(80,80)
@@ -88,7 +90,7 @@ function CreateRingHud()
 end
 
 function ShowRingHud()
-	for i=1, 7 do
+	for i=1, 8 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(true)
 		end
@@ -96,7 +98,7 @@ function ShowRingHud()
 end
 
 function HideRingHud()
-	for i=1, 7 do
+	for i=1, 8 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(false)
 		end
