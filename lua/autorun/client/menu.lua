@@ -45,7 +45,8 @@ function RefreshRingHud()
         QM_RingHud_Items[i]:SetText(QM_hud_names[i])
    
         QM_RingHud_Items[i].OnMousePressed = function()
-      
+
+            RunConsoleCommand("give", QM_entity_names[i])
             RunConsoleCommand("use", QM_entity_names[i])
        
         end
