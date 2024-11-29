@@ -1044,8 +1044,8 @@ end
 
 function SWEP:Reload()
     local ply = self.Owner
-
 	local entity = Entity(self.bleedEntityIndex)
+
 	if IsValid(entity) then
 
 		if CurTime() < self.NextFinalSpecialMove then return end
@@ -1057,61 +1057,62 @@ function SWEP:Reload()
 		local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
 
 		self:DoAnimation("anim_jashin")
+		if SERVER then
+			timer.Simple(0.5, function()
 
-		timer.Simple(0.5, function()
-
-			ply:EmitSound(AttackHit1)
-			ply:Freeze(true)
-			ply:SetHealth(ply:GetMaxHealth())
-			if attachment then
-				ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
-			end
-
-			local damageInfo = DamageInfo()
-			damageInfo:SetDamage(entity:GetMaxHealth()) 
-			damageInfo:SetAttacker(ply) 
-			damageInfo:SetInflictor(self) 
-			entity:TakeDamageInfo(damageInfo)
-
-			net.Start("DisplayDamage")
-			net.WriteInt(entity:GetMaxHealth(), 32)
-			net.WriteEntity(entity)
-			net.Send(ply)
-
-			local modelEntity = ents.Create("prop_physics")
-			if IsValid(modelEntity) then
-				modelEntity:SetModel("models/yuno/tahlesfou.mdl")
-				
-			
-				modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 0)) 
-				modelEntity:SetAngles(Angle(0, 0, 0))
-				modelEntity:SetColor(Color(255, 0, 0, 255))
-				modelEntity:SetModelScale(1)
-				modelEntity:Spawn()
-
-				local physObj = modelEntity:GetPhysicsObject()
-				if IsValid(physObj) then
-					physObj:EnableMotion(false)
+				ply:EmitSound(AttackHit1)
+				ply:Freeze(true)
+				ply:SetHealth(ply:GetMaxHealth())
+				if attachment then
+					ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
 				end
 
-		
-				timer.Simple(3, function()
-					ply:StopParticles()
-					if IsValid(modelEntity) then
+				local damageInfo = DamageInfo()
+				damageInfo:SetDamage(entity:GetMaxHealth()) 
+				damageInfo:SetAttacker(ply) 
+				damageInfo:SetInflictor(self) 
+				entity:TakeDamageInfo(damageInfo)
 
-						modelEntity:Remove()
-						
+				net.Start("DisplayDamage")
+				net.WriteInt(entity:GetMaxHealth(), 32)
+				net.WriteEntity(entity)
+				net.Send(ply)
+
+				local modelEntity = ents.Create("prop_physics")
+				if IsValid(modelEntity) then
+					modelEntity:SetModel("models/yuno/tahlesfou.mdl")
+					
+				
+					modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 0)) 
+					modelEntity:SetAngles(Angle(0, 0, 0))
+					modelEntity:SetColor(Color(255, 0, 0, 255))
+					modelEntity:SetModelScale(1)
+					modelEntity:Spawn()
+
+					local physObj = modelEntity:GetPhysicsObject()
+					if IsValid(physObj) then
+						physObj:EnableMotion(false)
 					end
-					ply:Freeze(false)
-				end)
 
-			end
+			
+					timer.Simple(3, function()
+						ply:StopParticles()
+						if IsValid(modelEntity) then
+
+							modelEntity:Remove()
+							
+						end
+						ply:Freeze(false)
+					end)
+
+				end
 
 
 
 
 
-		end)
+			end)
+		end
 	end
 
     if CurTime() < self.NextSpecialMove then return end
