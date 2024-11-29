@@ -759,7 +759,7 @@ local function progressiveHeal(ply)
 end
 
 --==================--
-function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, anim, viewbob, primarystuntime, stuntime, sound, sounddelay, hastrail, haspush, push, pushdelay, aircombo ,pushenemy)
+function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, anim, viewbob, primarystuntime, stuntime, sound, sounddelay, hastrail, haspush, push, pushdelay, aircombo ,pushenemy, weaponart)
 	local ply = self.Owner
 	self.back = false
 	self.combo = combonumber
@@ -848,18 +848,21 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		net.WriteEntity(v)
 		net.Send(ply)
 
-        timer.Create("KubiProgressiveHeal", 1, 5, function()
-            progressiveHeal(ply)
-        end)
-        if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
-            ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_c", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
-        end
+		if weaponart then
+			timer.Create("KubiProgressiveHeal", 1, 5, function()
+				progressiveHeal(ply)
+			end)
+			if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
+				ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
+			end
 
-        timer.Simple(5, function()
-            if IsValid(ply) then
-                ply:StopParticles()
-            end
-        end)
+			timer.Simple(5, function()
+				if IsValid(ply) then
+					ply:StopParticles()
+				end
+			end)
+		end
+
 		v:TakeDamageInfo( dmg )	ParticleEffect("blood_advisor_puncture",v:GetPos() + v:GetForward() * 0 + Vector( 0, 0, 40 ),Angle(0,45,0),nil)
 		if aircombo == true then
 			
@@ -927,7 +930,7 @@ if self.Owner:KeyDown(IN_WALK) and self.Owner:KeyDown(IN_ATTACK) and (self.Owner
 else
 if self.Owner:IsOnGround() then
 if self.combo == 11 then
-	self:DoCombo( AttackHit1, 11, 22, 1.2, 0.16, "g_combo1", Angle(3, -3, 0),0.3, 0.7, Combo1, 0.14, false, true, 150, 0.2,false)
+	self:DoCombo( AttackHit1, 11, 22, 1.2, 0.16, "g_combo1", Angle(3, -3, 0),0.3, 0.7, Combo1, 0.14, false, true, 150, 0.2,false,false,false )
 	self.combo = 12
 timer.Simple(1, function()
 	if self.combo == 12 then
@@ -935,7 +938,7 @@ timer.Simple(1, function()
 	end
 end)
 elseif self.combo == 12 then
-	self:DoCombo( AttackHit2, 12, 23, 1.2, 0.15, "g_combo2", Angle(1, 3, 0), 0.4, 0.8, Combo4, 0.12, false, true, 230, 0.2,false )
+	self:DoCombo( AttackHit2, 12, 23, 1.2, 0.15, "g_combo2", Angle(1, 3, 0), 0.4, 0.8, Combo4, 0.12, false, true, 230, 0.2,false,false,false  )
 	self.combo = 13
 timer.Simple(1, function()
 	if self.combo == 13 then
@@ -943,7 +946,7 @@ timer.Simple(1, function()
 	end
 end)
 elseif self.combo == 13 then
-	self:DoCombo( AttackHit1, 13, 26, 1.2,  0.17, "g_combo3", Angle(-2, -3, 0),0.3, 0.9, Combo2, 0.17, false, true, 300, 0.2,false )
+	self:DoCombo( AttackHit1, 13, 26, 1.2,  0.17, "g_combo3", Angle(-2, -3, 0),0.3, 0.9, Combo2, 0.17, false, true, 300, 0.2,false,false,false  )
 	self.combo = 14
 timer.Simple(0.8, function()
 	if self.combo == 14 then
@@ -957,7 +960,7 @@ timer.Simple(0.8, function()
 end)
 elseif self.combo == 14 then
 self.Owner:EmitSound(Ready)
-	self:DoCombo( Stapout, 14, 57, 2.7, 0.4, "g_combo4", Angle(3, -5, 0), 1.3, 1.2, Combo3, 0.4, true, true, 600, 0.3, false, true,false )
+	self:DoCombo( Stapout, 14, 57, 2.7, 0.4, "g_combo4", Angle(3, -5, 0), 1.3, 1.2, Combo3, 0.4, true, true, 600, 0.3, false, true,false,false,false  )
 	self.combo = 11
 	self.Owner:EmitSound(Cloth)
 elseif self.combo == 15 then
@@ -972,7 +975,7 @@ end
 end
 if not self.Owner:IsOnGround() then
 if self.combo == 11 then
-	self:DoCombo( AttackHit2, 21, 22, 1.2, 0.16, "a_combo1", Angle(3, -3, 0), 0.25, 0.7, Combo1, 0.14, false, false, 150, 0.2 , true,false)
+	self:DoCombo( AttackHit2, 21, 22, 1.2, 0.16, "a_combo1", Angle(3, -3, 0), 0.25, 0.7, Combo1, 0.14, false, false, 150, 0.2 , true,false,false,false )
 	self.combo = 12
 timer.Simple(1, function()
 	if self.combo == 12 then
@@ -980,7 +983,7 @@ timer.Simple(1, function()
 	end
 end)
 elseif self.combo == 12 then
-	self:DoCombo( AttackHit1, 22, 22, 1.2, 0.15, "a_combo2", Angle(-2, 3, 0), 0.25, 0.8, Combo4, 0.12, false, false, 230, 0.2, true,false )
+	self:DoCombo( AttackHit1, 22, 22, 1.2, 0.15, "a_combo2", Angle(-2, 3, 0), 0.25, 0.8, Combo4, 0.12, false, false, 230, 0.2, true,false,false,false  )
 	self.combo = 13
 timer.Simple(1, function()
 	if self.combo == 13 then
@@ -988,7 +991,7 @@ timer.Simple(1, function()
 	end
 end)
 elseif self.combo == 13 then
-	self:DoCombo( AttackHit1, 23, 23, 1.2, 0.15, "a_combo3", Angle(1, 3, 0), 0.32, 0.8, Combo2, 0.12, false, false, 230, 0.2, true,false )
+	self:DoCombo( AttackHit1, 23, 23, 1.2, 0.15, "a_combo3", Angle(1, 3, 0), 0.32, 0.8, Combo2, 0.12, false, false, 230, 0.2, true,false,false,false )
 	self.combo = 14
 timer.Simple(1, function()
 	if self.combo == 14 then
@@ -1074,7 +1077,7 @@ function SWEP:Reload()
     self:DoAnimation("weapon_art")
 
     timer.Simple(0.3, function()
-        self:DoCombo(AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0), 0, 0, Combo1, 0.14, false, false, 0, 0, false, true, true)
+        self:DoCombo(AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0), 0, 0, Combo1, 0.14, false, false, 0, 0, false, true, true, true)
 
 
     end)
