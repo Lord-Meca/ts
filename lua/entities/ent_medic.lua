@@ -27,7 +27,7 @@ end
 function ENT:Initialize()
     if CLIENT then return end
 
-    self:SetModel("models/players/kimonos_25.mdl")
+    self:SetModel("models/basalisk/basalisk.mdl")
     self:SetSolid(SOLID_BBOX)
     self:SetMoveType(MOVETYPE_NONE)
     self:SetUseType(SIMPLE_USE)
