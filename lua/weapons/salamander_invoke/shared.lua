@@ -44,58 +44,61 @@ end
 function SWEP:SecondaryAttack()
 end
 
-
 local function invokeSalamander(ply)
-	if SERVER then
-		local particleName = "nrp_venom_poisonsmoke"
-		local poisonSoundName = "ambient/fire/firebig.wav"
-		local modelEntity = ents.Create("prop_dynamic")
+    local particleName = "nrp_venom_poisonsmoke"
+    local poisonSoundName = "ambient/fire/firebig.wav"
+    local modelEntity = ents.Create("prop_dynamic")
 
-		if IsValid(modelEntity) then
-			modelEntity:SetModel("models/warwax/salamandre.mdl")
+    if not IsValid(modelEntity) then return end
 
-			local spawnOffset = Vector(200, 0, 0)
-			local playerAngles = ply:EyeAngles() 
+    modelEntity:SetModel("models/warwax/salamandre.mdl")
 
-			local forward = playerAngles:Forward()
-			local right = playerAngles:Right()
-			spawnOffset = right * (-100) 
+    local spawnOffset = Vector(200, 0, 0)
+    local playerAngles = ply:EyeAngles()
+    spawnOffset = playerAngles:Right() * -100
+    local spawnPos = ply:GetPos() + spawnOffset
 
-			local spawnPos = ply:GetPos() + spawnOffset 
-			local spawnAngles = playerAngles
+    modelEntity:SetPos(spawnPos)
+    modelEntity:SetAngles(Angle(0, playerAngles.yaw, 0))
+    modelEntity:SetModelScale(2)
+    modelEntity:Spawn()
 
-			modelEntity:SetPos(spawnPos)
-			modelEntity:SetAngles(Angle(0, spawnAngles.yaw, 0)) 
-			modelEntity:SetModelScale(2)
-			modelEntity:Spawn()
+    local particlePos = modelEntity:GetPos() + Vector(0, 0, 50)
+    ParticleEffect(particleName, particlePos, modelEntity:GetAngles(), modelEntity)
+    ply:EmitSound(poisonSoundName)
 
-			local particlePos = modelEntity:GetPos() + Vector(0, 0, 50)
-			ParticleEffect(particleName, particlePos, modelEntity:GetAngles(), modelEntity)
-			ply:EmitSound(poisonSoundName)
-			local attackAnimID = modelEntity:LookupSequence("attack")
-			if attackAnimID >= 0 then
-				modelEntity:SetSequence(attackAnimID)
-				modelEntity:SetCycle(0)
-				modelEntity:SetPlaybackRate(1)
+    local attackAnimID = modelEntity:LookupSequence("attack")
+    if attackAnimID < 0 then return end
 
-				local attackDuration = modelEntity:SequenceDuration(attackAnimID)
+    modelEntity:SetSequence(attackAnimID)
+    modelEntity:SetCycle(0)
+    modelEntity:SetPlaybackRate(1)
 
-				timer.Simple(attackDuration, function()
-					if IsValid(modelEntity) then
-						local idleAnimID = modelEntity:LookupSequence("idle")
-						modelEntity:StopParticles()
-						ply:StopSound(poisonSoundName)
-						if idleAnimID >= 0 then
-							modelEntity:SetSequence(idleAnimID)
-							modelEntity:SetCycle(0)
-							modelEntity:SetPlaybackRate(1)
-						end
-					end
-				end)
-			end
-		end
-	end
+    local attackDuration = modelEntity:SequenceDuration(attackAnimID)
+    timer.Simple(attackDuration, function()
+        if not IsValid(modelEntity) then return end
+
+        local idleAnimID = modelEntity:LookupSequence("idle")
+        if idleAnimID < 0 then return end
+
+        modelEntity:SetSequence(idleAnimID)
+        modelEntity:SetCycle(0)
+        modelEntity:SetPlaybackRate(1)
+        modelEntity:StopParticles()
+        ply:StopSound(poisonSoundName)
+
+        timer.Simple(5, function()
+            ParticleEffect("[6]_windstorm_add_4", particlePos, modelEntity:GetAngles(), modelEntity)
+			ply:EmitSound("ambient/explosions/explode_9.wav")
+            timer.Simple(1, function()
+                if IsValid(modelEntity) then
+                    modelEntity:Remove()
+                end
+            end)
+        end)
+    end)
 end
+
 
 
 
