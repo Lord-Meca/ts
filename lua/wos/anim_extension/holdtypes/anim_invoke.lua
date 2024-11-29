@@ -32,14 +32,13 @@ DATA.Translations = {}
 DATA.Translations[ ACT_MP_STAND_IDLE ]					= "idle_all_01"
 DATA.Translations[ ACT_MP_WALK ]						= "walk_all"
 DATA.Translations[ ACT_MP_RUN ]							= "run_all_01"
-DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "couch_idle"
-DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_melee1"
+DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "cidle_all"
+DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_all"
 DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_kisame_ninjutsu_sharkbomb_charge_end" 
+DATA.Translations[ ACT_MP_ATTACK_STAND_SECONDARYFIRE ]	= "foc_kisame_ninjutsu_sharkbomb_charge_start" 
 DATA.Translations[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= "foc_kisame_ninjutsu_sharkbomb_charge_end"
---DATA.Translations[ ACT_MP_RELOAD_STAND ]				= IdleActivity + 6
---DATA.Translations[ ACT_MP_RELOAD_CROUCH ]				= IdleActivity + 6
+DATA.Translations[ ACT_MP_RELOAD_STAND ]				= "foc_kisame_ninjutsu_sharkbomb_charge_start" 
 DATA.Translations[ ACT_MP_JUMP ]						= "jump_dual"
---DATA.Translations[ ACT_MP_SWIM ]						= IdleActivity + 9
-DATA.Translations[ ACT_LAND ]							= "wos_bs_shared_jump_land"
+
 
 wOS.AnimExtension:RegisterHoldtype( DATA )
