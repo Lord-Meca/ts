@@ -17,7 +17,7 @@ end
 
 SWEP.ViewModelFOV = 77
 SWEP.UseHands = false
-SWEP.Category = "TypeShit | Armes"
+SWEP.Category = "Other"
 SWEP.Purpose = ""
 SWEP.Contact = ""
 SWEP.Author = "Lord_Meca"
