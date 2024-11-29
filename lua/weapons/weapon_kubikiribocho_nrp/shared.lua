@@ -63,11 +63,11 @@ local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
 	
-	-- if IsValid(self.Owner) then
+	if IsValid(self.Owner) then
 
-	-- 	self.Owner:SetMaxHealth(500)
-	-- 	self.Owner:SetHealth(self.Owner:GetMaxHealth())
-	-- end
+		self.Owner:SetMaxHealth(1000)
+		self.Owner:SetHealth(self.Owner:GetMaxHealth())
+	end
 
 	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_custom_nass_01_hood.mdl")
 	self.Owner:ConCommand( "thirdperson_etp 1" )
@@ -96,8 +96,6 @@ function SWEP:Initialize()
 	self.DownSlashed = true
 	self.downslashingdelay = 0
 	self.back = true
-
-
 
 
 end
@@ -741,6 +739,25 @@ end)
 end
 
 
+local function progressiveHeal(ply)
+    if not IsValid(ply) then
+        timer.Remove("KubiProgressiveHeal") 
+        return
+    end
+
+    local maxHealth = ply:GetMaxHealth()
+    local currentHealth = ply:Health()
+    local healthStep = 100 
+
+
+    local newHealth = math.min(currentHealth + healthStep, maxHealth)
+    ply:SetHealth(newHealth)
+
+    if newHealth >= maxHealth then
+        timer.Remove("KubiProgressiveHeal")
+    end
+end
+
 --==================--
 function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, anim, viewbob, primarystuntime, stuntime, sound, sounddelay, hastrail, haspush, push, pushdelay, aircombo ,pushenemy)
 	local ply = self.Owner
@@ -825,13 +842,24 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 				end
 			end
 		end)
+
 		net.Start("DisplayDamage")
 		net.WriteInt(force, 32)
 		net.WriteEntity(v)
 		net.Send(ply)
 
+        timer.Create("KubiProgressiveHeal", 1, 5, function()
+            progressiveHeal(ply)
+        end)
+        if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
+            ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_c", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
+        end
 
-
+        timer.Simple(5, function()
+            if IsValid(ply) then
+                ply:StopParticles()
+            end
+        end)
 		v:TakeDamageInfo( dmg )	ParticleEffect("blood_advisor_puncture",v:GetPos() + v:GetForward() * 0 + Vector( 0, 0, 40 ),Angle(0,45,0),nil)
 		if aircombo == true then
 			
@@ -1038,28 +1066,17 @@ function SWEP:Reload()
     if CurTime() < self.NextSpecialMove then return end
     self.NextSpecialMove = CurTime() + 10
 
-	local particleName = "[0]_chakra_charge_hitmark"
-	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
-
-	self:SetHoldType("weapon_art")
-	ply:SetAnimation(PLAYER_ATTACK1)
-
-		
-	timer.Simple(0.3, function()
-
-		self:DoCombo( AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true, true)
-
-		-- if attachment then
-		-- 	ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
-		-- end
+    local time = 5 
+    local interval = 1 
+    local increments = time / interval 
 
 
-		-- timer.Simple(3, function()
-		-- 	ply:StopParticles()	
-		-- end)
-		
-		ply:SetHealth(ply:GetMaxHealth())
+    self:DoAnimation("weapon_art")
+
+    timer.Simple(0.3, function()
+        self:DoCombo(AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0), 0, 0, Combo1, 0.14, false, false, 0, 0, false, true, true)
+
 
     end)
-
 end
+
