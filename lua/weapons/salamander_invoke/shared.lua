@@ -44,6 +44,7 @@ end
 function SWEP:SecondaryAttack()
 end
 
+
 local function invokeSalamander(ply)
     local particleName = "nrp_venom_poisonsmoke"
     local poisonSoundName = "ambient/fire/firebig.wav"
@@ -63,8 +64,9 @@ local function invokeSalamander(ply)
     modelEntity:SetModelScale(2)
     modelEntity:Spawn()
 
-    local particlePos = modelEntity:GetPos() + Vector(0, 0, 50)
-    ParticleEffect(particleName, particlePos, modelEntity:GetAngles(), modelEntity)
+
+    ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, modelEntity, 0)
+ 
     ply:EmitSound(poisonSoundName)
 
     local attackAnimID = modelEntity:LookupSequence("attack")
@@ -75,6 +77,19 @@ local function invokeSalamander(ply)
     modelEntity:SetPlaybackRate(1)
 
     local attackDuration = modelEntity:SequenceDuration(attackAnimID)
+
+    local rotateTimer
+    rotateTimer = timer.Create("rotate_salamander", 0.05, 0, function()
+        if not IsValid(modelEntity) or modelEntity:GetSequence() ~= attackAnimID then
+            timer.Remove("rotate_salamander")
+            return
+        end
+
+        local currentAngles = modelEntity:GetAngles()
+        currentAngles:RotateAroundAxis(currentAngles:Up(), 5)
+        modelEntity:SetAngles(currentAngles)
+    end)
+
     timer.Simple(attackDuration, function()
         if not IsValid(modelEntity) then return end
 
@@ -88,8 +103,8 @@ local function invokeSalamander(ply)
         ply:StopSound(poisonSoundName)
 
         timer.Simple(5, function()
-            ParticleEffect("[6]_windstorm_add_4", particlePos, modelEntity:GetAngles(), modelEntity)
-			ply:EmitSound("ambient/explosions/explode_9.wav")
+            ParticleEffect("[6]_windstorm_add_4", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
+            ply:EmitSound("ambient/explosions/explode_9.wav")
             timer.Simple(1, function()
                 if IsValid(modelEntity) then
                     modelEntity:Remove()
@@ -98,6 +113,8 @@ local function invokeSalamander(ply)
         end)
     end)
 end
+
+
 
 
 
@@ -114,11 +131,17 @@ function SWEP:Reload()
 	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
 
 	self:SetHoldType("anim_invoke")
-	ply:SetAnimation(PLAYER_ATTACK1)
+    ply:SetAnimation(PLAYER_RELOAD)
+	timer.Simple(1, function()
+		self:SetHoldType("anim_invoke")
+		ply:SetAnimation(PLAYER_ATTACK1)
+	end)
+
+
 	if SERVER then
 
 
-		timer.Simple(0.3, function()
+		timer.Simple(1.3, function()
 			ply:Freeze(true)
 			ply:EmitSound("ambient/explosions/explode_9.wav")
 			if attachment then
@@ -147,7 +170,6 @@ function SWEP:Reload()
 
 				invokeSalamander(ply)
 
-			
 				timer.Simple(1.2, function()
 					ply:StopParticles()
 					ply:Freeze(false)
