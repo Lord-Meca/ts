@@ -67,7 +67,7 @@ function RefreshRingHud()
 end
 
 function CreateRingHud()
-	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 200  
+	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 300  
 	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png"}
 	for i=1, 8 do
 		local QM_HudButton = vgui.Create("DButton")
