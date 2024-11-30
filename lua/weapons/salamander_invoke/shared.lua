@@ -50,8 +50,7 @@ local function invokeSalamander(ply)
     local particleName = "nrp_venom_poisonsmoke"
     local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
-    local impactDamage = 10
-    local totalDamage = 0
+    local tickDamage = 10
 
     if not IsValid(modelEntity) then return end
 
@@ -100,7 +99,7 @@ local function invokeSalamander(ply)
             if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
 
                 local damageInfo = DamageInfo()
-                damageInfo:SetDamage(impactDamage)
+                damageInfo:SetDamage(tickDamage)
                 damageInfo:SetDamageType(DMG_BLAST) 
                 damageInfo:SetAttacker(ply)
                 damageInfo:SetInflictor(ply) 
@@ -108,12 +107,11 @@ local function invokeSalamander(ply)
                 entity:TakeDamageInfo(damageInfo)
 
                 net.Start("DisplayDamage")
-                net.WriteInt(impactDamage, 32)
+                net.WriteInt(tickDamage, 32)
                 net.WriteEntity(entity)
                 net.WriteColor(Color(221,51,255,255))
                 net.Send(ply)
 
-                totalDamage = totalDamage + impactDamage
             end
         end
     end)
@@ -121,16 +119,14 @@ local function invokeSalamander(ply)
     timer.Simple(attackDuration, function()
         if not IsValid(modelEntity) then return end
 
-        ply:ChatPrint(totalDamage)
-
         local idleAnimID = modelEntity:LookupSequence("idle")
         if idleAnimID < 0 then return end
 
         modelEntity:SetSequence(idleAnimID)
         modelEntity:SetCycle(0)
         modelEntity:SetPlaybackRate(1)
-        modelEntity:StopParticles() 
 
+        modelEntity:StopParticles() 
         ply:StopSound(poisonSoundName)  
 
         timer.Simple(5, function()
