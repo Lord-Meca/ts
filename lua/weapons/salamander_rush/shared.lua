@@ -47,7 +47,7 @@ end
 
 
 local function invokeSalamander(ply)
-    local particleName = "nrp_venom_smoke"
+    local particleName = "izox_nrp_venom_smoke_rework"
     local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
     local moveTimeLeft = 5
@@ -128,7 +128,7 @@ local function invokeSalamander(ply)
     timer.Simple(moveTimeLeft, function()
         modelEntity:StopParticles() 
         ply:StopSound(poisonSoundName)  
-        ParticleEffect("[6]_windstorm_add_4", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
+        ParticleEffect("nrp_tool_invocation", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
         ply:EmitSound("ambient/explosions/explode_9.wav")
         timer.Simple(1, function()
             if IsValid(modelEntity) then
@@ -152,7 +152,7 @@ function SWEP:Reload()
 	if CurTime() < self.NextSpecialMove then return end
 	self.NextSpecialMove = CurTime() + 10
 
-	local particleName = "[6]_windstorm_add_4"
+	local particleName = "nrp_tool_invocation"
 	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
 
 	self:SetHoldType("anim_invoke")
@@ -194,18 +194,22 @@ function SWEP:Reload()
 					physObj:EnableMotion(false)
 				end
 
-				invokeSalamander(ply)
-
-				timer.Simple(1.2, function()
-					ply:StopParticles()
-					ply:Freeze(false)
-					if IsValid(modelEntity) then
-		
-						modelEntity:Remove()
-							
-					end
 			
-				end)
+                timer.Simple(0.5, function()
+                    invokeSalamander(ply)
+
+                    
+                    timer.Simple(0.7, function() 
+                        if IsValid(ply) then
+                            ply:StopParticles()
+                            ply:Freeze(false)
+                        end
+
+                        if IsValid(modelEntity) then
+                            modelEntity:Remove()
+                        end
+                    end)
+                end)
 
 			end
 
