@@ -42,7 +42,23 @@ end
 function SWEP:SecondaryAttack()
 end
 
+local function progressiveHeal(entity, index)
+    if not IsValid(entity) then
+        timer.Remove("SlugProgressiveHeal_" .. index) 
+        return
+    end
 
+    local maxHealth = entity:GetMaxHealth()
+    local currentHealth = entity:Health()
+    local healthStep = maxHealth * 0.10
+  
+    local newHealth = math.min(currentHealth + healthStep, maxHealth)
+    entity:SetHealth(newHealth)
+
+    if newHealth >= maxHealth then
+        timer.Remove("SlugProgressiveHeal_" .. index)
+    end
+end
 
 local function invokeSlug(ply)
     local particleName = "izox_nrp_venom_poisonsmoke_rework"
@@ -107,7 +123,7 @@ local function invokeSlug(ply)
 
         local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 1200)
         for _, entity in ipairs(entitiesInRange) do
-            if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
+            if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply and entity:Health() < entity:GetMaxHealth() then
 
                 local targetAssigned = false
                 for katsuyu, target in pairs(katsuyuTargetMap) do
@@ -126,9 +142,9 @@ local function invokeSlug(ply)
                             local target = katsuyuTargetMap[smallKatsuyu]
                             if IsValid(target) then
                                 local direction = (target:GetPos() - smallKatsuyu:GetPos()):GetNormalized()
-                                local moveDistancePerSecond = 100
+                                local speed = 200
 
-                                local newPos = smallKatsuyu:GetPos() + direction * moveDistancePerSecond * 0.1
+                                local newPos = smallKatsuyu:GetPos() + direction * speed * 0.1
                                 newPos = getGroundPos(newPos)
 
                                 smallKatsuyu:SetPos(newPos)
@@ -142,7 +158,11 @@ local function invokeSlug(ply)
 
                                     ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)
 
-                                    timer.Simple(3, function()
+                                    timer.Create("SlugProgressiveHeal_" .. smallKatsuyu:EntIndex(), 1, 5, function()
+                                        progressiveHeal(entity, smallKatsuyu:EntIndex())
+                                    end)
+
+                                    timer.Simple(katsuyuTimes.smallKatsuyuDuration, function()
                                         katsuyuTargetMap[smallKatsuyu] = nil
                                         target:StopParticles()
 
@@ -192,6 +212,19 @@ local function invokeSlug(ply)
         if IsValid(modelEntity) then
             modelEntity:Remove()
         end
+        timer.Simple(1, function()
+            for _, katsuyus in ipairs(smallKatsuyuEntities) do
+                print(katsuyuTargetMap[katsuyus])
+                if katsuyuTargetMap[katsuyus] == nil then
+                    ParticleEffect("nrp_tool_invocation", katsuyus:GetPos(), playerAngles, ply)
+                    ply:EmitSound("ambient/explosions/explode_9.wav")
+
+                    katsuyus:Remove()
+                end 
+            end
+        end)
+
+
     end)
 
 end
