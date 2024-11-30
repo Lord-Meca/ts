@@ -31,17 +31,17 @@ function QM_Hover_Handler(i, mustPaint)
     local baseSize = 100
     local hoverSize = 150  
     QM_RingHud_Items[i].Paint = function()
-
-        surface.SetDrawColor(0, 200, 255, 180)
-        surface.SetMaterial(Material("materials/"..pictures[i], "noclamp"))
-        surface.SetDrawColor(color_white)
-
-        local size = baseSize
-        if mustPaint then
-            size = hoverSize  
-        end
+        surface.SetMaterial(Material("materials/" .. pictures[i], "noclamp"))
         
+       
+        if mustPaint then
+            surface.SetDrawColor(color_white) 
+        else
+            surface.SetDrawColor(color_black) 
+        end
 
+       
+        local size = mustPaint and hoverSize or baseSize
         surface.DrawTexturedRectUV(0, 0, size, size, 0, 0, 1, 1)
     end
 end
@@ -52,9 +52,16 @@ function RefreshRingHud()
    
         QM_RingHud_Items[i].OnMousePressed = function()
 
+			local ply = LocalPlayer()
+
             RunConsoleCommand("give", QM_entity_names[i])
             RunConsoleCommand("use", QM_entity_names[i])
-       
+
+			if IsValid(ply) then
+				ply:ChatPrint(string.Replace(QM_hud_names[i], "\n", " ") .. " | équipé !")
+			end
+	
+
         end
 
         QM_RingHud_Items[i].OnCursorEntered = function()
@@ -84,9 +91,9 @@ function CreateRingHud()
 			RunConsoleCommand("givecurrentammo")
 		end
 		QM_HudButton.Paint = function()
-			surface.SetDrawColor(0, 200, 255, 180)
+	
 			surface.SetMaterial(Material("materials/"..pictures[i], "noclamp"))
-			surface.SetDrawColor(color_white)
+			surface.SetDrawColor(color_black)
 			surface.DrawTexturedRectUV(0, 0, 100, 100, 0, 0, 1, 1)
 		end
 		table.insert(QM_RingHud_Items, QM_HudButton)
