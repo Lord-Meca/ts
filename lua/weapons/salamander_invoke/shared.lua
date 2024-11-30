@@ -27,7 +27,7 @@ SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 
 function SWEP:Deploy()
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/ame_ninja_npc.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
 end
 
 
@@ -45,10 +45,13 @@ function SWEP:SecondaryAttack()
 end
 
 
+
 local function invokeSalamander(ply)
     local particleName = "nrp_venom_poisonsmoke"
     local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
+    local impactDamage = 10
+    local totalDamage = 0
 
     if not IsValid(modelEntity) then return end
 
@@ -64,10 +67,14 @@ local function invokeSalamander(ply)
     modelEntity:SetModelScale(2)
     modelEntity:Spawn()
 
-
     ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, modelEntity, 0)
  
+
     ply:EmitSound(poisonSoundName)
+
+
+    local entities = ents.FindInSphere(modelEntity:GetPos(), 350)
+
 
     local attackAnimID = modelEntity:LookupSequence("attack")
     if attackAnimID < 0 then return end
@@ -88,10 +95,32 @@ local function invokeSalamander(ply)
         local currentAngles = modelEntity:GetAngles()
         currentAngles:RotateAroundAxis(currentAngles:Up(), 5)
         modelEntity:SetAngles(currentAngles)
+
+        for _, entity in pairs(entities) do
+            if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
+
+                local damageInfo = DamageInfo()
+                damageInfo:SetDamage(impactDamage)
+                damageInfo:SetDamageType(DMG_BLAST) 
+                damageInfo:SetAttacker(ply)
+                damageInfo:SetInflictor(ply) 
+
+                entity:TakeDamageInfo(damageInfo)
+
+                net.Start("DisplayDamage")
+                net.WriteInt(impactDamage, 32)
+                net.WriteEntity(entity)
+                net.Send(ply)
+
+                totalDamage = totalDamage + impactDamage
+            end
+        end
     end)
 
     timer.Simple(attackDuration, function()
         if not IsValid(modelEntity) then return end
+
+        ply:ChatPrint(totalDamage)
 
         local idleAnimID = modelEntity:LookupSequence("idle")
         if idleAnimID < 0 then return end
@@ -99,8 +128,9 @@ local function invokeSalamander(ply)
         modelEntity:SetSequence(idleAnimID)
         modelEntity:SetCycle(0)
         modelEntity:SetPlaybackRate(1)
-        modelEntity:StopParticles()
-        ply:StopSound(poisonSoundName)
+        modelEntity:StopParticles() 
+
+        ply:StopSound(poisonSoundName)  
 
         timer.Simple(5, function()
             ParticleEffect("[6]_windstorm_add_4", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
@@ -113,6 +143,7 @@ local function invokeSalamander(ply)
         end)
     end)
 end
+
 
 
 
@@ -138,10 +169,11 @@ function SWEP:Reload()
 	end)
 
 
+
 	if SERVER then
 
 
-		timer.Simple(1.3, function()
+		timer.Simple(1.5, function()
 			ply:Freeze(true)
 			ply:EmitSound("ambient/explosions/explode_9.wav")
 			if attachment then
