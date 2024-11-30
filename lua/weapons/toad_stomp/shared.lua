@@ -57,18 +57,16 @@ local function invokeSalamander(ply)
 
     modelEntity:SetModel("models/foc/ska/gamakichi.mdl")
 
-    local spawnOffset = Vector(200, 0, 1000)
+    local spawnOffset = Vector(0, 0, 0) 
     local playerAngles = ply:EyeAngles()
-    spawnOffset = playerAngles:Forward() * 700
+    spawnOffset = spawnOffset + playerAngles:Forward() * 700 
+
     local spawnPos = ply:GetPos() + spawnOffset
 
     modelEntity:SetPos(spawnPos)
     modelEntity:SetAngles(Angle(0, playerAngles.yaw, 0))
-    modelEntity:SetModelScale(1.5)
+    modelEntity:SetModelScale(2)
     modelEntity:Spawn()
-
-
-    --ply:EmitSound(poisonSoundName)
 
     local animID = modelEntity:LookupSequence("gamakichimoveaction")
     if animID < 0 then return end
@@ -94,6 +92,7 @@ local function invokeSalamander(ply)
         timer.Simple((i - 1) * 2.5, function() 
             ParticleEffect("[0]_chakra_charge_groundhit",modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
             util.ScreenShake(ply:GetPos(), 20, 2, 3, 3000)
+            ply:EmitSound(Sound( "physics/concrete/concrete_break3.wav"))
             for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 600)) do
                 if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
                     local damageInfo = DamageInfo()
