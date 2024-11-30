@@ -50,14 +50,14 @@ local function invokeSalamander(ply)
     local particleName = "izox_nrp_venom_smoke_rework"
     local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
-    local moveTimeLeft = 5
+    local moveTimeLeft = 4
     local tickDamage = 100
 
     if not IsValid(modelEntity) then return end
 
     modelEntity:SetModel("models/warwax/salamandre.mdl")
 
-    local spawnOffset = Vector(200, 0, 0)
+    local spawnOffset = Vector(200, 0, 1000)
     local playerAngles = ply:EyeAngles()
     spawnOffset = playerAngles:Forward() * 300
     local spawnPos = ply:GetPos() + spawnOffset
@@ -75,10 +75,10 @@ local function invokeSalamander(ply)
 
     modelEntity:SetSequence(animID)
     modelEntity:SetCycle(0)
-    modelEntity:SetPlaybackRate(3)
+    modelEntity:SetPlaybackRate(2)
 
     local direction = playerAngles:Forward()
-    local moveDistancePerSecond = 500 
+    local moveDistancePerSecond = 500
 
     local function getGroundPos(pos)
         local trace = util.TraceLine({
@@ -126,6 +126,14 @@ local function invokeSalamander(ply)
 
 
     timer.Simple(moveTimeLeft, function()
+
+        local animID = modelEntity:LookupSequence("idle")
+        if animID < 0 then return end
+
+        modelEntity:SetSequence(animID)
+        modelEntity:SetCycle(0)
+        modelEntity:SetPlaybackRate(1)
+
         modelEntity:StopParticles() 
         ply:StopSound(poisonSoundName)  
         ParticleEffect("nrp_tool_invocation", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
