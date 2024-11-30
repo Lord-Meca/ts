@@ -103,7 +103,7 @@ local function invokeSlug(ply)
 
         smallKatsuyu:SetSequence(animID)
         smallKatsuyu:SetCycle(0)
-        smallKatsuyu:SetPlaybackRate(1)
+        smallKatsuyu:SetPlaybackRate(2)
 
         local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 1200)
         for _, entity in ipairs(entitiesInRange) do
@@ -120,27 +120,39 @@ local function invokeSlug(ply)
                 if not targetAssigned then
                   
                     katsuyuTargetMap[smallKatsuyu] = entity
-                    ply:ChatPrint(katsuyuTargetMap[smallKatsuyu])
-            
-
+                 
                     local moveTimer = timer.Create("SlugMove_" .. smallKatsuyu:EntIndex(), 0.1, 0, function()
                         if IsValid(smallKatsuyu) then
                             local target = katsuyuTargetMap[smallKatsuyu]
                             if IsValid(target) then
                                 local direction = (target:GetPos() - smallKatsuyu:GetPos()):GetNormalized()
-                                local moveDistancePerSecond = 50
+                                local moveDistancePerSecond = 100
 
                                 local newPos = smallKatsuyu:GetPos() + direction * moveDistancePerSecond * 0.1
                                 newPos = getGroundPos(newPos)
 
                                 smallKatsuyu:SetPos(newPos)
 
-                                -- Vérifier la distance pour supprimer le timer
+                             
                                 if (target:GetPos() - smallKatsuyu:GetPos()):Length() < 10 then
                                     timer.Remove("SlugMove_" .. smallKatsuyu:EntIndex())
-                                    katsuyuTargetMap[smallKatsuyu] = nil
+                                    
 
-                                    ply:ChatPrint("Cible atteinte pour Katsuyu avec index " .. smallKatsuyu:EntIndex())
+                                    ply:ChatPrint("oui cible index: " .. smallKatsuyu:EntIndex())
+
+                                    ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)
+
+                                    timer.Simple(3, function()
+                                        katsuyuTargetMap[smallKatsuyu] = nil
+                                        target:StopParticles()
+
+                                        ParticleEffect("nrp_tool_invocation", newPos, playerAngles, ply)
+                                        ply:EmitSound("ambient/explosions/explode_9.wav")
+                                        
+                                        if IsValid(smallKatsuyu) then
+                                            smallKatsuyu:Remove()
+                                        end
+                                    end)
                                 end
                             end
                         else
@@ -159,7 +171,7 @@ local function invokeSlug(ply)
 
 
 
-    --timer.Create("smallKatsuyuSpawn", katsuyuTimes.smallKatsuyuSpawn, katsuyuTimes.largeKatsuyuDuration * (1 / katsuyuTimes.smallKatsuyuSpawn), spawnSmallKatsuyu)
+    timer.Create("smallKatsuyuSpawn", katsuyuTimes.smallKatsuyuSpawn, katsuyuTimes.largeKatsuyuDuration * (1 / katsuyuTimes.smallKatsuyuSpawn), spawnSmallKatsuyu)
 
     local defaultScale = 4
     local scaleReduction = 0.05
