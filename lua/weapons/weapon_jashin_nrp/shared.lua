@@ -839,6 +839,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		net.Start("DisplayDamage")
 		net.WriteInt(force, 32)
 		net.WriteEntity(v)
+		net.WriteColor(Color(249,148,6,255))
 		net.Send(ply)
 
 
@@ -1076,6 +1077,7 @@ function SWEP:Reload()
 				net.Start("DisplayDamage")
 				net.WriteInt(entity:GetMaxHealth(), 32)
 				net.WriteEntity(entity)
+				net.WriteColor(Color(249,148,6,255))
 				net.Send(ply)
 
 				local modelEntity = ents.Create("prop_physics")

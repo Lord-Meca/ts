@@ -815,6 +815,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		net.Start("DisplayDamage")
 		net.WriteInt(force, 32)
 		net.WriteEntity(v)
+		net.WriteColor(Color(249,148,6,255))
 		net.Send(ply)
 		v:TakeDamageInfo( dmg )	ParticleEffect("blood_advisor_puncture",v:GetPos() + v:GetForward() * 0 + Vector( 0, 0, 40 ),Angle(0,45,0),nil)
 		if aircombo == true then
@@ -1037,6 +1038,7 @@ function SWEP:Reload()
 				net.Start("DisplayDamage")
 				net.WriteInt(300, 32)
 				net.WriteEntity(entity)
+				net.WriteColor(Color(51,125,255,255))
 				net.Send(ply)
 			end
 		end

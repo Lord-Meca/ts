@@ -110,6 +110,7 @@ local function invokeSalamander(ply)
                 net.Start("DisplayDamage")
                 net.WriteInt(impactDamage, 32)
                 net.WriteEntity(entity)
+                net.WriteColor(Color(221,51,255,255))
                 net.Send(ply)
 
                 totalDamage = totalDamage + impactDamage
