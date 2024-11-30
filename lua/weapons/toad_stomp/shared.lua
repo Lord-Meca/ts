@@ -104,7 +104,7 @@ local function invokeSalamander(ply)
             util.ScreenShake(ply:GetPos(), 20, 2, 3, 3000)
             ply:EmitSound(Sound("physics/concrete/concrete_break3.wav"))
 
-            local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 600)
+            local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 750)
             for _, entity in ipairs(entitiesInRange) do
                 if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
                     local damageInfo = DamageInfo()
