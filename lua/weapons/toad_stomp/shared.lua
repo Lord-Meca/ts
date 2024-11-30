@@ -52,6 +52,7 @@ local function invokeSalamander(ply)
     local modelEntity = ents.Create("prop_dynamic")
     local moveTimeLeft = 4
     local tickDamage = 300
+    local totalMove = 0
 
     if not IsValid(modelEntity) then return end
 
@@ -59,13 +60,13 @@ local function invokeSalamander(ply)
 
     local spawnOffset = Vector(0, 0, 0) 
     local playerAngles = ply:EyeAngles()
-    spawnOffset = spawnOffset + playerAngles:Forward() * 700 
+    spawnOffset = spawnOffset + playerAngles:Forward() * 300 
 
     local spawnPos = ply:GetPos() + spawnOffset
 
     modelEntity:SetPos(spawnPos)
     modelEntity:SetAngles(Angle(0, playerAngles.yaw, 0))
-    modelEntity:SetModelScale(2)
+    modelEntity:SetModelScale(1)
     modelEntity:Spawn()
 
     local animID = modelEntity:LookupSequence("gamakichimoveaction")
@@ -76,7 +77,7 @@ local function invokeSalamander(ply)
     modelEntity:SetPlaybackRate(2)
 
     local direction = playerAngles:Forward()
-    local moveDistancePerSecond = 1
+    local moveDistancePerSecond = 2000
 
     local function getGroundPos(pos)
         local trace = util.TraceLine({
@@ -88,28 +89,36 @@ local function invokeSalamander(ply)
         return trace.HitPos
     end
 
+
     for i = 1, 2 do
-        timer.Simple((i - 1) * 2.5, function() 
-            ParticleEffect("[0]_chakra_charge_groundhit",modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
+        
+        timer.Simple((i - 1) * 2.5, function()
+      
+            if i == 1 then
+                timer.Simple(0.5, function()
+                    moveDistancePerSecond = 0
+                end)
+            end
+
+            ParticleEffect("[0]_chakra_charge_groundhit", modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector(0, 0, 0), Angle(0, 0, 0), nil)
             util.ScreenShake(ply:GetPos(), 20, 2, 3, 3000)
-            ply:EmitSound(Sound( "physics/concrete/concrete_break3.wav"))
-            for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 600)) do
+            ply:EmitSound(Sound("physics/concrete/concrete_break3.wav"))
+
+            local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 600)
+            for _, entity in ipairs(entitiesInRange) do
                 if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
                     local damageInfo = DamageInfo()
                     damageInfo:SetDamage(tickDamage)
-                    damageInfo:SetDamageType(DMG_BLAST) 
+                    damageInfo:SetDamageType(DMG_BLAST)
                     damageInfo:SetAttacker(ply)
-                    damageInfo:SetInflictor(ply) 
-
+                    damageInfo:SetInflictor(ply)
                     entity:TakeDamageInfo(damageInfo)
-
+                    ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos() + entity:GetForward() * 0 + Vector(0, 0, 40), Angle(0, 45, 0))
                     net.Start("DisplayDamage")
                     net.WriteInt(tickDamage, 32)
                     net.WriteEntity(entity)
                     net.WriteColor(Color(160, 37, 37, 255))
                     net.Send(ply)
-
-
                 end
             end
         end)
@@ -118,16 +127,16 @@ local function invokeSalamander(ply)
 
 
 
+
     local moveTimer = timer.Create("ToadMove", 0.1, moveTimeLeft * 10, function()
         if IsValid(modelEntity) then
-      
+           
+
+        
             local newPos = modelEntity:GetPos() + direction * moveDistancePerSecond * 0.1
-         
+
             newPos = getGroundPos(newPos)
-
             modelEntity:SetPos(newPos)
-
-       
 
         else
             timer.Remove("ToadMove")
