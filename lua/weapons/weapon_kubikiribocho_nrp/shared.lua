@@ -888,8 +888,19 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 	--========================================================--
 			if v:IsPlayer() then
 
-				if IsValid(ply) and ply:GetActiveWeapon():GetClass() == "weapon_shibuki_nrp" then
-					v:Ignite(5, 0) 
+				if weaponart then
+					timer.Create("KubiProgressiveHeal", 1, 5, function()
+						progressiveHeal(ply)
+					end)
+					if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
+						ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
+					end
+
+					timer.Simple(5, function()
+						if IsValid(ply) then
+							ply:StopParticles()
+						end
+					end)
 				end
 
 				ply:EmitSound(sound)

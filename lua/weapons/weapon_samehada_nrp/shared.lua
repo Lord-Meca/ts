@@ -856,9 +856,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 	--========================================================--
 			if v:IsPlayer() then
 
-				if IsValid(ply) and ply:GetActiveWeapon():GetClass() == "weapon_shibuki_nrp" then
-					v:Ignite(5, 0) 
-				end
+	
 
 				ply:EmitSound(sound)
 		
