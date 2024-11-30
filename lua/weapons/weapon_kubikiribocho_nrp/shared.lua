@@ -65,7 +65,7 @@ function SWEP:Deploy()
 	local ply = self.Owner
 	if IsValid(ply) then
 
-		if not ply:GetMaxHealth() == 1000 then 
+		if ply:GetMaxHealth() != 1000 then 
 
 			ply:SetMaxHealth(1000)
 			ply:SetHealth(ply:GetMaxHealth())
