@@ -46,13 +46,11 @@ end
 
 
 
-local function invokeSalamander(ply)
+local function invokeToad(ply)
     local particleName = "[0]_chakra_charge_groundhit"
-    local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
     local moveTimeLeft = 4
     local tickDamage = 300
-    local totalMove = 0
 
     if not IsValid(modelEntity) then return end
 
@@ -148,7 +146,7 @@ local function invokeSalamander(ply)
 
 
         modelEntity:StopParticles() 
-        ply:StopSound(poisonSoundName)  
+  
         ParticleEffect("nrp_tool_invocation", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
         ply:EmitSound("ambient/explosions/explode_9.wav")
         timer.Simple(1, function()
@@ -217,7 +215,7 @@ function SWEP:Reload()
 
 			
                 timer.Simple(0.5, function()
-                    invokeSalamander(ply)
+                    invokeToad(ply)
 
                     
                     timer.Simple(0.7, function() 
