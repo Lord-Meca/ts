@@ -62,16 +62,19 @@ local Combo4 = Sound( "physics/body/body_medium_break2.wav")
 local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
-	
-	if IsValid(self.Owner) then
+	local ply = self.Owner
+	if IsValid(ply) then
 
-		self.Owner:SetMaxHealth(1000)
-		self.Owner:SetHealth(self.Owner:GetMaxHealth())
+		if not ply:GetMaxHealth() == 1000 then 
+
+			ply:SetMaxHealth(1000)
+			ply:SetHealth(ply:GetMaxHealth())
+		end
 	end
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_custom_nass_01_hood.mdl")
-	self.Owner:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
+	ply:SetModel("models/falko_naruto_foc/body_upper/man_custom_nass_01_hood.mdl")
+	ply:ConCommand( "thirdperson_etp 1" )
+		hook.Add("GetFallDamage", "RemoveFallDamage"..ply:GetName(), function(ply, speed)
 			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
 				return ( speed - 826.5 ) * ( 100 / 896 )
 			end
