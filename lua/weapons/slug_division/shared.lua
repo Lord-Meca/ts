@@ -142,7 +142,7 @@ local function invokeSlug(ply)
                             local target = katsuyuTargetMap[smallKatsuyu]
                             if IsValid(target) then
                                 local direction = (target:GetPos() - smallKatsuyu:GetPos()):GetNormalized()
-                                local speed = 200
+                                local speed = 500
 
                                 local newPos = smallKatsuyu:GetPos() + direction * speed * 0.1
                                 newPos = getGroundPos(newPos)
@@ -153,9 +153,6 @@ local function invokeSlug(ply)
                                 if (target:GetPos() - smallKatsuyu:GetPos()):Length() < 10 then
                                     timer.Remove("SlugMove_" .. smallKatsuyu:EntIndex())
                                     
-
-                                    ply:ChatPrint("oui cible index: " .. smallKatsuyu:EntIndex())
-
                                     ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)
 
                                     timer.Create("SlugProgressiveHeal_" .. smallKatsuyu:EntIndex(), 1, 5, function()
@@ -214,12 +211,15 @@ local function invokeSlug(ply)
         end
         timer.Simple(1, function()
             for _, katsuyus in ipairs(smallKatsuyuEntities) do
-                print(katsuyuTargetMap[katsuyus])
+             
                 if katsuyuTargetMap[katsuyus] == nil then
-                    ParticleEffect("nrp_tool_invocation", katsuyus:GetPos(), playerAngles, ply)
-                    ply:EmitSound("ambient/explosions/explode_9.wav")
+                    
+                    if IsValid(katsuyus) then
+                        ParticleEffect("nrp_tool_invocation", katsuyus:GetPos(), playerAngles, ply)
+                        ply:EmitSound("ambient/explosions/explode_9.wav")
 
-                    katsuyus:Remove()
+                        katsuyus:Remove()
+                    end
                 end 
             end
         end)
