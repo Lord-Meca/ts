@@ -27,7 +27,7 @@ SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 
 function SWEP:Deploy()
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/sogeki_man_anbucapuche_iwa.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/sogeki_man_samurairouge_corne.mdl")
 end
 
 
