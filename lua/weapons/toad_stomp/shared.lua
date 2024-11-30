@@ -27,7 +27,7 @@ SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 
 function SWEP:Deploy()
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/sogeki_man_anbucapuche_iwa.mdl")
 end
 
 
@@ -93,7 +93,8 @@ local function invokeSalamander(ply)
     for i = 1, 2 do
         timer.Simple((i - 1) * 2.5, function() 
             ParticleEffect("[0]_chakra_charge_groundhit",modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
-            for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 300)) do
+            util.ScreenShake(ply:GetPos(), 20, 2, 3, 3000)
+            for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 600)) do
                 if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
                     local damageInfo = DamageInfo()
                     damageInfo:SetDamage(tickDamage)
