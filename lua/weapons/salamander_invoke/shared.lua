@@ -141,12 +141,6 @@ local function invokeSalamander(ply)
     end)
 end
 
-
-
-
-
-
-
 function SWEP:Reload()
 	local ply = self.Owner
 
@@ -168,6 +162,9 @@ function SWEP:Reload()
 
 
 	if SERVER then
+
+
+
 
 
 		timer.Simple(1.5, function()

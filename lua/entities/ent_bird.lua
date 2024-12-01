@@ -107,7 +107,7 @@ net.Receive("OpenMenu", function()
         elseif index == 2 then
             ent:SetSequence("sumnj02_fly_loop")
 
-            
+
         end
 
         frame:Close()
