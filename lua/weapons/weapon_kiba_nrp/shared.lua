@@ -99,8 +99,8 @@ function SWEP:Initialize()
 
 end
 
-function SWEP:DoAnimation( anim1 )
-self:SetHoldType(anim1)
+function SWEP:DoAnimation( anim )
+self:SetHoldType(anim)
 self.Owner:SetAnimation(PLAYER_ATTACK1)
 end
 
