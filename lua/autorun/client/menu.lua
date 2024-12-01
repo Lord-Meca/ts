@@ -10,6 +10,7 @@ local QM_entity_names = {
 	"salamander_invoke",
 	"salamander_rush",
 	"toad_stomp",
+	"toad_spy",
 	"slug_division"
 }
 local QM_hud_names = {
@@ -23,13 +24,14 @@ local QM_hud_names = {
 	"Salamandre\nQui tourne",
 	"Ruée de la\nSalamandre",
 	"Piétinement\ndu Crapeau",
+	"Espionnage\ndu Crapeau",
 	"Division des\nLimaces"
 }
 local QM_OpenKey = KEY_X
 
 function QM_Hover_Handler(i, mustPaint)
     local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
-	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png"}
+	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
     
     local baseSize = 100
     local hoverSize = 150  
@@ -50,7 +52,7 @@ function QM_Hover_Handler(i, mustPaint)
 end
 
 function RefreshRingHud()
-    for i = 1,11 do
+    for i = 1,12 do
         QM_RingHud_Items[i]:SetText(QM_hud_names[i])
    
         QM_RingHud_Items[i].OnMousePressed = function()
@@ -83,8 +85,8 @@ end
 function CreateRingHud()
 	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 550  
 	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
-	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png"}
-	for i=1,11 do
+	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png"}
+	for i=1,12 do
 		local QM_HudButton = vgui.Create("DButton")
 		QM_HudButton:SetPos(startX, startY + (i-1) * 85)  
 		QM_HudButton:SetSize(80,80)
@@ -105,7 +107,7 @@ function CreateRingHud()
 end
 
 function ShowRingHud()
-	for i=1,11 do
+	for i=1,12 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(true)
 		end
@@ -113,7 +115,7 @@ function ShowRingHud()
 end
 
 function HideRingHud()
-	for i=1,11 do
+	for i=1,12 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(false)
 		end
