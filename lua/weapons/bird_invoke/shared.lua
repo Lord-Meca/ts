@@ -7,7 +7,7 @@ SWEP.Instructions = ""
 
 SWEP.Base = "weapon_base"
 
-SWEP.Category = "TypeShit | Armes"
+SWEP.Category = "TypeShit | Invocations"
 
 SWEP.Spawnable = true
 SWEP.AdminSpawnable = false
