@@ -26,6 +26,19 @@ SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 
+SWEP.PlayerStates = {} 
+SWEP.PlayerState = {
+	DEFAULT = 0,
+    MUST_PLACE = 1,
+    HAS_PLACED = 2,
+    WATCHING = 3
+}
+
+SWEP.toadPos = {loc = Vector(0, 0, 0), ang = Angle(0, 0, 0)}
+SWEP.oldPosToad = 0
+SWEP.oldPosVision = 0
+
+
 function SWEP:Deploy()
 	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
 end
@@ -34,7 +47,8 @@ end
 function SWEP:Initialize()
 
     self:SetHoldType( "none" )
-
+	self:SetPlayerState(self.Owner, self.PlayerState.DEFAULT)
+ 	self.tempClone = nil
 end
 
 
@@ -42,78 +56,311 @@ function SWEP:PrimaryAttack()
 end
 
 function SWEP:SecondaryAttack()
+
+	removeToad(self)
+	
+
+end
+
+function SWEP:DoAnimation( anim, type )
+	self:SetHoldType(anim)
+	self.Owner:SetAnimation(type)
+end
+
+function SWEP:SetPlayerState(ply, state)
+    if not IsValid(ply) then return end
+    self.PlayerStates[ply] = state
+end
+
+function SWEP:GetPlayerState(ply)
+    if not IsValid(ply) then return nil end
+    return self.PlayerStates[ply]
+end
+
+function takeVisionToad(ply, bool)
+
+	if bool then
+
+		ply:Freeze(true)
+		ply:SetModelScale(0.5)
+
+	else
+		ply:Freeze(false)
+		ply:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
+		ply:SetModelScale(1)
+	end
+
 end
 
 
 
-local function controlToad(ply)
+function controlToad(ply, time, self)
 
-    local modelEntity = ents.Create("prop_dynamic")
+    self.oldPosToad = ply:GetPos()
 
+    ply:SetModel("models/warwax/gamabunta.mdl")
+    ply:SetModelScale(0.5)
+
+    timer.Create("toad_untransform", time, 1, function()
+
+        if not IsValid(ply) then return end
+
+		removeClone(self)
+        
+        takeVisionToad(ply, false)
+        self:SetPlayerState(ply, self.PlayerState.DEFAULT)
+		ply:SetPos(self.oldPosToad)
+        ply:EmitSound("ambient/explosions/explode_9.wav")
+
+        self:DoAnimation("anim_invoke", PLAYER_ATTACK1)
+
+    end)
+end
+
+
+
+-- function SWEP:Think()
+--     local ply = self.Owner
+--     if not IsValid(ply) then return end
+
+--     local currentState = self:GetPlayerState(ply)
+
+
+--     print("toadpos loc :", self.toadPos.loc)
+--     print("toadpos ang :", self.toadPos.ang)
+--     --print("old ivsion pos :", self.oldPosVision)
+
+--     self:NextThink(CurTime())
+--     return true
+-- end
+
+function spawnDynamicModel(pos, ang, model, animation, scale)
+
+    local modelEntity = ents.Create("prop_dynamic") 
     if not IsValid(modelEntity) then return end
 
-    modelEntity:SetModel("models/warwax/gamabunta.mdl")
+    modelEntity:SetModel(model) 
+    modelEntity:SetPos(pos)
+	modelEntity:SetModelScale(scale)
+    modelEntity:SetAngles(ang or Angle(0, 0, 0)) 
 
-    local spawnOffset = Vector(200, 0, 0)
-    local playerAngles = ply:EyeAngles()
-    spawnOffset = playerAngles:Right() * -100
-    local spawnPos = ply:GetPos() + spawnOffset
+    modelEntity:Spawn() 
+    modelEntity:Activate()
 
-    modelEntity:SetPos(spawnPos)
-    modelEntity:SetAngles(Angle(0, playerAngles.yaw, 0))
-    modelEntity:SetModelScale(2)
-    modelEntity:Spawn()
-
-    local animID = modelEntity:LookupSequence("idle")
+    local animID = modelEntity:LookupSequence(animation)
     if animID < 0 then return end
 
     modelEntity:SetSequence(animID)
     modelEntity:SetCycle(0)
-    modelEntity:SetPlaybackRate(2)
+    modelEntity:SetPlaybackRate(1)
 
-
-    timer.Simple(5, function()
-        ParticleEffect("nrp_tool_invocation", modelEntity:GetPos(), modelEntity:GetAngles(), modelEntity)
-        ply:EmitSound("ambient/explosions/explode_9.wav")
-        timer.Simple(1, function()
-            if IsValid(modelEntity) then
-                modelEntity:Remove()
-            end
-        end)
-    end)
+    return modelEntity
 end
 
-function SWEP:Reload()
-    local player = self:GetOwner()
-    if not IsValid(player) then return end
 
-    if CurTime() < self.NextSpecialMove then return end
-    self.NextSpecialMove = CurTime() + 10
+function createClone(ply, self)
+    if not IsValid(ply) or not ply:IsPlayer() then return end
 
-    if not self.hasSetView then
-
-        self.targetPos = player:GetPos()
-        self.targetAngles = player:EyeAngles()
-
-        self.hasSetView = true
-
-       
-    else
-        self.originalPos = player:GetPos()
-        self.originalAngles = player:EyeAngles()
-        if not IsValid(player) then return end
-
-        player:SetPos(self.targetPos)
-        player:SetEyeAngles(self.targetAngles)
-
-        timer.Simple(3, function()
-            if IsValid(player) then
-           
-                player:SetEyeAngles(self.originalAngles)
-                player:SetPos(self.originalPos)
-
-                self.hasSetView = false
-            end
-        end)
+    if IsValid(self.tempClone) then
+        self.tempClone:Remove()
     end
+
+    self.tempClone = ents.Create("prop_dynamic")
+    if not IsValid(self.tempClone) then return end
+
+    self.tempClone:SetModel(ply:GetModel())
+    self.tempClone:SetPos(ply:GetPos() + ply:GetRight() * 50 + Vector(0, 0, 5)) 
+    self.tempClone:SetAngles(ply:GetAngles())
+    self.tempClone:SetKeyValue("solid", "6")
+    self.tempClone:Spawn()
+
+    self.tempClone:SetColor(ply:GetColor())
+    self.tempClone:SetMaterial(ply:GetMaterial())
+    self.tempClone:SetSkin(ply:GetSkin())
+
+    for i = 0, ply:GetNumBodyGroups() - 1 do
+        self.tempClone:SetBodygroup(i, ply:GetBodygroup(i))
+    end
+
+    if self.tempClone:LookupSequence("kisame_ninjutsu_sharkbomb_charge_loop") >= 0 then
+        self.tempClone:ResetSequence("kisame_ninjutsu_sharkbomb_charge_loop")
+     end
+
+end
+
+function removeClone(self)
+    if IsValid(self.tempClone) then
+
+		ParticleEffect("nrp_tool_invocation", self.tempClone:GetPos(), Angle(0, 0, 0), nil)
+	    self.tempClone:Remove()
+        self.tempClone = nil
+
+
+    end
+end
+
+function removeNearlyEntities(ply, modelName, radius)
+	if SERVER then
+		local pos = ply:GetPos()
+		local nearbyEntities = ents.FindInSphere(pos, radius)
+		for _, ent in pairs(nearbyEntities) do
+			if IsValid(ent) and ent:GetClass() == "prop_dynamic" then
+				if ent:GetModel() == modelName then
+					ent:Remove()
+
+				end
+			end
+		end
+	end
+end
+
+
+function removeToad(self)
+
+	removeNearlyEntities(self.Owner, "models/warwax/gamabunta.mdl", 100)
+
+   	self:SetPlayerState(self.Owner, self.PlayerState.DEFAULT)
+	self.Owner:ChatPrint("toad removed")
+	self.toadPos = {loc = Vector(0, 0, 0), ang = Angle(0, 0, 0)}
+	self.oldPosToad = 0
+	self.oldPosVision = 0
+
+end
+
+
+function SWEP:Reload()
+	local ply = self.Owner
+
+	if not ply:IsOnGround() then return end
+
+	if CurTime() < self.NextSpecialMove then return end
+	self.NextSpecialMove = CurTime() + 3
+
+	local particleName = "nrp_tool_invocation"
+	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
+	local currentState = self:GetPlayerState(ply)
+
+	if currentState == 0 or currentState == nil then
+
+		self:DoAnimation("anim_invoke", PLAYER_RELOAD)
+		timer.Simple(1, function()
+			self:DoAnimation("anim_invoke", PLAYER_ATTACK1)
+		end)
+
+
+
+		if SERVER then
+
+		    util.AddNetworkString("TemporaryClone")
+
+
+			timer.Simple(1.5, function()
+				ply:Freeze(true)
+				ply:EmitSound("ambient/explosions/explode_9.wav")
+				if attachment then
+					ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
+				end
+
+
+				local modelEntity = ents.Create("prop_physics")
+				if IsValid(modelEntity) then
+					modelEntity:SetModel("models/foc_props_jutsu/jutsu_sceau_piege/foc_jutsu_sceau_piege.mdl")
+					
+					modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 0)) 
+					modelEntity:SetAngles(Angle(0, 0, 0))
+					modelEntity:SetColor(Color(0,0,0,255))
+					modelEntity:SetModelScale(4)
+					modelEntity:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE) 
+					modelEntity:SetRenderMode(RENDERMODE_TRANSCOLOR)
+					modelEntity:SetKeyValue("solid", "0")
+						
+					modelEntity:Spawn()
+
+					local physObj = modelEntity:GetPhysicsObject()
+					if IsValid(physObj) then
+						physObj:EnableMotion(false)
+					end
+
+				
+					timer.Simple(0.5, function()
+
+						self:SetHoldType("anim_gamabunta")
+						self:SetPlayerState(ply, self.PlayerState.MUST_PLACE)
+						
+						createClone(ply, self)
+						controlToad(ply,10,self)
+						
+
+						timer.Simple(0.7, function() 
+							if IsValid(ply) then
+							
+								ply:Freeze(false)
+							end
+
+							if IsValid(modelEntity) then
+								modelEntity:Remove()
+							end
+						end)
+					end)
+
+				end
+
+
+
+
+
+			end)
+		end
+	
+	elseif currentState == 1 then
+	
+	    self.toadPos = {
+			loc = ply:GetPos(),
+			ang = ply:EyeAngles()
+		}
+		ply:ChatPrint("Crapeau déposé")
+		removeClone(self)
+		self:SetPlayerState(ply, self.PlayerState.HAS_PLACED)
+		spawnDynamicModel(self.toadPos.loc, self.toadPos.ang, "models/warwax/gamabunta.mdl", "idle", 0.5)
+
+		takeVisionToad(ply, false)
+		timer.Remove("toad_untransform")
+
+        
+		
+		ply:SetPos(self.oldPosToad)
+		self.oldPosToad = 0
+
+	elseif currentState == 2 then
+
+		self.oldPosVision = ply:GetPos()
+		self:SetPlayerState(ply, self.PlayerState.WATCHING)
+
+		createClone(ply, self)
+		takeVisionToad(ply, true)
+		ply:SetNoDraw(true)
+
+		ply:SetPos(self.toadPos.loc)	
+		ply:SetEyeAngles(self.toadPos.ang)	
+		ply:ChatPrint("vision pour 3 secondes")
+
+		timer.Simple(3, function()
+		
+			self:SetPlayerState(ply, self.PlayerState.HAS_PLACED)
+			removeClone(self)
+
+			takeVisionToad(ply, false)
+
+			ply:ChatPrint("fin vision")
+			ply:SetPos(self.oldPosVision)
+			ply:SetNoDraw(false)	
+			self.oldPosVision = 0
+		end)
+
+	end
+
+
+
+
+
 end
