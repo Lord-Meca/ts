@@ -47,7 +47,7 @@ end
 
 
 local function invokeToad(ply)
-    local particleName = "[0]_chakra_charge_groundhit"
+
     local modelEntity = ents.Create("prop_dynamic")
     local moveTimeLeft = 4
     local tickDamage = 300
@@ -98,7 +98,7 @@ local function invokeToad(ply)
                 end)
             end
 
-            ParticleEffect("[0]_chakra_charge_groundhit", modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector(0, 0, 0), Angle(0, 0, 0), nil)
+            ParticleEffect("nrp_tool_invocation", modelEntity:GetPos() + modelEntity:GetForward() * 0 + Vector(0, 0, 0), Angle(0, 0, 0), nil)
             util.ScreenShake(ply:GetPos(), 20, 2, 3, 3000)
             ply:EmitSound(Sound("physics/concrete/concrete_break3.wav"))
 

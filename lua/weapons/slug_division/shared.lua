@@ -111,15 +111,15 @@ local function invokeSlug(ply)
         local smallKatsuyu = ents.Create("prop_dynamic")
         if not IsValid(smallKatsuyu) then return end
 
-        smallKatsuyu:SetModel("models/falko_naruto_foc/animal/katsuyu.mdl")
+        smallKatsuyu:SetModel("models/fsc/billy/chienninja6.mdl")
         smallKatsuyu:SetPos(modelEntity:GetPos() + Vector(math.random(-50, 50), math.random(-50, 50), 0))
         smallKatsuyu:SetAngles(Angle(0, playerAngles.yaw, 0))
         smallKatsuyu:SetModelScale(1)
         smallKatsuyu:Spawn()
 
-        smallKatsuyu:SetSequence(animID)
+        smallKatsuyu:SetSequence(smallKatsuyu:LookupSequence("akamaruadulte_run_base"))
         smallKatsuyu:SetCycle(0)
-        smallKatsuyu:SetPlaybackRate(2)
+        smallKatsuyu:SetPlaybackRate(1)
 
         local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 1200)
         for _, entity in ipairs(entitiesInRange) do
@@ -142,7 +142,7 @@ local function invokeSlug(ply)
                             local target = katsuyuTargetMap[smallKatsuyu]
                             if IsValid(target) then
                                 local direction = (target:GetPos() - smallKatsuyu:GetPos()):GetNormalized()
-                                local speed = 500
+                                local speed = 300
 
                                 local newPos = smallKatsuyu:GetPos() + direction * speed * 0.1
                                 newPos = getGroundPos(newPos)
