@@ -111,15 +111,15 @@ local function invokeSlug(ply)
         local smallKatsuyu = ents.Create("prop_dynamic")
         if not IsValid(smallKatsuyu) then return end
 
-        smallKatsuyu:SetModel("models/fsc/billy/chienninja6.mdl")
+        smallKatsuyu:SetModel("models/falko_naruto_foc/animal/katsuyu.mdl")
         smallKatsuyu:SetPos(modelEntity:GetPos() + Vector(math.random(-50, 50), math.random(-50, 50), 0))
         smallKatsuyu:SetAngles(Angle(0, playerAngles.yaw, 0))
         smallKatsuyu:SetModelScale(1)
         smallKatsuyu:Spawn()
 
-        smallKatsuyu:SetSequence(smallKatsuyu:LookupSequence("akamaruadulte_run_base"))
+        smallKatsuyu:SetSequence(animID)
         smallKatsuyu:SetCycle(0)
-        smallKatsuyu:SetPlaybackRate(1)
+        smallKatsuyu:SetPlaybackRate(2)
 
         local entitiesInRange = ents.FindInSphere(modelEntity:GetPos(), 1200)
         for _, entity in ipairs(entitiesInRange) do
@@ -142,8 +142,9 @@ local function invokeSlug(ply)
                             local target = katsuyuTargetMap[smallKatsuyu]
                             if IsValid(target) then
                                 local direction = (target:GetPos() - smallKatsuyu:GetPos()):GetNormalized()
-                                local speed = 300
+                                local speed = 100
 
+                   
                                 local newPos = smallKatsuyu:GetPos() + direction * speed * 0.1
                                 newPos = getGroundPos(newPos)
 
@@ -171,10 +172,17 @@ local function invokeSlug(ply)
                                         end
                                     end)
                                 end
+                            else
+                                ParticleEffect("nrp_tool_invocation", smallKatsuyu:GetPos(), playerAngles, ply)
+                                ply:EmitSound("ambient/explosions/explode_9.wav")
+                                        
+                                smallKatsuyu:Remove()  
                             end
                         else
+                     
                             timer.Remove("SlugMove_" .. smallKatsuyu:EntIndex())
                             katsuyuTargetMap[smallKatsuyu] = nil
+                       
                         end
                     end)
 
@@ -209,14 +217,14 @@ local function invokeSlug(ply)
         if IsValid(modelEntity) then
             modelEntity:Remove()
         end
-        timer.Simple(1, function()
+        timer.Simple(0.5, function()
             for _, katsuyus in ipairs(smallKatsuyuEntities) do
              
                 if katsuyuTargetMap[katsuyus] == nil then
                     
                     if IsValid(katsuyus) then
                         ParticleEffect("nrp_tool_invocation", katsuyus:GetPos(), playerAngles, ply)
-                        ply:EmitSound("ambient/explosions/explode_9.wav")
+                        --ply:EmitSound("ambient/explosions/explode_9.wav")
 
                         katsuyus:Remove()
                     end
