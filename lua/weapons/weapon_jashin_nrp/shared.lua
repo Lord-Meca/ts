@@ -115,9 +115,7 @@ function SWEP:Think()
 
 	local entity = Entity(self.bleedEntityIndex)
 	
-	if IsValid(entity) then
-		print(entity:EntIndex())
-	else
+	if not IsValid(entity) then
 		self.bleedEntityIndex = 0
 	end
 --====================--
@@ -863,7 +861,9 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		end
 	--========================================================--
 			if v:IsPlayer() then
-
+				if bleed then
+					self.bleedEntityIndex = v:EntIndex() 
+				end
 
 				ply:EmitSound(sound)
 		
