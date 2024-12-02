@@ -11,7 +11,8 @@ local QM_entity_names = {
 	"toad_stomp",
 	"toad_spy",
 	"slug_division",
-	"lantern_magic"
+	"lantern_magic",
+	"shuriken_fuma"
 }
 local QM_hud_names = {
 	"Jashin",
@@ -25,13 +26,14 @@ local QM_hud_names = {
 	"Piétinement\ndu Crapeau",
 	"Espionnage\ndu Crapeau",
 	"Division des\nLimaces",
-	"Technique\nLanterne\nMagique"
+	"Technique\nLanterne\nMagique",
+	"Shuriken\nFûma"
 }
 local QM_OpenKey = KEY_X
 
 function QM_Hover_Handler(i, mustPaint)
     local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
-	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
+	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
     
     local baseSize = 100
     local hoverSize = 150  
@@ -52,7 +54,7 @@ function QM_Hover_Handler(i, mustPaint)
 end
 
 function RefreshRingHud()
-    for i = 1,12 do
+    for i = 1,13 do
         QM_RingHud_Items[i]:SetText(QM_hud_names[i])
    
         QM_RingHud_Items[i].OnMousePressed = function()
@@ -85,8 +87,8 @@ end
 function CreateRingHud()
 	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 550  
 	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
-	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png"}
-	for i=1,12 do
+	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
+	for i=1,13 do
 		local QM_HudButton = vgui.Create("DButton")
 		QM_HudButton:SetPos(startX, startY + (i-1) * 85)  
 		QM_HudButton:SetSize(80,80)
@@ -100,14 +102,14 @@ function CreateRingHud()
 	
 			surface.SetMaterial(Material("materials/"..pictures[i], "noclamp"))
 			surface.SetDrawColor(color_black)
-			surface.DrawTexturedRectUV(0, 0, 100, 100, 0, 0, 1, 1)
+			surface.DrawTexturedRectUV(0, 0, 100, 60, 0, 0, 1, 1)
 		end
 		table.insert(QM_RingHud_Items, QM_HudButton)
 	end
 end
 
 function ShowRingHud()
-	for i=1,12 do
+	for i=1,13 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(true)
 		end
@@ -115,7 +117,7 @@ function ShowRingHud()
 end
 
 function HideRingHud()
-	for i=1,12 do
+	for i=1,13 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(false)
 		end
