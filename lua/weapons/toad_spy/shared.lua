@@ -40,7 +40,9 @@ SWEP.oldPosVision = 0
 
 
 function SWEP:Deploy()
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/konoha_ninja_npc.mdl")
+
+	
 end
 
 
@@ -52,14 +54,17 @@ function SWEP:Initialize()
 end
 
 
+
 function SWEP:PrimaryAttack()
+
 end
 
 function SWEP:SecondaryAttack()
+	local ply = self.Owner
+    if ply:Crouching() then
 
-	removeToad(self)
-	
-
+        removeToad(self)
+    end
 end
 
 function SWEP:DoAnimation( anim, type )
@@ -86,12 +91,45 @@ function takeVisionToad(ply, bool)
 
 	else
 		ply:Freeze(false)
-		ply:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_01.mdl")
+		ply:SetModel("models/falko_naruto_foc/body_upper/konoha_ninja_npc.mdl")
 		ply:SetModelScale(1)
 	end
 
 end
 
+function SWEP:Think()
+    local ply = self.Owner
+    if not IsValid(ply) then return end
+
+    if self:GetPlayerState(ply) == 3 then
+
+        ply:SetNWBool("IsInVignetteState", true)
+    else
+        ply:SetNWBool("IsInVignetteState", false)
+    end
+
+    self:NextThink(CurTime())
+    return true
+end
+
+hook.Add("HUDPaint", "DrawThickVignette", function()
+    local ply = LocalPlayer()
+
+    if ply:GetNWBool("IsInVignetteState", false) then
+        local width, height = ScrW(), ScrH()
+        local radius = 750
+        local centerX, centerY = width / 2, height / 2
+
+        surface.SetDrawColor(0, 0, 0, 100)
+        surface.DrawRect(0, 0, width, height)
+
+        for i = 0, 2000 do
+            local alpha = math.max(255) 
+            surface.SetDrawColor(0, 0, 0, alpha)
+            surface.DrawCircle(centerX, centerY, radius + (i * 1))
+        end
+    end
+end)
 
 
 function controlToad(ply, time, self)
@@ -116,23 +154,6 @@ function controlToad(ply, time, self)
 
     end)
 end
-
-
-
--- function SWEP:Think()
---     local ply = self.Owner
---     if not IsValid(ply) then return end
-
---     local currentState = self:GetPlayerState(ply)
-
-
---     print("toadpos loc :", self.toadPos.loc)
---     print("toadpos ang :", self.toadPos.ang)
---     --print("old ivsion pos :", self.oldPosVision)
-
---     self:NextThink(CurTime())
---     return true
--- end
 
 function spawnDynamicModel(pos, ang, model, animation, scale)
 
@@ -191,7 +212,7 @@ end
 function removeClone(self)
     if IsValid(self.tempClone) then
 
-		ParticleEffect("nrp_tool_invocation", self.tempClone:GetPos(), Angle(0, 0, 0), nil)
+		
 	    self.tempClone:Remove()
         self.tempClone = nil
 
@@ -199,9 +220,9 @@ function removeClone(self)
     end
 end
 
-function removeNearlyEntities(ply, modelName, radius)
+function removeNearlyEntities(pos, modelName, radius)
 	if SERVER then
-		local pos = ply:GetPos()
+	
 		local nearbyEntities = ents.FindInSphere(pos, radius)
 		for _, ent in pairs(nearbyEntities) do
 			if IsValid(ent) and ent:GetClass() == "prop_dynamic" then
@@ -217,10 +238,10 @@ end
 
 function removeToad(self)
 
-	removeNearlyEntities(self.Owner, "models/warwax/gamabunta.mdl", 100)
-
+	removeNearlyEntities(self.toadPos.loc, "models/warwax/gamabunta.mdl", 1)
+	
    	self:SetPlayerState(self.Owner, self.PlayerState.DEFAULT)
-	self.Owner:ChatPrint("toad removed")
+
 	self.toadPos = {loc = Vector(0, 0, 0), ang = Angle(0, 0, 0)}
 	self.oldPosToad = 0
 	self.oldPosVision = 0
@@ -246,8 +267,6 @@ function SWEP:Reload()
 		timer.Simple(1, function()
 			self:DoAnimation("anim_invoke", PLAYER_ATTACK1)
 		end)
-
-
 
 		if SERVER then
 
@@ -318,7 +337,7 @@ function SWEP:Reload()
 			loc = ply:GetPos(),
 			ang = ply:EyeAngles()
 		}
-		ply:ChatPrint("Crapeau déposé")
+	
 		removeClone(self)
 		self:SetPlayerState(ply, self.PlayerState.HAS_PLACED)
 		spawnDynamicModel(self.toadPos.loc, self.toadPos.ang, "models/warwax/gamabunta.mdl", "idle", 0.5)
@@ -342,7 +361,7 @@ function SWEP:Reload()
 
 		ply:SetPos(self.toadPos.loc)	
 		ply:SetEyeAngles(self.toadPos.ang)	
-		ply:ChatPrint("vision pour 3 secondes")
+		
 
 		timer.Simple(3, function()
 		
@@ -351,7 +370,6 @@ function SWEP:Reload()
 
 			takeVisionToad(ply, false)
 
-			ply:ChatPrint("fin vision")
 			ply:SetPos(self.oldPosVision)
 			ply:SetNoDraw(false)	
 			self.oldPosVision = 0
