@@ -151,7 +151,7 @@ local function invokeSlug(ply)
                                 smallKatsuyu:SetPos(newPos)
 
                              
-                                if (target:GetPos() - smallKatsuyu:GetPos()):Length() < 10 then
+                                if (target:GetPos() - smallKatsuyu:GetPos()):Length() < 30 then
                                     timer.Remove("SlugMove_" .. smallKatsuyu:EntIndex())
                                     
                                     ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)

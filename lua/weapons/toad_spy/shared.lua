@@ -179,7 +179,7 @@ function spawnDynamicModel(pos, ang, model, animation, scale)
 end
 
 
-function createClone(ply, self)
+function createPlyClone(ply, self)
     if not IsValid(ply) or not ply:IsPlayer() then return end
 
     if IsValid(self.tempClone) then
@@ -306,7 +306,7 @@ function SWEP:Reload()
 						self:SetHoldType("anim_gamabunta")
 						self:SetPlayerState(ply, self.PlayerState.MUST_PLACE)
 						
-						createClone(ply, self)
+						createPlyClone(ply, self)
 						controlToad(ply,10,self)
 						
 
@@ -355,7 +355,7 @@ function SWEP:Reload()
 		self.oldPosVision = ply:GetPos()
 		self:SetPlayerState(ply, self.PlayerState.WATCHING)
 
-		createClone(ply, self)
+		createPlyClone(ply, self)
 		takeVisionToad(ply, true)
 		ply:SetNoDraw(true)
 

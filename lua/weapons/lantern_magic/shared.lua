@@ -122,6 +122,9 @@ function openSelectMenu(self)
             net.WriteEntity(self)
             net.SendToServer()
 
+            self:SetHoldType("anim_invoke")
+            self.Owner:SetAnimation(PLAYER_ATTACK1)
+
             frame:Close()
         end
 
@@ -161,7 +164,7 @@ function holographicPlayer(ply, selectedNames, owner,self)
             elapsed = elapsed + interval
 
             local hue = (elapsed * 360) % 360
-            local color = HSVToColor(hue, 0.5, 0.3)
+            local color = HSVToColor(hue, 1,0.7)
             color.a = math.random(80, 100) 
 
             ply:SetColor(color)
@@ -185,7 +188,7 @@ function reCallPlayers(self)
         if IsValid(clone) then
             
             timer.Simple(0.5, function()
-       
+                ply:GodDisable()
                 ply:SetPos(clone:GetPos())
                 ParticleEffect("nrp_tool_invocation", clone:GetPos(), Angle(0,0,0), nil)
                 clone:Remove()
@@ -230,8 +233,9 @@ net.Receive("removeHolographicEffect", function(len, ply)
                     return 
                 end
                 
-                ply:SetRenderMode(RENDERMODE_TRANSCOLOR)
-                
+                if IsValid(ply) then
+                    ply:SetRenderMode(RENDERMODE_TRANSCOLOR)
+                end
             end
         end
     end
@@ -250,6 +254,8 @@ net.Receive("teleportSelectedPlayers", function(len, ply)
                 if SERVER then
                     createClone(player, self)
                 end
+
+                player:GodEnable()
                 
                 player:SetPos(ply:GetPos() + Vector(math.random(20, 150), math.random(10, 150), 0))
 
