@@ -1,6 +1,5 @@
 local QM_RingHud_Items = {}
 local QM_entity_names = {
-    "empty_hands",
 	"weapon_jashin_nrp",
 	"weapon_kiba_nrp",
 	"weapon_kubikiribocho_nrp",
@@ -11,10 +10,10 @@ local QM_entity_names = {
 	"salamander_rush",
 	"toad_stomp",
 	"toad_spy",
-	"slug_division"
+	"slug_division",
+	"lantern_magic"
 }
 local QM_hud_names = {
-    "Mains",
 	"Jashin",
 	"Kiba",
 	"Kubikiribocho",
@@ -25,13 +24,14 @@ local QM_hud_names = {
 	"Ruée de la\nSalamandre",
 	"Piétinement\ndu Crapeau",
 	"Espionnage\ndu Crapeau",
-	"Division des\nLimaces"
+	"Division des\nLimaces",
+	"Technique\nLanterne\nMagique"
 }
 local QM_OpenKey = KEY_X
 
 function QM_Hover_Handler(i, mustPaint)
-    local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
-	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
+    local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
+	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
     
     local baseSize = 100
     local hoverSize = 150  
@@ -84,8 +84,8 @@ end
 
 function CreateRingHud()
 	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 550  
-	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
-	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png"}
+	local pictures = {"QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
+	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png"}
 	for i=1,12 do
 		local QM_HudButton = vgui.Create("DButton")
 		QM_HudButton:SetPos(startX, startY + (i-1) * 85)  
