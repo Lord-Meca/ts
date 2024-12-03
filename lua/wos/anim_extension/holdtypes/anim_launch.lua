@@ -34,7 +34,8 @@ DATA.Translations[ ACT_MP_WALK ]						= "walk_all"
 DATA.Translations[ ACT_MP_RUN ]							= "run_all_01"
 DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "cidle_all"
 DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_all"
-DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_naruto_ninjutsu_rasenshuriken"  --foc_kunai
+DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_naruto_ninjutsu_rasenshuriken" 
+DATA.Translations[ ACT_MP_RELOAD_STAND ]	= "foc_minato_ninjutsu_flyingraijinlv2_hit"
 
 DATA.Translations[ ACT_MP_JUMP ]						= "jump_dual"
 
