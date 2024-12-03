@@ -74,6 +74,8 @@ local function invokeToad(ply)
     modelEntity:SetCycle(0)
     modelEntity:SetPlaybackRate(2)
 
+    ply:EmitSound("content/shukaku_scream1.wav")
+
     local direction = playerAngles:Forward()
     local moveDistancePerSecond = 2000
 
