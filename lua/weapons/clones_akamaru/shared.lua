@@ -241,7 +241,7 @@ end
 
 function SWEP:Reload()
     local ply = self.Owner
-    local maxDistance = 1500
+    local maxDistance = 2000
   
     if not ply:IsOnGround() then return end
 

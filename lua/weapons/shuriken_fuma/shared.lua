@@ -37,24 +37,12 @@ function SWEP:Initialize()
     
     self.shurikenLaunched = false
     self.shurikenEnt = nil
+    self.attachedModels = {}
 
+    --AttachModelToPlayer(self.Owner,self)
 end
 
 
-function SWEP:PrimaryAttack()
-
-    local maxDistance = 50
-    local ply = self.Owner
-    local trace = ply:GetEyeTrace()
-    local target = trace.Entity
-
-    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-        return 
-    end
-
-    ply:ChatPrint(target:Name())
-    
-end
 
 function SWEP:SecondaryAttack()
     if self.shurikenLaunched and IsValid(self.shurikenEnt) then
@@ -81,6 +69,7 @@ function launchShuriken(ply, self)
     local ent = ents.Create("prop_physics")
     ent:SetModel("models/naruto_demonwind_shuriken.mdl")
     ent:SetPos(startPos + ply:EyeAngles():Forward() * 100)
+    ent:SetModelScale(1)
     ent:SetAngles(aimDir:Angle())
 
     ent:Spawn()
@@ -131,57 +120,74 @@ function launchShuriken(ply, self)
 end
 
 
--- if SERVER then return end
 
--- local function AttachModelToPlayer(ply)
---     if not IsValid(ply) or not ply:IsPlayer() then return end
+-- function AttachModelToPlayer(ply,self)
+--     if CLIENT then
+--         if not IsValid(ply) or not ply:IsPlayer() then return end
 
---     -- Création d'un modèle côté client
---     local model = ClientsideModel("models/naruto_demonwind_shuriken.mdl") -- Change le chemin pour ton modèle
---     model:SetNoDraw(false) -- Pour afficher le modèle
---     model:SetModelScale(1, 0) -- Ajuste l'échelle si nécessaire
+--         if self.attachedModels[ply] and IsValid(self.attachedModels[ply]) then return end
 
---     -- Définir la position et l'angle de l'attachement
---     hook.Add("PostPlayerDraw", model, function()
---         if not IsValid(ply) or not ply:Alive() then
---             model:Remove()
---             hook.Remove("PostPlayerDraw", model)
---             return
---         end
+--         local model = ClientsideModel("models/foc_props_arme/arme_shuriken_fuma/foc_arme_shuriken_fuma.mdl")
+--         model:SetNoDraw(false)
+--         model:SetModelScale(1, 0)
 
---         local boneId = ply:LookupBone("ValveBiped.Bip01_Spine2") -- Bone du dos
---         if not boneId then return end
+--         self.attachedModels[ply] = model
 
---         local bonePos, boneAng = ply:GetBonePosition(boneId)
---         if not bonePos or not boneAng then return end
+--         hook.Add("PostPlayerDraw", model, function()
+--             if not IsValid(ply) or not ply:Alive() then
+--                 if IsValid(self.attachedModels[ply]) then
+--                     self.attachedModels[ply]:Remove()
+--                     self.attachedModels[ply] = nil
+--                 end
+--                 hook.Remove("PostPlayerDraw", model)
+--                 return
+--             end
 
---         -- Position et rotation relative
---         local offsetPos = Vector(0, 7, 0) -- Ajuste les valeurs pour le positionnement
---         local offsetAng = Angle(45, 0, 90) -- Ajuste l'angle
+--             local boneId = ply:LookupBone("ValveBiped.Bip01_Spine2")
+--             if not boneId then return end
 
---         -- Applique l'offset
---         local newPos = bonePos + boneAng:Forward() * offsetPos.x + boneAng:Right() * offsetPos.y + boneAng:Up() * offsetPos.z
---         local newAng = boneAng
---         newAng:RotateAroundAxis(boneAng:Right(), offsetAng.p)
---         newAng:RotateAroundAxis(boneAng:Up(), offsetAng.y)
---         newAng:RotateAroundAxis(boneAng:Forward(), offsetAng.r)
+--             local bonePos, boneAng = ply:GetBonePosition(boneId)
+--             if not bonePos or not boneAng then return end
 
---         -- Met à jour la position et l'angle du modèle
---         model:SetPos(newPos)
---         model:SetAngles(newAng)
---     end)
+--             local offsetPos = Vector(10, 7, 0)
+--             local offsetAng = Angle(45, 0, 90)
+
+--             local newPos = bonePos + boneAng:Forward() * offsetPos.x + boneAng:Right() * offsetPos.y + boneAng:Up() * offsetPos.z
+--             local newAng = boneAng
+--             newAng:RotateAroundAxis(boneAng:Right(), offsetAng.p)
+--             newAng:RotateAroundAxis(boneAng:Up(), offsetAng.y)
+--             newAng:RotateAroundAxis(boneAng:Forward(), offsetAng.r)
+
+--             model:SetPos(newPos)
+--             model:SetAngles(newAng)
+--         end)
+--     end
 -- end
 
--- -- Ajout pour un joueur spécifique (par exemple, le joueur local)
--- hook.Add("Think", "AttachWeaponModelToPlayer", function()
---     local ply = LocalPlayer()
---     if IsValid(ply) and ply:Alive() then
---         if not self.shurikenLaunched then
---             AttachModelToPlayer(ply)
---             hook.Remove("Think", "AttachWeaponModelToPlayer") 
+-- function RemoveModelFromPlayer(ply,self)
+--     if CLIENT and self.attachedModels[ply] then
+--         if IsValid(self.attachedModels[ply]) then
+--             self.attachedModels[ply]:Remove()
 --         end
+--         self.attachedModels[ply] = nil
 --     end
--- end)
+-- end
+function SWEP:PrimaryAttack()
+
+   
+
+    local maxDistance = 50
+    local ply = self.Owner
+    local trace = ply:GetEyeTrace()
+    local target = trace.Entity
+
+    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+        return 
+    end
+
+    ply:ChatPrint(target:Name() .. " etrangle")
+    
+end
 
 
 function SWEP:Reload()
@@ -193,40 +199,42 @@ function SWEP:Reload()
     if not self.shurikenLaunched then
         self:SetHoldType("anim_launch")
         ply:SetAnimation(PLAYER_ATTACK1)
+
+
     end
- 
 
-    if SERVER then
-
-        if not self.shurikenLaunched then
+    if not self.shurikenLaunched then
+       
+        if SERVER then
             launchShuriken(ply,self)
-   
-        else
-            if IsValid(self.shurikenEnt) then
-                local newPos = self.shurikenEnt:GetPos()
-                local shuriken = self.shurikenEnt
-
-                shuriken:Remove()
-
-                ply:SetPos(newPos)
-
-
-                ply:EmitSound("ambient/explosions/explode_9.wav",50,100,1)
-           
-
-            end
-            
         end
+    else
+        if IsValid(self.shurikenEnt) then
+            local newPos = self.shurikenEnt:GetPos()
+            local shuriken = self.shurikenEnt
+
+            shuriken:Remove()
+
+            ply:SetPos(newPos)
+  
+
+            ply:EmitSound("ambient/explosions/explode_9.wav",50,100,1)
+  
+          
+        end
+        
     end
-    
     if self.shurikenLaunched and IsValid(self.shurikenEnt) then
+
         timer.Simple(0.1,function()
             ParticleEffect("nrp_tool_invocation", ply:GetPos(), Angle(0,0,0), nil)
-    
+           
             self.shurikenEnt = nil
             self.shurikenLaunched = false
         end)
     end
+        
+    
     
 end
 
