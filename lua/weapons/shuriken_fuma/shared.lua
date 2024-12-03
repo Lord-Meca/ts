@@ -43,6 +43,17 @@ end
 
 function SWEP:PrimaryAttack()
 
+    local maxDistance = 50
+    local ply = self.Owner
+    local trace = ply:GetEyeTrace()
+    local target = trace.Entity
+
+    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+        return 
+    end
+
+    ply:ChatPrint(target:Name())
+    
 end
 
 function SWEP:SecondaryAttack()
@@ -68,7 +79,7 @@ function launchShuriken(ply, self)
     local velocity = aimDir * speed  
 
     local ent = ents.Create("prop_physics")
-    ent:SetModel("models/fsc/billy/cubeonoki.mdl")
+    ent:SetModel("models/naruto_demonwind_shuriken.mdl")
     ent:SetPos(startPos + ply:EyeAngles():Forward() * 100)
     ent:SetAngles(aimDir:Angle())
 
@@ -188,8 +199,8 @@ function SWEP:Reload()
     if SERVER then
 
         if not self.shurikenLaunched then
-
             launchShuriken(ply,self)
+   
         else
             if IsValid(self.shurikenEnt) then
                 local newPos = self.shurikenEnt:GetPos()
