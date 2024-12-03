@@ -4,12 +4,12 @@ hook.Add( "HUDShouldDraw", "RemoveRedScreen", function( name )
        return false 
     end
 end )
-hook.Add("PlayerBindPress", "DisableMouseWheel", function(ply, bind, pressed)
+-- hook.Add("PlayerBindPress", "DisableMouseWheel", function(ply, bind, pressed)
    
-    if string.find(bind, "invnext") or string.find(bind, "invprev") then
-        return true
-    end
-end)
+--     if string.find(bind, "invnext") or string.find(bind, "invprev") then
+--         return true
+--     end
+-- end)
 -- local parryCD = {}
 
 -- local allowedWeapons = {
