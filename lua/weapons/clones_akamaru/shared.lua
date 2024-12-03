@@ -67,6 +67,18 @@ end
 
 local function invokeAkamarus(ply,self)
     local attackList = {"akamaruadulteattaque1", "akamaruadulteattaque2", "akamaruadulteattaque5", "akamaruadulteattaque4"}
+
+    local function getGroundPos(pos)
+        local trace = util.TraceLine({
+            start = pos + Vector(0, 0, 10), 
+            endpos = pos + Vector(0, 0, -50), 
+            filter = modelEntity
+        })
+
+        return trace.HitPos
+    end
+
+
     for i = 1, 2 do
         local modelEntity = ents.Create("prop_dynamic")
     
@@ -96,7 +108,7 @@ local function invokeAkamarus(ply,self)
     
         modelEntity:SetSequence(animID)
         modelEntity:SetCycle(0)
-        modelEntity:SetPlaybackRate(1)
+        modelEntity:SetPlaybackRate(0.5)
 
         table.insert(self.listEntities, modelEntity)
     end
@@ -120,10 +132,9 @@ local function invokeAkamarus(ply,self)
         
                     local moveSpeed = 500
                     local moveOffset = directionToTarget * moveSpeed * 0.1
-
-                    modelEntity:SetPos(modelPos + moveOffset)
+                    local newPos = getGroundPos(modelPos + moveOffset)
+                    modelEntity:SetPos(newPos)
         
-  
                     local newAngles = (targetPos - modelPos):Angle()
                     modelEntity:SetAngles(Angle(0, newAngles.yaw, 0))
 
@@ -132,7 +143,7 @@ local function invokeAkamarus(ply,self)
                         local randomAnimAttack = attackList[math.random(1, #attackList)]
 
                         local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(3) 
+                        damageInfo:SetDamage(5) 
                         damageInfo:SetAttacker(modelEntity) 
                         damageInfo:SetInflictor(self) 
                         target:TakeDamageInfo(damageInfo)
@@ -144,7 +155,7 @@ local function invokeAkamarus(ply,self)
                         modelEntity:SetPlaybackRate(1)
         
                         net.Start("DisplayDamage")
-                        net.WriteInt(3, 32)
+                        net.WriteInt(5, 32)
                         net.WriteEntity(target)
                         net.WriteColor(Color(249, 148, 6, 255))
                         net.Send(ply)
@@ -194,7 +205,7 @@ local function invokeAkamarus(ply,self)
         
                     local directionToPlayer = (playerPos - modelPos):GetNormalized() 
     
-                    local moveSpeed = 500
+                    local moveSpeed = 700
                     local moveOffset = directionToPlayer * moveSpeed * 0.1
 
                     modelEntity:SetPos(modelPos + moveOffset)
@@ -246,7 +257,7 @@ function SWEP:Reload()
     if not ply:IsOnGround() then return end
 
 	if CurTime() < self.NextSpecialMove then return end
-	self.NextSpecialMove = CurTime() + 2
+	self.NextSpecialMove = CurTime() + 1
 
 	local particleName = "nrp_tool_invocation"
 	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
