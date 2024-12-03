@@ -186,8 +186,10 @@ end
 function reCallPlayers(self)
     for clone, ply in pairs(self.selectedClones) do
         if IsValid(clone) then
-            
+
             timer.Simple(0.5, function()
+
+
                 ply:GodDisable()
                 ply:SetPos(clone:GetPos())
                 ParticleEffect("nrp_tool_invocation", clone:GetPos(), Angle(0,0,0), nil)
@@ -213,6 +215,8 @@ end
 
 function SWEP:SecondaryAttack()
     reCallPlayers(self)
+    self:SetHoldType("anim_invoke")
+    self.Owner:SetAnimation(PLAYER_ATTACK1)
 end
 
 
@@ -257,8 +261,9 @@ net.Receive("teleportSelectedPlayers", function(len, ply)
 
                 player:GodEnable()
                 
-                player:SetPos(ply:GetPos() + Vector(math.random(20, 150), math.random(10, 150), 0))
-
+                player:SetPos(ply:GetPos() + Vector(math.random(20, 150), math.random(10, 150)))
+                --player:SetPos(ply:GetPos() + Vector(0,math.random(20, 150),20) + ply:EyeAngles():Forward()*math.random(100,300), 0)
+                ParticleEffect("[5]_blackexplosion8", player:GetPos(), Angle(0, 0, 0), nil)
             end
         end
     end

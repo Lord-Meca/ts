@@ -37,14 +37,14 @@ function SWEP:Initialize()
     
     self.shurikenLaunched = false
     self.shurikenEnt = nil
-    self.attachedModels = {}
+    --attachModelEnt = {}
 
-    --AttachModelToPlayer(self.Owner,self)
 end
 
-
+local attachModelEnt = nil
 
 function SWEP:SecondaryAttack()
+
     if self.shurikenLaunched and IsValid(self.shurikenEnt) then
         timer.Simple(0.1,function()
             local ent = self.shurikenEnt
@@ -121,121 +121,122 @@ end
 
 
 
--- function AttachModelToPlayer(ply,self)
---     if CLIENT then
---         if not IsValid(ply) or not ply:IsPlayer() then return end
+function AttachModelToPlayer(ply)
+    if CLIENT then
+        if not IsValid(ply) or not ply:IsPlayer() then return end
 
---         if self.attachedModels[ply] and IsValid(self.attachedModels[ply]) then return end
+        if attachModelEnt and IsValid(attachModelEnt) then return end
 
---         local model = ClientsideModel("models/foc_props_arme/arme_shuriken_fuma/foc_arme_shuriken_fuma.mdl")
---         model:SetNoDraw(false)
---         model:SetModelScale(1, 0)
+        local model = ClientsideModel("models/naruto_demonwind_shuriken.mdl")
+        --local model = ClientsideModel("models/fsc/billy/doublebrassusanoo.mdl")
+        model:SetNoDraw(false)
+        --model:SetColor(Color(math.random(0,255),math.random(0,255),math.random(0,255)))
+        model:SetModelScale(1, 0)
 
---         self.attachedModels[ply] = model
+        attachModelEnt = model
 
---         hook.Add("PostPlayerDraw", model, function()
---             if not IsValid(ply) or not ply:Alive() then
---                 if IsValid(self.attachedModels[ply]) then
---                     self.attachedModels[ply]:Remove()
---                     self.attachedModels[ply] = nil
---                 end
---                 hook.Remove("PostPlayerDraw", model)
---                 return
---             end
+        hook.Add("PostPlayerDraw", model, function()
+            if not IsValid(ply) or not ply:Alive() then
+                if IsValid(attachModelEnt) then
+                    attachModelEnt:Remove()
+                    attachModelEnt = nil
+                end
+                hook.Remove("PostPlayerDraw", model)
+                return
+            end
 
---             local boneId = ply:LookupBone("ValveBiped.Bip01_Spine2")
---             if not boneId then return end
+            local boneId = ply:LookupBone("ValveBiped.Bip01_Spine2")
+            if not boneId then return end
 
---             local bonePos, boneAng = ply:GetBonePosition(boneId)
---             if not bonePos or not boneAng then return end
+            local bonePos, boneAng = ply:GetBonePosition(boneId)
+            if not bonePos or not boneAng then return end
 
---             local offsetPos = Vector(10, 7, 0)
---             local offsetAng = Angle(45, 0, 90)
+            --local offsetPos = Vector(-30, -5, 0)
+            --local offsetAng = Angle(0, 90, 90)
+            local offsetPos = Vector(10, 7, 0)
+            local offsetAng = Angle(45, 0, 90)
 
---             local newPos = bonePos + boneAng:Forward() * offsetPos.x + boneAng:Right() * offsetPos.y + boneAng:Up() * offsetPos.z
---             local newAng = boneAng
---             newAng:RotateAroundAxis(boneAng:Right(), offsetAng.p)
---             newAng:RotateAroundAxis(boneAng:Up(), offsetAng.y)
---             newAng:RotateAroundAxis(boneAng:Forward(), offsetAng.r)
+            local newPos = bonePos + boneAng:Forward() * offsetPos.x + boneAng:Right() * offsetPos.y + boneAng:Up() * offsetPos.z
+            local newAng = boneAng
+            newAng:RotateAroundAxis(boneAng:Right(), offsetAng.p)
+            newAng:RotateAroundAxis(boneAng:Up(), offsetAng.y)
+            newAng:RotateAroundAxis(boneAng:Forward(), offsetAng.r)
 
---             model:SetPos(newPos)
---             model:SetAngles(newAng)
---         end)
---     end
--- end
+            model:SetPos(newPos)
+            model:SetAngles(newAng)
+        end)
 
--- function RemoveModelFromPlayer(ply,self)
---     if CLIENT and self.attachedModels[ply] then
---         if IsValid(self.attachedModels[ply]) then
---             self.attachedModels[ply]:Remove()
---         end
---         self.attachedModels[ply] = nil
---     end
--- end
-function SWEP:PrimaryAttack()
-
-   
-
-    local maxDistance = 50
-    local ply = self.Owner
-    local trace = ply:GetEyeTrace()
-    local target = trace.Entity
-
-    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-        return 
-    end
-
-    ply:ChatPrint(target:Name() .. " etrangle")
-    
-end
-
-
-function SWEP:Reload()
-	local ply = self.Owner
-
-	if CurTime() < self.NextSpecialMove then return end
-	self.NextSpecialMove = CurTime() + 0.5
-
-    if not self.shurikenLaunched then
-        self:SetHoldType("anim_launch")
-        ply:SetAnimation(PLAYER_ATTACK1)
-
-
-    end
-
-    if not self.shurikenLaunched then
-       
-        if SERVER then
-            launchShuriken(ply,self)
-        end
-    else
-        if IsValid(self.shurikenEnt) then
-            local newPos = self.shurikenEnt:GetPos()
-            local shuriken = self.shurikenEnt
-
-            shuriken:Remove()
-
-            ply:SetPos(newPos)
-  
-
-            ply:EmitSound("ambient/explosions/explode_9.wav",50,100,1)
-  
-          
-        end
-        
-    end
-    if self.shurikenLaunched and IsValid(self.shurikenEnt) then
-
-        timer.Simple(0.1,function()
-            ParticleEffect("nrp_tool_invocation", ply:GetPos(), Angle(0,0,0), nil)
-           
-            self.shurikenEnt = nil
-            self.shurikenLaunched = false
+        timer.Simple(5,function()
+            RemoveModelFromPlayer(ply,self)
         end)
     end
-        
-    
+end
+
+function RemoveModelFromPlayer(ply)
+    if CLIENT and attachModelEnt then
+        if IsValid(attachModelEnt) then
+            attachModelEnt:Remove()
+        end
+        attachModelEnt = nil
+    end
+end
+function SWEP:PrimaryAttack()
+
+    -- local maxDistance = 50
+    -- local ply = self.Owner
+    -- local trace = ply:GetEyeTrace()
+    -- local target = trace.Entity
+
+    -- if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+    --     return 
+    -- end
+
+    -- ply:ChatPrint(target:Name() .. " etrangle")
     
 end
 
+function SWEP:Reload()
+    local ply = self:GetOwner() 
+    if not IsValid(ply) or not ply:IsPlayer() then return end
+
+    self:SetHoldType("anim_launch") 
+
+    if CurTime() < (self.NextSpecialMove or 0) then return end
+    self.NextSpecialMove = CurTime() + 0.5
+
+    if not self.shurikenLaunched then
+
+        ply:SetAnimation(PLAYER_ATTACK1)
+
+        if SERVER then
+            launchShuriken(ply, self)
+        end
+    else
+
+        timer.Simple(0.01, function()
+            if IsValid(ply) then
+                ply:SetAnimation(PLAYER_RELOAD)
+              
+            end
+        end)
+
+        if IsValid(self.shurikenEnt) then
+            local newPos = self.shurikenEnt:GetPos()
+            self.shurikenEnt:Remove()
+            ply:SetPos(newPos)
+
+            ply:EmitSound("ambient/explosions/explode_9.wav", 50, 100, 1)
+        end
+    end
+
+    if self.shurikenLaunched and IsValid(self.shurikenEnt) then
+        timer.Simple(0.1, function()
+            if IsValid(ply) then
+                ParticleEffect("[5]_blackexplosion8", ply:GetPos(), Angle(0, 0, 0), nil)
+                self.shurikenEnt = nil
+                self.shurikenLaunched = false
+            end
+        end)
+    end
+end
 
