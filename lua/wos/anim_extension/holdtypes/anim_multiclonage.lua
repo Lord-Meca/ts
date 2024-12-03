@@ -24,8 +24,8 @@
 
 local DATA = {}
 
-DATA.Name = "Anim Launch"
-DATA.HoldType = "anim_launch"
+DATA.Name = "Anim Multiclonage"
+DATA.HoldType = "anim_multiclonage"
 DATA.BaseHoldType = "melee2"
 DATA.Translations = {}
 
@@ -34,7 +34,7 @@ DATA.Translations[ ACT_MP_WALK ]						= "walk_all"
 DATA.Translations[ ACT_MP_RUN ]							= "run_all_01"
 DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "cidle_all"
 DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_all"
-DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_naruto_ninjutsu_rasenshuriken"  --foc_kunai
+DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_naruto_ninjutsu_shadowclone_handsealsix"
 
 DATA.Translations[ ACT_MP_JUMP ]						= "jump_dual"
 
