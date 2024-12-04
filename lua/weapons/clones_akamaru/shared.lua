@@ -68,15 +68,15 @@ end
 local function invokeAkamarus(ply,self)
     local attackList = {"akamaruadulteattaque1", "akamaruadulteattaque2", "akamaruadulteattaque5", "akamaruadulteattaque4"}
 
-    local function getGroundPos(pos)
-        local trace = util.TraceLine({
-            start = pos + Vector(0, 0, 10), 
-            endpos = pos + Vector(0, 0, -50), 
-            filter = modelEntity
-        })
+    -- local function getGroundPos(pos)
+    --     local trace = util.TraceLine({
+    --         start = pos + Vector(0, 0, 10), 
+    --         endpos = pos + Vector(0, 0, -50), 
+    --         filter = modelEntity
+    --     })
 
-        return trace.HitPos
-    end
+    --     return trace.HitPos
+    -- end
 
 
     for i = 1, 2 do
@@ -132,7 +132,7 @@ local function invokeAkamarus(ply,self)
         
                     local moveSpeed = 500
                     local moveOffset = directionToTarget * moveSpeed * 0.1
-                    local newPos = getGroundPos(modelPos + moveOffset)
+                    local newPos = (modelPos + moveOffset)
                     modelEntity:SetPos(newPos)
         
                     local newAngles = (targetPos - modelPos):Angle()
@@ -249,10 +249,27 @@ local function invokeAkamarus(ply,self)
     
    
 end
+local function DrawRadius3D(ply, radius)
+    local model = "models/props_phx/construct/metal_dome360.mdl"  
+    local circle = ClientsideModel(model, RENDERGROUP_TRANSLUCENT)
+    if not IsValid(circle) then return end
 
+    circle:SetModelScale(radius / 50, 0)
+    circle:SetMaterial("models/wireframe")  
+    circle:SetColor(Color(255,0,0,255))
+    circle:SetPos(ply:GetPos())
+    circle:SetAngles(Angle(0, 0, 0))
+
+    timer.Simple(3, function()
+        if IsValid(circle) then
+            circle:Remove()
+        end
+    end)
+end
 function SWEP:Reload()
     local ply = self.Owner
     local maxDistance = 2000
+    local radius = 300
   
     if not ply:IsOnGround() then return end
 
@@ -268,9 +285,20 @@ function SWEP:Reload()
         local trace = ply:GetEyeTrace()
         local target = trace.Entity
         if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-            return 
-        end
 
+            local hitPos = trace.HitPos
+            for _, ent in ipairs(ents.FindInSphere(hitPos, radius)) do
+                if ent:IsPlayer() and ent ~= ply then
+                    target = ent
+                    break
+                end
+            end
+
+            if not (IsValid(target) and target:IsPlayer()) then
+                return
+            end
+        end
+        --DrawRadius3D(target, radius)
         self.targetPlayer = target
 
 
