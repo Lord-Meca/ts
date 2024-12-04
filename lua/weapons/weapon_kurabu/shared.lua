@@ -1017,8 +1017,8 @@ function growCorals(ply, self, max,damage)
     for i = 1, max do
         timer.Simple(i * 0.1, function()
             local traceData = {
-                start = ply:GetPos() + ply:EyeAngles():Forward() * 100 * i + Vector(0, 0, 100),
-                endpos = ply:GetPos() + ply:EyeAngles():Forward() * 100 * i - Vector(0, 0, 300),
+                start = ply:GetPos() + ply:EyeAngles():Forward() * 150 * i + Vector(0, 0, 100),
+                endpos = ply:GetPos() + ply:EyeAngles():Forward() * 150 * i - Vector(0, 0, 300),
                 filter = ply
             }
 
@@ -1034,7 +1034,7 @@ function growCorals(ply, self, max,damage)
 
                 modelEntity:SetPos(startPos)
                 modelEntity:SetAngles(Angle(0, math.random(0, 180), 0))
-                modelEntity:SetModelScale(4)
+                modelEntity:SetModelScale(math.random(2,9))
                 modelEntity:SetColor(Color(math.random(0, 255), math.random(0, 255), math.random(0, 255)))
 
                 modelEntity:SetCollisionGroup(COLLISION_GROUP_NONE)
@@ -1082,13 +1082,15 @@ function growCorals(ply, self, max,damage)
                             end
                         end)
 
-                        local nearbyEntities = ents.FindInSphere(modelEntity:GetPos(), 100)
+                        local nearbyEntities = ents.FindInSphere(modelEntity:GetPos(), 250)
                         for _, entity in ipairs(nearbyEntities) do
-                            if entity:IsPlayer() or entity:IsNPC() and entity ~= ply then
+                            if entity:IsPlayer() and entity ~= ply or entity:IsNPC() then
+							
                                 ply:EmitSound(AttackHit1, 50, 100, 0.5)
+
 								local damageInfo = DamageInfo()
 								damageInfo:SetDamage(damage) 
-								damageInfo:SetAttacker(entity) 
+								damageInfo:SetAttacker(modelEntity) 
 								damageInfo:SetInflictor(self) 
 								entity:TakeDamageInfo(damageInfo)
 
@@ -1123,6 +1125,6 @@ function SWEP:Reload()
     ply:SetAnimation(PLAYER_ATTACK1)
 
     timer.Simple(0.2, function()
-		growCorals(ply,self,30,50)
+		growCorals(ply,self,300,50)
     end)
 end

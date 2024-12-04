@@ -957,11 +957,7 @@ function SWEP:SecondaryAttack()
 		self:SlashDown()
 		self.Weapon:SetNextSecondaryFire(CurTime() + 0.8 )
 
-		timer.Simple(0.5, function()
-		
-			ParticleEffect("[0]_chakra_charge_groundhit",ply:GetPos() + ply:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
-		
-		end)
+	
 		
 	else
 		if ply:KeyDown( IN_FORWARD ) then
@@ -1007,9 +1003,9 @@ function SWEP:Reload()
     self.NextSpecialMove = CurTime() + cooldownTime
 
 	self:SetHoldType("slashdown")
-	ply:SetAnimation(PLAYER_ATTACK1)	
+	ply:SetAnimation(PLAYER_RELOAD)	
 
-    timer.Simple(0.4, function()
+    timer.Simple(0.3, function()
 	
 		ply:EmitSound("ambient/levels/labs/electric_explosion1.wav")
 		

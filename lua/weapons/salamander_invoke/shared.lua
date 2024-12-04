@@ -50,7 +50,7 @@ local function invokeSalamander(ply)
     local particleName = "izox_nrp_venom_poisonsmoke_rework"
     local poisonSoundName = "ambient/fire/firebig.wav"
     local modelEntity = ents.Create("prop_dynamic")
-    local tickDamage = 10
+    local tickDamage = 4
 
     if not IsValid(modelEntity) then return end
 

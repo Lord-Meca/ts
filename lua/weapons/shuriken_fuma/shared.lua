@@ -59,7 +59,7 @@ function SWEP:SecondaryAttack()
         end)
     end
 end
-function launchShuriken(ply, self)
+function launchShuriken(ply, self,damage)
     local startPos = ply:GetShootPos()
     local aimDir = ply:GetAimVector()
 
@@ -73,6 +73,8 @@ function launchShuriken(ply, self)
     ent:SetAngles(aimDir:Angle())
 
     ent:Spawn()
+    
+    util.SpriteTrail(ent, 0, Color(255,255,255), false, 10, 10, 1, 50, "trails/laser.vmt")
 
     self.shurikenLaunched = true
 
@@ -101,7 +103,31 @@ function launchShuriken(ply, self)
             local effectdata = EffectData()
             effectdata:SetOrigin(trace.HitPos)
             effectdata:SetNormal(trace.HitNormal)
-            util.Effect("cball_explode", effectdata) 
+            util.Effect("StunstickImpact", effectdata) 
+
+            for _, entity in ipairs(ents.FindInSphere(trace.HitPos, 150)) do
+                if entity:IsPlayer() or entity:IsNPC() then
+				
+                    if entity ~= ply then
+                        
+                        local damageInfo = DamageInfo()
+                        damageInfo:SetDamage(damage) 
+                        damageInfo:SetAttacker(ent) 
+                        damageInfo:SetInflictor(self)
+
+                        
+                        entity:TakeDamageInfo(damageInfo)
+                        
+
+                        net.Start("DisplayDamage")
+                        net.WriteInt(damage, 32)
+                        net.WriteEntity(entity)
+                        net.WriteColor(Color(207, 91, 23))
+                        net.Send(ply)
+                    end
+                    break
+                end
+            end
 
             self.shurikenLaunched = false
             self.shurikenEnt = nil
@@ -209,7 +235,8 @@ function SWEP:Reload()
         ply:SetAnimation(PLAYER_ATTACK1)
 
         if SERVER then
-            launchShuriken(ply, self)
+            util.AddNetworkString("DisplayDamage")
+            launchShuriken(ply, self,120)
         end
     else
 

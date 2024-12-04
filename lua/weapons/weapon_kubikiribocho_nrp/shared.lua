@@ -596,10 +596,6 @@ end
 			v:SetCondition( 67 )
 			v:EmitSound(AttackHit2)
 
-			ParticleEffect("[1]_ground_bolt_strike_add",ply:GetPos() + ply:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
-			timer.Simple(0.2, function()
-				ply:StopParticles()	
-			end)
 
 			timer.Simple(2.3, function()
 			if IsValid(v) then 
@@ -616,11 +612,7 @@ end
 			ply:EmitSound(Combo2)
 
 		
-			ParticleEffect("[1]_ground_bolt_strike_add",ply:GetPos() + ply:GetForward() * 0 + Vector( 0, 0, 0 ),Angle(0,0,0),nil)
-			timer.Simple(0.2, function()
-				ply:StopParticles()	
-			end)
-			
+		
 
 			timer.Simple(0.9, function()
 			if IsValid(v) then 
@@ -1031,14 +1023,7 @@ function SWEP:SecondaryAttack()
 		self:SlashDown()
 		self.Weapon:SetNextSecondaryFire(CurTime() + 0.8 )
 
-        timer.Simple(0.5, function()
-            if IsValid(ply) then
-                ParticleEffect("[1]_ground_bolt_add", ply:GetPos(), Angle(0, 0, 0), nil)
-                ParticleEffect("[1]_ground_bolt_add_4", ply:GetPos() + ply:GetForward() * 0 + Vector(0, 0, 0), Angle(0, 0, 0), nil)
-            end
-        
-
-        end)
+      
 		
 	else
 		if ply:KeyDown( IN_FORWARD ) then
@@ -1091,7 +1076,7 @@ function SWEP:Reload()
 
     self:DoAnimation("weapon_art")
 
-    timer.Simple(0.3, function()
+    timer.Simple(0.7, function()
         self:DoCombo(AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0), 0, 0, Combo1, 0.14, false, false, 0, 0, false, true, true, true)
 
 

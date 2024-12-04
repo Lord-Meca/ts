@@ -1018,7 +1018,7 @@ function shootBlowgun(ply, self)
     local startPos = ply:GetShootPos()
     local aimDir = ply:GetAimVector()
 	
-	local damage = 50
+	local damage = 75
     local speed = 3000
     local velocity = aimDir * speed  
 
