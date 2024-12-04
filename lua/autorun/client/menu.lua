@@ -10,6 +10,7 @@ local QM_RingHud_Items = {}
 local QM_entity_names = {
 	"weapon_blowgun",
 	"weapon_kurabu",
+	"doton_punch",
 	"weapon_jashin_nrp",
 	"weapon_kiba_nrp",
 	"weapon_kubikiribocho_nrp",
@@ -19,15 +20,14 @@ local QM_entity_names = {
 	"salamander_invoke",
 	"salamander_rush",
 	"toad_stomp",
-	"toad_spy",
 	"slug_division",
-	"lantern_magic",
 	"shuriken_fuma",
 	"clones_akamaru"
 }
 local QM_hud_names = {
 	"Sarbacane",
 	"Kurabu",
+	"Frappe de\nRoche",
 	"Jashin",
 	"Kiba",
 	"Kubikiribocho",
@@ -37,16 +37,14 @@ local QM_hud_names = {
 	"Salamandre\nQui tourne",
 	"Ruée de la\nSalamandre",
 	"Piétinement\ndu Crapeau",
-	"Espionnage\ndu Crapeau",
 	"Division des\nLimaces",
-	"Technique\nLanterne\nMagique",
 	"Shuriken\nFûma",
 	"Attaque\n2 Chiens"
 }
 local QM_OpenKey = KEY_X
 
 function QM_Hover_Handler(i, mustPaint)
-    local pictures = {"QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
+    local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
 	 "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
 	  "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png"}
     
@@ -69,7 +67,7 @@ function QM_Hover_Handler(i, mustPaint)
 end
 
 function RefreshRingHud()
-    for i = 1,16 do
+    for i = 1,15 do
         QM_RingHud_Items[i]:SetText(QM_hud_names[i])
    
         QM_RingHud_Items[i]:SetFont("DermaDefaultSmall") 
@@ -97,10 +95,10 @@ end
 
 function CreateRingHud()
 	local startX, startY = ScrW() / 1.017 - 50, ScrH() / 2 - 550
-	local pictures = {"QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
+	local pictures = {"QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png",
 	"QM_mid_left.png", "QM_mid_left.png","QM_mid_left.png","QM_mid_left.png","QM_mid_left.png", "QM_mid_left.png", "QM_mid_left.png",
 	 "QM_mid_left.png"}
-	for i=1,16 do
+	for i=1,15 do
 		local QM_HudButton = vgui.Create("DButton")
 		QM_HudButton:SetPos(startX, startY + (i-1) * 60)  
 		QM_HudButton:SetSize(60, 60)  
@@ -120,7 +118,7 @@ function CreateRingHud()
 end
 
 function ShowRingHud()
-	for i=1,16 do
+	for i=1,15 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(true)
 		end
@@ -128,7 +126,7 @@ function ShowRingHud()
 end
 
 function HideRingHud()
-	for i=1,16 do
+	for i=1,15 do
 		if QM_RingHud_Items[i] then
 			QM_RingHud_Items[i]:SetVisible(false)
 		end
