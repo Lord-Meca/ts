@@ -117,7 +117,7 @@ local function invokeToad(ply)
                     net.Start("DisplayDamage")
                     net.WriteInt(tickDamage, 32)
                     net.WriteEntity(entity)
-                    net.WriteColor(Color(160, 37, 37, 255))
+                    net.WriteColor(Color(249,148,6,255))
                     net.Send(ply)
                 end
             end

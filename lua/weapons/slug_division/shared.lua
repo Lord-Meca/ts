@@ -42,7 +42,7 @@ end
 function SWEP:SecondaryAttack()
 end
 
-local function progressiveHeal(entity, index)
+local function progressiveHeal(ply,entity, index)
     if not IsValid(entity) then
         timer.Remove("SlugProgressiveHeal_" .. index) 
         return
@@ -54,6 +54,12 @@ local function progressiveHeal(entity, index)
   
     local newHealth = math.min(currentHealth + healthStep, maxHealth)
     entity:SetHealth(newHealth)
+
+    net.Start("DisplayDamage")
+    net.WriteInt(healthStep, 32)
+    net.WriteEntity(entity)
+    net.WriteColor(Color(97,185,93))
+    net.Send(ply)
 
     if newHealth >= maxHealth then
         timer.Remove("SlugProgressiveHeal_" .. index)
@@ -157,7 +163,7 @@ local function invokeSlug(ply)
                                     ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)
 
                                     timer.Create("SlugProgressiveHeal_" .. smallKatsuyu:EntIndex(), 1, 5, function()
-                                        progressiveHeal(entity, smallKatsuyu:EntIndex())
+                                        progressiveHeal(ply,entity, smallKatsuyu:EntIndex())
                                     end)
 
                                     timer.Simple(katsuyuTimes.smallKatsuyuDuration, function()
@@ -266,6 +272,7 @@ function SWEP:Reload()
 
 	if SERVER then
 
+        util.AddNetworkString("DisplayDamage")
 
 		timer.Simple(1.5, function()
 			ply:Freeze(true)

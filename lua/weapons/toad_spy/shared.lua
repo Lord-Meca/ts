@@ -270,8 +270,7 @@ function SWEP:Reload()
 
 		if SERVER then
 
-		    util.AddNetworkString("TemporaryClone")
-
+		    --util.AddNetworkString("TemporaryClone")
 
 			timer.Simple(1.5, function()
 				ply:Freeze(true)
@@ -357,6 +356,7 @@ function SWEP:Reload()
 
 		createPlyClone(ply, self)
 		takeVisionToad(ply, true)
+		ply:GodEnable()
 		ply:SetNoDraw(true)
 
 		ply:SetPos(self.toadPos.loc)	
@@ -369,6 +369,7 @@ function SWEP:Reload()
 			removeClone(self)
 
 			takeVisionToad(ply, false)
+			ply:GodDisable()
 
 			ply:SetPos(self.oldPosVision)
 			ply:SetNoDraw(false)	

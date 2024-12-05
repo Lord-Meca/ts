@@ -747,7 +747,11 @@ local function progressiveHeal(ply)
 
     local newHealth = math.min(currentHealth + healthStep, maxHealth)
     ply:SetHealth(newHealth)
-
+    net.Start("DisplayDamage")
+    net.WriteInt(healthStep, 32)
+    net.WriteEntity(ply)
+    net.WriteColor(Color(97,185,93))
+    net.Send(ply)
     if newHealth >= maxHealth then
         timer.Remove("KubiProgressiveHeal")
     end

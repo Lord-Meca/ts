@@ -124,7 +124,7 @@ local function dotonPunch(ply, self)
                             net.Start("DisplayDamage")
                             net.WriteInt(50, 32)
                             net.WriteEntity(target)
-                            net.WriteColor(Color(207, 91, 23))
+                            net.WriteColor(Color(249,148,6,255))
                             net.Send(ply)
 
                             damageDealt = true
@@ -243,7 +243,7 @@ local function dotonPunchWall(ply, self)
                             net.Start("DisplayDamage")
                             net.WriteInt(50, 32)
                             net.WriteEntity(target)
-                            net.WriteColor(Color(207, 91, 23))
+                            net.WriteColor(Color(249,148,6,255))
                             net.Send(ply)
 
                             damageDealt = true
@@ -290,7 +290,7 @@ function SWEP:Reload()
     local radius = 300
 
     if CurTime() < self.NextSpecialMove then return end
-    self.NextSpecialMove = CurTime() + 5
+    self.NextSpecialMove = CurTime() + 1
     self:SetHoldType("anim_ninjutsu1")
     ply:SetAnimation(PLAYER_RELOAD)
 

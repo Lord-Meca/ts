@@ -115,7 +115,7 @@ local function invokeSalamander(ply)
                     net.Start("DisplayDamage")
                     net.WriteInt(tickDamage, 32)
                     net.WriteEntity(entity)
-                    net.WriteColor(Color(221,51,255,255))
+                    net.WriteColor(Color(51,125,255,255))
                     net.Send(ply)
                 end
             end

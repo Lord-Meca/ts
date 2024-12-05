@@ -1066,7 +1066,7 @@ function shootBlowgun(ply, self)
 					net.Start("DisplayDamage")
 					net.WriteInt(damage, 32)
 					net.WriteEntity(ent)
-					net.WriteColor(Color(6, 111, 249))
+					net.WriteColor(Color(51,125,255,255))
 					net.Send(ply)
 
                     break

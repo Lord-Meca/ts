@@ -1097,7 +1097,7 @@ function growCorals(ply, self, max,damage)
 								net.Start("DisplayDamage")
 								net.WriteInt(damage, 32)
 								net.WriteEntity(entity)
-								net.WriteColor(Color(207, 91, 23))
+								net.WriteColor(Color(249,148,6,255))
 								net.Send(ply)
                             end
                         end
