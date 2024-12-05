@@ -26,6 +26,9 @@ SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 
+SWEP.StrangleTime = 3 
+SWEP.RagdollTime = 5 
+
 function SWEP:Deploy()
 	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_hood_03.mdl")
 end
@@ -37,7 +40,11 @@ function SWEP:Initialize()
     
     self.shurikenLaunched = false
     self.shurikenEnt = nil
-    --attachModelEnt = {}
+
+
+    self.IsStrangling = false
+    self.StrangleStartTime = 0
+    self.StrangleTarget = nil
 
 end
 
@@ -122,7 +129,7 @@ function launchShuriken(ply, self,damage)
                         net.Start("DisplayDamage")
                         net.WriteInt(damage, 32)
                         net.WriteEntity(entity)
-                        net.WriteColor(Color(207, 91, 23))
+                        net.WriteColor(Color(249,148,6,255))
                         net.Send(ply)
                     end
                     break
@@ -207,18 +214,89 @@ function RemoveModelFromPlayer(ply)
     end
 end
 function SWEP:PrimaryAttack()
+    local maxDistance = 150
+    local ply = self.Owner
+    local trace = ply:GetEyeTrace()
+    local target = trace.Entity
 
-    -- local maxDistance = 50
-    -- local ply = self.Owner
-    -- local trace = ply:GetEyeTrace()
-    -- local target = trace.Entity
+    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+        return
+    end
 
-    -- if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-    --     return 
-    -- end
+    if not self.IsStrangling then
 
-    -- ply:ChatPrint(target:Name() .. " etrangle")
-    
+        
+        self:SetHoldType("anim_ninjutsu1")
+        ply:SetAnimation(PLAYER_ATTACK1)
+
+        self.IsStrangling = true
+        self.StrangleStartTime = CurTime()
+        self.StrangleTarget = target
+        target:Freeze(true) 
+    end
+end
+
+function SWEP:Think()
+    if self.IsStrangling then
+        local ply = self.Owner
+        local trace = ply:GetEyeTrace()
+        local target = self.StrangleTarget
+
+        if not ply:KeyDown(IN_ATTACK) or not (IsValid(target) and target:IsPlayer()) then
+ 
+            self:CancelStrangle()
+            return
+        end
+
+        local elapsedTime = CurTime() - self.StrangleStartTime
+        local percentage = math.Clamp((elapsedTime / self.StrangleTime) * 100, 0, 100)
+
+        ply:PrintMessage(HUD_PRINTCENTER, math.floor(percentage) .. "%")
+
+        if elapsedTime >= self.StrangleTime then
+      
+            self:ApplyRagdollEffect(target)
+            self.IsStrangling = false
+      
+        end
+    end
+end
+
+function SWEP:CancelStrangle()
+
+    if self.StrangleTarget and IsValid(self.StrangleTarget) then
+        self.StrangleTarget:Freeze(false) 
+    end
+    self.IsStrangling = false
+    self.StrangleTarget = nil
+end
+
+function SWEP:ApplyRagdollEffect(target)
+    if not SERVER then return end
+    if not IsValid(target) then return end
+
+    target:Freeze(false) 
+
+    local ragdoll = ents.Create("prop_ragdoll")
+    ragdoll:SetModel(target:GetModel())
+    ragdoll:SetPos(target:GetPos())
+    ragdoll:SetAngles(target:GetAngles())
+    ragdoll:Spawn()
+
+    target:Spectate(OBS_MODE_CHASE)
+    target:SpectateEntity(ragdoll)
+    target:SetParent(ragdoll)
+
+    timer.Simple(self.RagdollTime, function()
+        if not IsValid(target) or not IsValid(ragdoll) then return end
+        target:UnSpectate()
+        target:SetParent(nil)
+        target:Spawn()
+        target:SetPos(ragdoll:GetPos())
+        ragdoll:Remove()
+
+        self.StrangleTarget = nil
+    end)
 end
 
 function SWEP:Reload()
@@ -248,6 +326,19 @@ function SWEP:Reload()
         end)
 
         if IsValid(self.shurikenEnt) then
+
+            if IsValid(self.StrangleTarget) then
+                
+                local strangleTarget = self.StrangleTarget
+                timer.Simple(1, function()
+                    strangleTarget:SetPos(ply:GetPos())
+
+                    
+                end)
+               
+                
+            end
+
             local newPos = self.shurikenEnt:GetPos()
             self.shurikenEnt:Remove()
             ply:SetPos(newPos)
