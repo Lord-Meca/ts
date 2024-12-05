@@ -1,6 +1,6 @@
 if (SERVER) then
 	AddCSLuaFile()
-    util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("DisplayDamage")
 end
 
 if (CLIENT) then
@@ -823,11 +823,14 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 				end
 			end
 		end)
+
+		
 		net.Start("DisplayDamage")
 		net.WriteInt(force, 32)
 		net.WriteEntity(v)
 		net.WriteColor(Color(249,148,6,255))
 		net.Send(ply)
+
 		v:TakeDamageInfo( dmg )	ParticleEffect("blood_advisor_puncture",v:GetPos() + v:GetForward() * 0 + Vector( 0, 0, 40 ),Angle(0,45,0),nil)
 		if aircombo == true then
 			
@@ -846,8 +849,15 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 	--========================================================--
 			if v:IsPlayer() then
 				ply:EmitSound(sound)
-				
 
+				if SERVER then
+					net.Start("DisplayDamage")
+					net.WriteInt(force, 32)
+					net.WriteEntity(v)
+					net.WriteColor(Color(249,148,6,255))
+					net.Send(ply)
+				end
+				
 			ParticleEffect("blood_advisor_puncture", v:GetPos() + v:GetForward() * 0 + Vector(0, 0, 40), Angle(0, 45, 0))
 
 			if aircombo == true then
@@ -1011,6 +1021,7 @@ function SWEP:Reload()
 
     if CurTime() < self.NextSpecialMove then return end
     self.NextSpecialMove = CurTime() + cooldownTime
+
 
 	self:SetHoldType("slashdown")
 	ply:SetAnimation(PLAYER_RELOAD)

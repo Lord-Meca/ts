@@ -874,10 +874,19 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 			end
 	--========================================================--
 			if v:IsPlayer() then
+				if SERVER then
 
-				if IsValid(ply) and ply:GetActiveWeapon():GetClass() == "weapon_shibuki_nrp" then
-					v:Ignite(5, 0) 
+					net.Start("DisplayDamage")
+					net.WriteInt(force, 32)
+					net.WriteEntity(v)
+					net.WriteColor(Color(249,148,6,255))
+					net.Send(ply)
+
+					if IsValid(ply) and ply:GetActiveWeapon():GetClass() == "weapon_shibuki_nrp" then
+						v:Ignite(5, 0) 
+					end
 				end
+
 
 				ply:EmitSound(sound)
 		

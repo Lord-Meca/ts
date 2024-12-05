@@ -1,6 +1,6 @@
 if (SERVER) then
 	AddCSLuaFile()
-    util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("DisplayDamage")
 end
 
 if (CLIENT) then
@@ -747,11 +747,13 @@ local function progressiveHeal(ply)
 
     local newHealth = math.min(currentHealth + healthStep, maxHealth)
     ply:SetHealth(newHealth)
+
     net.Start("DisplayDamage")
     net.WriteInt(healthStep, 32)
     net.WriteEntity(ply)
     net.WriteColor(Color(97,185,93))
     net.Send(ply)
+
     if newHealth >= maxHealth then
         timer.Remove("KubiProgressiveHeal")
     end
@@ -884,6 +886,15 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 	--========================================================--
 			if v:IsPlayer() then
 
+				if SERVER then
+
+					net.Start("DisplayDamage")
+					net.WriteInt(force, 32)
+					net.WriteEntity(v)
+					net.WriteColor(Color(249,148,6,255))
+					net.Send(ply)
+				end
+				
 				if weaponart then
 					timer.Create("KubiProgressiveHeal", 1, 5, function()
 						progressiveHeal(ply)
