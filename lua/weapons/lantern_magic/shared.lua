@@ -189,7 +189,8 @@ function reCallPlayers(self)
 
             timer.Simple(0.5, function()
 
-
+                ply:SetCollisionGroup(COLLISION_GROUP_NONE)
+                
                 ply:GodDisable()
                 ply:SetPos(clone:GetPos())
                 ParticleEffect("nrp_tool_invocation", clone:GetPos(), Angle(0,0,0), nil)
@@ -215,6 +216,7 @@ end
 
 function SWEP:SecondaryAttack()
     reCallPlayers(self)
+    self.Owner:SetCollisionGroup(COLLISION_GROUP_NONE)
     self:SetHoldType("anim_invoke")
     self.Owner:SetAnimation(PLAYER_ATTACK1)
 end
@@ -260,6 +262,9 @@ net.Receive("teleportSelectedPlayers", function(len, ply)
                 end
 
                 player:GodEnable()
+
+                player:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+                ply:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
                 
                 player:SetPos(ply:GetPos() + Vector(math.random(20, 150), math.random(10, 150)))
                 --player:SetPos(ply:GetPos() + Vector(0,math.random(20, 150),20) + ply:EyeAngles():Forward()*math.random(100,300), 0)
@@ -268,8 +273,6 @@ net.Receive("teleportSelectedPlayers", function(len, ply)
         end
     end
 end)
-
-
 
 
 function SWEP:Reload()
