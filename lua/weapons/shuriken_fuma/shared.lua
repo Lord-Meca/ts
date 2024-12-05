@@ -277,11 +277,31 @@ function SWEP:ApplyRagdollEffect(target)
 
     target:Freeze(false) 
 
+    local datas = {
+        model = target:GetModel(),
+        skin = target:GetSkin(),
+        color = target:GetColor(),
+        material = target:GetMaterial(),
+        weapon = target:GetActiveWeapon()
+    }
+    
+
+
     local ragdoll = ents.Create("prop_ragdoll")
-    ragdoll:SetModel(target:GetModel())
+    ragdoll:SetModel(datas.model)
     ragdoll:SetPos(target:GetPos())
     ragdoll:SetAngles(target:GetAngles())
+  
+
+    ragdoll:SetColor(datas.color)
+    ragdoll:SetMaterial(datas.material)
+    ragdoll:SetSkin(datas.skin)
+
     ragdoll:Spawn()
+
+    for i = 0, target:GetNumBodyGroups() - 1 do
+        ragdoll:SetBodygroup(i, target:GetBodygroup(i))
+    end
 
     target:Spectate(OBS_MODE_CHASE)
     target:SpectateEntity(ragdoll)
@@ -291,11 +311,21 @@ function SWEP:ApplyRagdollEffect(target)
         if not IsValid(target) or not IsValid(ragdoll) then return end
         target:UnSpectate()
         target:SetParent(nil)
+
         target:Spawn()
         target:SetPos(ragdoll:GetPos())
+
+        target:SetModel(datas.model)
+        target:SetColor(datas.color)
+        target:SetMaterial(datas.material)
+        target:SetSkin(datas.skin)
+
+        target:SelectWeapon(datas.weapon)
+
         ragdoll:Remove()
 
         self.StrangleTarget = nil
+        datas = {}
     end)
 end
 
@@ -314,7 +344,7 @@ function SWEP:Reload()
 
         if SERVER then
             util.AddNetworkString("DisplayDamage")
-            launchShuriken(ply, self,120)
+            launchShuriken(ply, self,30)
         end
     else
 
