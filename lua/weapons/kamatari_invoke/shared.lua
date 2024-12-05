@@ -49,78 +49,80 @@ function invokeFuret(ply,self)
 	local speed = 1500
     local velocity = aimDir * speed  
     local affectedNearbyEntities = {}
-	local ent = ents.Create("prop_dynamic")
-	ent:SetModel("models/fsc/billy/furetprout.mdl")
-	ent:SetPos(startPos + ply:EyeAngles():Forward() * 200)
-	ent:SetModelScale(2)
-	ent:SetAngles(aimDir:Angle())
-	ent:Spawn()
+	local kamatari = ents.Create("prop_dynamic")
+	kamatari:SetModel("models/fsc/billy/furetprout.mdl")
+	kamatari:SetPos(startPos + ply:EyeAngles():Forward() * 200)
+	kamatari:SetModelScale(2)
+	kamatari:SetAngles(aimDir:Angle()+Angle(0,0,60))
+	kamatari:Spawn()
 
 	local kusarigama = ents.Create("prop_physics")
 	kusarigama:SetModel("models/warwax_et_tsu/foc/naruto/faux_kusarigama2.mdl")
 	kusarigama:SetModelScale(2)
-	kusarigama:SetAngles(aimDir:Angle()+Angle(45,20,0))
+	kusarigama:SetAngles(aimDir:Angle()+Angle(0,70,60))
+	--kusarigama:SetAngles(aimDir:Angle()+Angle(45,20,0))
 	kusarigama:Spawn()
 
 
 	local offset = Vector(-120,-20,-40) 
-	local furetAngles = ent:GetAngles()
-	local attachedPos = ent:GetPos() + furetAngles:Forward() * offset.x + furetAngles:Right() * offset.y + furetAngles:Up() * offset.z
+	local offset = Vector(-120,-20,-30) 
+	local furetAngles = kamatari:GetAngles()
+	local attachedPos = kamatari:GetPos() + furetAngles:Forward() * offset.x + furetAngles:Right() * offset.y + furetAngles:Up() * offset.z
 	kusarigama:SetPos(attachedPos)
 
-	constraint.Weld(ent, kusarigama, 0, 0, 0, true)
+	constraint.Weld(kamatari, kusarigama, 0, 0, 0, true)
 
-    print(ent:GetSequence())
+    print(kamatari:GetSequence())
 
-	util.SpriteTrail(ent, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
+	util.SpriteTrail(kamatari, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
 
-	local phys = ent:GetPhysicsObject()
+	local phys = kamatari:GetPhysicsObject()
 	if IsValid(phys) then
 		phys:EnableGravity(false)
 		phys:EnableMotion(true) 
 		phys:SetVelocity(velocity)
 	end
 
-    hook.Add("Think", "furetMove" .. ent:EntIndex(), function()
-        if not IsValid(ent) or not IsValid(kusarigama) then return end
+    hook.Add("Think", "kamatariMove" .. kamatari:EntIndex(), function()
+        if not IsValid(kamatari) or not IsValid(kusarigama) then return end
     
-
-        local currentAngles = ent:GetAngles()
-        local newAngles = currentAngles + Angle(100 * FrameTime(), 0, 0)
-        ent:SetAngles(newAngles)
+        local currentAngles = kamatari:GetAngles()
+        local newAngles = currentAngles + Angle(0, 500 * FrameTime(), 0)
+        --local newAngles = currentAngles + Angle(300 * FrameTime(), 0, 0)
+        kamatari:SetAngles(newAngles)
     
         local kusarigamaAngles = kusarigama:GetAngles()
-        local newkusarigamaAngles = kusarigamaAngles + Angle(100 * FrameTime(), 0, 0)
+        local newkusarigamaAngles = kusarigamaAngles + Angle(300 * FrameTime(), 0, 0)
         kusarigama:SetAngles(newkusarigamaAngles)
 
         local trace = util.TraceLine({
-            start = ent:GetPos(),
-            endpos = ent:GetPos() + velocity * 0.2,
-            filter = ent
+            start = kamatari:GetPos(),
+            endpos = kamatari:GetPos() + velocity * 0.2,
+            filter = kamatari
         })
     
         if trace.Hit then
      
-            if trace.Entity == ent or trace.Entity == kusarigama then
+            if trace.Entity == kamatari or trace.Entity == kusarigama then
                 return
             end
 
             local effectdata = EffectData()
             effectdata:SetOrigin(trace.HitPos)
             effectdata:SetNormal(trace.HitNormal)
-            ParticleEffect("nrp_tool_invocation", ent:GetPos(), Angle(0, 0, 0), nil)
+            ParticleEffect("nrp_tool_invocation", kamatari:GetPos(), Angle(0, 0, 0), nil)
             ply:EmitSound("ambient/explosions/explode_9.wav", 50, 100, 0.5)
     
             for _, entity in ipairs(ents.FindInSphere(trace.HitPos, 350)) do
                 if entity:IsPlayer() or entity:IsNPC() then
                     if entity ~= ply then
                     
-                        ParticleEffect("nrp_kenjutsu_tranchant", ent:GetPos(),ent:GetAngles(), nil)
+                        ParticleEffect("nrp_kenjutsu_tranchant", kamatari:GetPos(),kamatari:GetAngles(), nil)
                         ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
            
                         local damageInfo = DamageInfo()
                         damageInfo:SetDamage(350) 
-                        damageInfo:SetAttacker(ent) 
+                        damageInfo:SetAttacker(kamatari) 
                         damageInfo:SetInflictor(self)
                         entity:TakeDamageInfo(damageInfo)
     
@@ -135,27 +137,27 @@ function invokeFuret(ply,self)
             end
     
 
-            ent:Remove()
+            kamatari:Remove()
             kusarigama:Remove()
-            hook.Remove("Think", "furetMove" .. ent:EntIndex())
+            hook.Remove("Think", "kamatariMove" .. kamatari:EntIndex())
         else
    
-            ent:SetPos(ent:GetPos() + velocity * FrameTime())
+            kamatari:SetPos(kamatari:GetPos() + velocity * FrameTime())
             kusarigama:SetPos(kusarigama:GetPos() + velocity * FrameTime())
 
-            for _, entity in ipairs(ents.FindInSphere(ent:GetPos(), 200)) do
+            for _, entity in ipairs(ents.FindInSphere(kamatari:GetPos(), 200)) do
                 if entity:IsPlayer() or entity:IsNPC() then
                     if entity ~= ply and not affectedNearbyEntities[entity] then
 
-                        ent:SetSequence(ent:LookupSequence("d52_ninjutsu_d52nj2_attack_kmt_start"))
-                        ent:SetCycle(0)
-                        ent:SetPlaybackRate(1)
+                        kamatari:SetSequence(kamatari:LookupSequence("d52_ninjutsu_d52nj2_attack_kmt_start"))
+                        kamatari:SetCycle(0)
+                        kamatari:SetPlaybackRate(1)
 
 
                         ply:EmitSound("physics/body/body_medium_break3.wav", 50, 100, 0.5)
                         local damageInfo = DamageInfo()
                         damageInfo:SetDamage(100)
-                        damageInfo:SetAttacker(ent)
+                        damageInfo:SetAttacker(kamatari)
                         damageInfo:SetInflictor(self)
                         entity:TakeDamageInfo(damageInfo)
 
@@ -167,7 +169,7 @@ function invokeFuret(ply,self)
  
                         affectedNearbyEntities[entity] = true
    
-                        ParticleEffect("nrp_kenjutsu_slash", ent:GetPos(), ent:GetAngles(), nil)
+                        ParticleEffect("nrp_kenjutsu_slash", kamatari:GetPos(), kamatari:GetAngles(), nil)
                         ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
                       
                     end
@@ -180,10 +182,10 @@ function invokeFuret(ply,self)
 
         if not IsValid(ent) then return end
 
-        ParticleEffect("nrp_tool_invocation", ent:GetPos(), Angle(0, 0, 0), nil)
+        ParticleEffect("nrp_tool_invocation", kamatari:GetPos(), Angle(0, 0, 0), nil)
         ply:EmitSound("ambient/explosions/explode_9.wav", 50, 100, 0.5)
 
-        for _, entity in ipairs(ents.FindInSphere(ent:GetPos(), 350)) do
+        for _, entity in ipairs(ents.FindInSphere(kamatari:GetPos(), 350)) do
             if entity:IsPlayer() or entity:IsNPC() then
                 if entity ~= ply then
 
@@ -193,7 +195,7 @@ function invokeFuret(ply,self)
        
                     local damageInfo = DamageInfo()
                     damageInfo:SetDamage(350) 
-                    damageInfo:SetAttacker(ent) 
+                    damageInfo:SetAttacker(kamatari) 
                     damageInfo:SetInflictor(self)
                     entity:TakeDamageInfo(damageInfo)
 
@@ -207,9 +209,9 @@ function invokeFuret(ply,self)
             end
         end
 
-        ent:Remove()
+        kamatari:Remove()
         kusarigama:Remove()
-        hook.Remove("Think", "furetMove" .. ent:EntIndex())
+        hook.Remove("Think", "kamatariMove" .. kamatari:EntIndex())
 
     end)
     
