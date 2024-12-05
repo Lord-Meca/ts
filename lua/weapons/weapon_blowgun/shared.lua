@@ -43,7 +43,7 @@ SWEP.LowegreenAngles = Angle(60, 60, 60)
 SWEP.IronSightPos = Vector(0, 0, 0)
 SWEP.IronSightAng = Vector(0, 0, 0)
 SWEP.NextSpecialMove = 0
-SWEP.NextFinalSpecialMove = 0
+
 SWEP.canParry = false
 
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")

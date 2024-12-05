@@ -853,6 +853,14 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		end
 	--========================================================--
 			if v:IsPlayer() then
+				if SERVER then
+					net.Start("DisplayDamage")
+					net.WriteInt(force, 32)
+					net.WriteEntity(v)
+					net.WriteColor(Color(249,148,6,255))
+					net.Send(ply)
+				end
+			
 				if bleed then
 					self.bleedEntityIndex = v:EntIndex() 
 				end

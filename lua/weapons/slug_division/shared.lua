@@ -55,11 +55,15 @@ local function progressiveHeal(ply,entity, index)
     local newHealth = math.min(currentHealth + healthStep, maxHealth)
     entity:SetHealth(newHealth)
 
-    net.Start("DisplayDamage")
-    net.WriteInt(healthStep, 32)
-    net.WriteEntity(entity)
-    net.WriteColor(Color(97,185,93))
-    net.Send(ply)
+	
+	if SERVER then
+		net.Start("DisplayDamage")
+		net.WriteInt(healthStep, 32)
+		net.WriteEntity(ply)
+		net.WriteColor(Color(97,185,93))
+		net.Send(ply)
+	end	
+
 
     if newHealth >= maxHealth then
         timer.Remove("SlugProgressiveHeal_" .. index)

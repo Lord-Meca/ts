@@ -108,7 +108,9 @@ local function dotonPunch(ply, self)
 
                         local force = Vector(0, 0, 250)
                         target:SetVelocity(force)
+                        ParticleEffect("nrp_hit_main", target:GetPos(), Angle(0, 0, 0), nil)
 
+                       
                         if not soundPlayed then
                             ply:EmitSound(Sound("physics/body/body_medium_break2.wav"))
                             soundPlayed = true
@@ -286,7 +288,7 @@ local function dotonPunchWall(ply, self)
 end
 function SWEP:Reload()
     local ply = self.Owner
-    local maxDistance = 13000
+    local maxDistance = 3000
     local radius = 300
 
     if CurTime() < self.NextSpecialMove then return end

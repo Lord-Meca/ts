@@ -149,6 +149,7 @@ local function invokeAkamarus(ply,self)
                         target:TakeDamageInfo(damageInfo)
 
                         ParticleEffect("blood_advisor_puncture",target:GetPos() + target:GetForward() * 0 + Vector( 0, 0, 20 ),Angle(0,45,0),nil)
+                        ParticleEffect("nrp_kenjutsu_slash",target:GetPos() + target:GetForward() * 0 + Vector( 0, 0, 20 ),Angle(0,45,0),nil)
 
                         modelEntity:SetSequence(modelEntity:LookupSequence(randomAnimAttack))
                         modelEntity:SetCycle(0)

@@ -1132,6 +1132,6 @@ function SWEP:Reload()
     ply:SetAnimation(PLAYER_ATTACK1)
 
     timer.Simple(0.2, function()
-		growCorals(ply,self,300,50)
+		growCorals(ply,self,30,50)
     end)
 end
