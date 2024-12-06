@@ -71,10 +71,10 @@ function invokeFuret(ply,self)
 	kusarigama:SetPos(attachedPos)
 
 	constraint.Weld(kamatari, kusarigama, 0, 0, 0, true)
-
-    print(kamatari:GetSequence())
+  
 
 	util.SpriteTrail(kamatari, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
+	util.SpriteTrail(kusarigama, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
 
 	local phys = kamatari:GetPhysicsObject()
 	if IsValid(phys) then
