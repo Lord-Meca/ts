@@ -856,10 +856,11 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 			timer.Create("KubiProgressiveHeal", 1, 5, function()
 				progressiveHeal(ply)
 			end)
-			if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
-				ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
+			for i = 1,6 do
+				ParticleEffectAttach("[6]_wind_blade_aura_add", PATTACH_POINT_FOLLOW, ply, i)
 			end
-
+	
+					
 			timer.Simple(5, function()
 				if IsValid(ply) then
 					ply:StopParticles()
@@ -900,9 +901,9 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 					timer.Create("KubiProgressiveHeal", 1, 5, function()
 						progressiveHeal(ply)
 					end)
-					if ply:LookupBone("ValveBiped.Bip01_R_Foot") then
-						ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, ply, ply:LookupBone("ValveBiped.Bip01_R_Foot"))
-					end
+
+					ParticleEffectAttach("[6]_wind_blade_aura_add", PATTACH_POINT_FOLLOW, ply, 1)
+					
 
 					timer.Simple(5, function()
 						if IsValid(ply) then

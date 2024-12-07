@@ -34,8 +34,9 @@ DATA.Translations[ ACT_MP_WALK ]						= "walk_charactercustom"
 DATA.Translations[ ACT_MP_RUN ]							= "run_charactercustom"
 DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "couch_idle"
 DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_melee1"
-DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "wos_bs_shared_block_star" 
-DATA.Translations[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= "wos_bs_shared_block_star" 
+DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "judge_b_left_t1" 
+DATA.Translations[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= "foc_jiraiya_needle_jizo_end" 
+DATA.Translations[ ACT_MP_RELOAD_STAND ]	= "foc_jiraiya_needle_jizo_end" 
 
 
 DATA.Translations[ ACT_MP_JUMP ]						= "wos_judge_a_idle"

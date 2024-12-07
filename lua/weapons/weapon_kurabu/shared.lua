@@ -1131,7 +1131,12 @@ function SWEP:Reload()
     self:SetHoldType("weapon_art2")
     ply:SetAnimation(PLAYER_ATTACK1)
 
+    for i = 5,6 do
+        ParticleEffectAttach("[3]_water_swirl_add_5", PATTACH_POINT_FOLLOW, ply, i)
+    end
+
     timer.Simple(0.2, function()
+		ply:StopParticles()
 		growCorals(ply,self,30,50)
     end)
 end

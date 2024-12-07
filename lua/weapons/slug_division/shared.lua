@@ -164,7 +164,9 @@ local function invokeSlug(ply)
                                 if (target:GetPos() - smallKatsuyu:GetPos()):Length() < 30 then
                                     timer.Remove("SlugMove_" .. smallKatsuyu:EntIndex())
                                     
-                                    ParticleEffectAttach("izoxfoc_taijutsu_porte_green_bis_e", PATTACH_ABSORIGIN_FOLLOW, target, 0)
+                                    for i = 1,6 do
+                                        ParticleEffectAttach("[6]_wind_blade_aura_add", PATTACH_POINT_FOLLOW, target, i)
+                                    end
 
                                     timer.Create("SlugProgressiveHeal_" .. smallKatsuyu:EntIndex(), 1, 5, function()
                                         progressiveHeal(ply,entity, smallKatsuyu:EntIndex())

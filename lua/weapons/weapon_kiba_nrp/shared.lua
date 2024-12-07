@@ -1012,7 +1012,14 @@ function SWEP:Reload()
 	self:SetHoldType("slashdown")
 	ply:SetAnimation(PLAYER_RELOAD)	
 
+    for i = 5,6 do
+        ParticleEffectAttach("[0]_white_thunderbolt_add", PATTACH_POINT_FOLLOW, ply, i)
+    end
+
+
     timer.Simple(0.3, function()
+
+		ply:StopParticles()
 	
 		ply:EmitSound("ambient/levels/labs/electric_explosion1.wav")
 		
