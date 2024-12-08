@@ -50,7 +50,7 @@ function SWEP:Reload()
     self:SetHoldType("anim_ninjutsu2") 
 
     if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 3
+    self.NextSpecialMove = CurTime() + 25
 
 	ply:SetAnimation(PLAYER_ATTACK1)
 

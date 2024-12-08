@@ -82,7 +82,7 @@ function ENT:FreezeNearbyPlayers()
 end
 
 function ENT:startTimer()
-    timer.Simple(6, function()
+    timer.Simple(4, function()
         if not IsValid(self) then return end
 
         for _, player in ipairs(self.playersFrozen or {}) do

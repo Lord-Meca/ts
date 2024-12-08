@@ -25,6 +25,7 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
+SWEP.NextTP = 0
 
 SWEP.StrangleTime = 3 
 SWEP.RagdollTime = 5 
@@ -335,10 +336,13 @@ function SWEP:Reload()
 
     self:SetHoldType("anim_launch") 
 
-    if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 0.5
+    if CurTime() < (self.NextTP or 0) then return end
+    self.NextTP = CurTime() + 0.5
 
     if not self.shurikenLaunched then
+
+        if CurTime() < (self.NextSpecialMove or 0) then return end
+        self.NextSpecialMove = CurTime() + 15
 
         ply:SetAnimation(PLAYER_ATTACK1)
 
@@ -346,7 +350,10 @@ function SWEP:Reload()
             util.AddNetworkString("DisplayDamage")
             launchShuriken(ply, self,30)
         end
+
     else
+
+
 
         timer.Simple(0.01, function()
             if IsValid(ply) then

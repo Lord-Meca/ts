@@ -143,7 +143,7 @@ local function invokeAkamarus(ply,self)
                         local randomAnimAttack = attackList[math.random(1, #attackList)]
 
                         local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(5) 
+                        damageInfo:SetDamage(50) 
                         damageInfo:SetAttacker(modelEntity) 
                         damageInfo:SetInflictor(self) 
                         target:TakeDamageInfo(damageInfo)
@@ -156,7 +156,7 @@ local function invokeAkamarus(ply,self)
                         modelEntity:SetPlaybackRate(1)
         
                         net.Start("DisplayDamage")
-                        net.WriteInt(5, 32)
+                        net.WriteInt(50, 32)
                         net.WriteEntity(target)
                         net.WriteColor(Color(249, 148, 6, 255))
                         net.Send(ply)

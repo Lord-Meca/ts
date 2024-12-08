@@ -1004,7 +1004,7 @@ end
 
 function SWEP:Reload()
     local ply = self.Owner
-    local cooldownTime = 10
+    local cooldownTime = 20
 
     if CurTime() < self.NextSpecialMove then return end
     self.NextSpecialMove = CurTime() + cooldownTime

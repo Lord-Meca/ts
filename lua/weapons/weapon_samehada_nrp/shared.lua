@@ -1019,7 +1019,7 @@ function SWEP:SecondaryAttack()
 		end
 		return
     end
-       
+
 	ply:Freeze(true)
 	target:Freeze(true)
 
@@ -1046,7 +1046,7 @@ function SWEP:SecondaryAttack()
 
 			timer.Simple(0.5, function()
 			
-				self:Reload()
+				self:SlashDown()
 			
 
 				timer.Simple(0.2,function()

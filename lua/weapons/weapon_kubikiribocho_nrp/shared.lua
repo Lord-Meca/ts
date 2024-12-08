@@ -853,7 +853,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 		net.Send(ply)
 
 		if weaponart then
-			timer.Create("KubiProgressiveHeal", 1, 5, function()
+			timer.Create("KubiProgressiveHeal", 1, 3, function()
 				progressiveHeal(ply)
 			end)
 			for i = 1,6 do
@@ -898,7 +898,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 					net.Send(ply)
 				end
 				if weaponart then
-					timer.Create("KubiProgressiveHeal", 1, 5, function()
+					timer.Create("KubiProgressiveHeal", 1, 3, function()
 						progressiveHeal(ply)
 					end)
 

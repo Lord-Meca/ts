@@ -106,6 +106,8 @@ function SWEP:Think()
 
 	local ply = self.Owner
 
+
+
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
 if IsValid(self) and self.Owner:IsOnGround() then
@@ -143,16 +145,30 @@ self.duringattack = false
 end
 
 if self.duringattack == true then
-self.Owner:SetWalkSpeed( 250 )
-self.Owner:SetRunSpeed( 450 )
-self.Owner:SetJumpPower(300)
-self.Owner:SetSlowWalkSpeed( 120 )
+	self.Owner:SetWalkSpeed( 250 )
+	self.Owner:SetRunSpeed( 450 )
+	self.Owner:SetJumpPower(300)
+	self.Owner:SetSlowWalkSpeed( 120 )
 elseif self.duringattack == false  then
-self.Owner:SetWalkSpeed( 7 )
-self.Owner:SetSlowWalkSpeed( 10 )
-self.Owner:SetJumpPower(50)
-self.Owner:SetRunSpeed( 200 )
-end 
+	self.Owner:SetWalkSpeed( 7 )
+	self.Owner:SetSlowWalkSpeed( 10 )
+	self.Owner:SetJumpPower(50)
+	self.Owner:SetRunSpeed( 200 )
+end
+
+if ply:KeyDown(IN_SPEED) then 
+	if self.specialMoveActive then
+
+		ply:SetWalkSpeed(800)
+		ply:SetRunSpeed(800)
+	else
+		ply:SetWalkSpeed( 250 )
+		ply:SetRunSpeed( 450 )
+	end
+
+
+
+end
 
 --==============================--
 if self.duringattack == true and not self.Owner:KeyDown( IN_ATTACK ) and self.Owner:KeyDown( IN_JUMP ) and CurTime() > self.dodgetime then
@@ -360,7 +376,7 @@ function SWEP:DownSlashing()
 if IsValid(self.Owner) then
 		local k, v
 		local dmg = DamageInfo()
-			dmg:SetDamage(10)
+			dmg:SetDamage(15)
 			dmg:SetDamageType(DMG_SLASH)
 			dmg:SetAttacker(self.Owner)
 			dmg:SetInflictor(self.Owner)
@@ -1053,7 +1069,7 @@ function SWEP:SecondaryAttack()
 		return
     end
        
-	local dmglotus = 20
+	local dmglotus = 50
 	if self.specialMoveActive then
 		dmglotus = dmglotus*2
 	end
@@ -1165,7 +1181,7 @@ function SWEP:Reload()
 
 
     if CurTime() < self.NextSpecialMove then return end
-    self.NextSpecialMove = CurTime() + 20
+    self.NextSpecialMove = CurTime() + 30
 
 	self:SetHoldType("anim_nuibari")
 	ply:SetAnimation(PLAYER_RELOAD)	
@@ -1179,10 +1195,11 @@ function SWEP:Reload()
 
 		end
     end
+	
 
 	self.specialMoveActive = true
 
-	timer.Simple(15, function()
+	timer.Simple(10, function()
 	
 		if IsValid(self) and IsValid(ply) then
 			
@@ -1192,8 +1209,6 @@ function SWEP:Reload()
 
 	end)
 
-	--DrawRadius3D(ply, 300)
 
 
 end
-

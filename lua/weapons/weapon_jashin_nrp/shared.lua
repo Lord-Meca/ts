@@ -1040,7 +1040,7 @@ function SWEP:Reload()
 	if IsValid(entity) then
 
 		if CurTime() < self.NextFinalSpecialMove then return end
-    	self.NextFinalSpecialMove = CurTime() + 30
+    	self.NextFinalSpecialMove = CurTime() + 40
 
 		self.bleedEntityIndex = 0
 
@@ -1053,19 +1053,19 @@ function SWEP:Reload()
 
 				ply:EmitSound(AttackHit1)
 				ply:Freeze(true)
-				ply:SetHealth(ply:GetMaxHealth())
+				ply:SetHealth(ply:Health()+200)
 				if attachment then
 					ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
 				end
 
 				local damageInfo = DamageInfo()
-				damageInfo:SetDamage(entity:GetMaxHealth()) 
+				damageInfo:SetDamage(200) 
 				damageInfo:SetAttacker(ply) 
 				damageInfo:SetInflictor(self) 
 				entity:TakeDamageInfo(damageInfo)
 
 				net.Start("DisplayDamage")
-				net.WriteInt(entity:GetMaxHealth(), 32)
+				net.WriteInt(200, 32)
 				net.WriteEntity(entity)
 				net.WriteColor(Color(249,148,6,255))
 				net.Send(ply)
@@ -1087,7 +1087,7 @@ function SWEP:Reload()
 					end
 
 			
-					timer.Simple(3, function()
+					timer.Simple(2, function()
 						ply:StopParticles()
 						if IsValid(modelEntity) then
 

@@ -149,9 +149,9 @@ function invokeFuret(ply,self)
                 if entity:IsPlayer() or entity:IsNPC() then
                     if entity ~= ply and not affectedNearbyEntities[entity] then
 
-                        kamatari:SetSequence(kamatari:LookupSequence("d52_ninjutsu_d52nj2_attack_kmt_start"))
-                        kamatari:SetCycle(0)
-                        kamatari:SetPlaybackRate(1)
+                        -- kamatari:SetSequence(kamatari:LookupSequence("d52_ninjutsu_d52nj2_attack_kmt_start"))
+                        -- kamatari:SetCycle(0)
+                        -- kamatari:SetPlaybackRate(1)
 
 
                         ply:EmitSound("physics/body/body_medium_break3.wav", 50, 100, 0.5)
@@ -168,7 +168,7 @@ function invokeFuret(ply,self)
                         net.Send(ply)
  
                         affectedNearbyEntities[entity] = true
-   
+
                         ParticleEffect("nrp_kenjutsu_slash", kamatari:GetPos(), kamatari:GetAngles(), nil)
                         ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
                       
@@ -225,7 +225,7 @@ function SWEP:Reload()
 	local ply = self.Owner
 
     if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 5
+    self.NextSpecialMove = CurTime() + 15
 
 	self:SetHoldType("anim_invoke")
     ply:SetAnimation(PLAYER_RELOAD)

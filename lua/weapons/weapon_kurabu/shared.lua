@@ -373,6 +373,7 @@ ply:EmitSound(Cloth)
 end
 if self.Owner:IsOnGround() then	
 	local k, v
+	if v == nil then return end
 	v:TakeDamageInfo( dmg )
 		local dmg = DamageInfo()
 			dmg:SetDamage( 15 ) 
@@ -970,41 +971,127 @@ end
 end
 end
 
- 
 function SWEP:SecondaryAttack()
 
-	if self.canParry then return end
+	--if self.canParry then return end
+	local force = Vector(0, 0, 750)
+	
+    local maxDistance = 800
+    local ply = self.Owner
+    local trace = ply:GetEyeTrace()
+    local target = trace.Entity
 
-	local ply = self.Owner
-	if not ply:IsOnGround() then
-		self:SlashDown()
-		self.Weapon:SetNextSecondaryFire(CurTime() + 0.8 )
-
-		
-	else
-		if ply:KeyDown( IN_FORWARD ) then
-
-			local particleName1 = "[6]_wind_blade"
-			local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
-
-			if attachment then
-				ParticleEffectAttach(particleName1, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
-			end
-			timer.Simple(0.5, function()
-				ply:StopParticles()	
-			end)
-
-			self:LeapAttack()
-			self.Weapon:SetNextSecondaryFire(CurTime() + 1.3 )
-
-
-		else ply:KeyDown( IN_BACK )
-			self:SlashUp()
-
+    if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+		local ply = self.Owner
+		if not ply:IsOnGround() then
+			self:SlashDown()
 			self.Weapon:SetNextSecondaryFire(CurTime() + 0.8 )
+	
+	 
+			
+		else
+			if ply:KeyDown( IN_FORWARD ) then
+	
+				local particleName1 = "[6]_wind_blade"
+				local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
+	
+				if attachment then
+					ParticleEffectAttach(particleName1, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
+				end
+				timer.Simple(0.5, function()
+					ply:StopParticles()	
+				end)
+	
+				self:LeapAttack()
+				if self.specialMoveActive then
+					self.Weapon:SetNextSecondaryFire(CurTime()+0.5)
+				else
+					self.Weapon:SetNextSecondaryFire(CurTime() + 1.3 )
+				end
+	
+	
+	
+			else ply:KeyDown( IN_BACK )
+				self:SlashUp()
+	
+				self.Weapon:SetNextSecondaryFire(CurTime() + 0.8 )
+			end
 		end
+		return
+    end
+       
+	local dmglotus = 50
+	if self.specialMoveActive then
+		dmglotus = dmglotus*2
 	end
+
+	ply:Freeze(true)
+	target:Freeze(true)
+
+	self:SetNoDraw(true)
+
+	self:SetHoldType("anim_ninjutsu2")
+	ply:SetAnimation(PLAYER_RELOAD)
+
+	local targetPos = target:GetPos() + target:GetAngles():Forward() * 50
+	ply:EmitSound("physics/body/body_medium_break2.wav", 50, 100, 0.5)
+	ply:SetPos(targetPos)
+
+	timer.Simple(0.5, function()
+	
+		target:SetVelocity(force)
+		ply:SetVelocity(force)
+		
+
+		timer.Simple(0.5, function()
+			self:SetHoldType("anim_launch")
+			ply:SetAnimation(PLAYER_RELOAD)
+			ply:Freeze(false)
+			self:SetNoDraw(false)
+
+			timer.Simple(0.5, function()
+			
+				self:SlashDown()
+			
+
+				timer.Simple(0.2,function()
+
+					target:SetPos(ply:GetPos()+Vector(0,0,-100))
+					target:SetVelocity(-force*100)
+			
+					ply:EmitSound("ambient/explosions/explode_9.wav",50,100,0.5)
+					ParticleEffect("[5]_blackexplosion8", target:GetPos(), Angle(0, 0, 0), nil)
+
+					if SERVER then
+						if IsValid(target) and target:IsPlayer() then
+							local damageInfo = DamageInfo()
+							damageInfo:SetDamage(dmglotus) 
+							damageInfo:SetAttacker(ply) 
+							damageInfo:SetInflictor(self)
+							target:TakeDamageInfo(damageInfo)
+						end
+						
+		
+						net.Start("DisplayDamage")
+						net.WriteInt(dmglotus, 32)
+						net.WriteEntity(target)
+						net.WriteColor(Color(249,148,6,255))
+						net.Send(ply)
+
+						timer.Simple(0.4,function()
+							target:Freeze(false)
+							self:SetHoldType("a_combo1")
+						end)
+				
+					end
+				end)
+
+			end)
+		end)
+	end)
+
 end
+
 
 function SWEP:Holster()
 	self.duringattack = true
@@ -1126,7 +1213,7 @@ function SWEP:Reload()
     local ply = self.Owner
 
     if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 5
+    self.NextSpecialMove = CurTime() + 8
 
     self:SetHoldType("weapon_art2")
     ply:SetAnimation(PLAYER_ATTACK1)

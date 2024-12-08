@@ -52,7 +52,7 @@ function SWEP:SecondaryAttack()
 
 
 
-	self.Weapon:SetNextSecondaryFire(CurTime() + 2 )
+	self.Weapon:SetNextSecondaryFire(CurTime() + 1 )
 
 	local force = Vector(0, 0, 750)
 	
@@ -101,7 +101,7 @@ function SWEP:SecondaryAttack()
 					if SERVER then
 						if IsValid(target) and target:IsPlayer() then
 							local damageInfo = DamageInfo()
-							damageInfo:SetDamage(10) 
+							damageInfo:SetDamage(50) 
 							damageInfo:SetAttacker(ply) 
 							damageInfo:SetInflictor(self)
 							target:TakeDamageInfo(damageInfo)
@@ -109,7 +109,7 @@ function SWEP:SecondaryAttack()
 						
 		
 						net.Start("DisplayDamage")
-						net.WriteInt(10, 32)
+						net.WriteInt(50, 32)
 						net.WriteEntity(target)
 						net.WriteColor(Color(249,148,6,255))
 						net.Send(ply)
