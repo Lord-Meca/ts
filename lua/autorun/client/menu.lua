@@ -16,6 +16,7 @@ local QM_entity_names = {
 	"weapon_kubikiribocho_nrp",
 	"weapon_kabutowari_nrp",
 	"weapon_samehada_nrp",
+	"weapon_hiramekarei_nrp",
 	"weapon_shibuki_nrp",
 	"salamander_invoke",
 	"salamander_rush",
@@ -25,8 +26,7 @@ local QM_entity_names = {
 	"kamatari_invoke",
 	"shuriken_fuma",
 
-	"weapon_nara_zone",
-	"weapon_fleur_lotus"
+	"weapon_nara_zone"
 }
 local QM_hud_names = {
 	"Sarbacane",
@@ -37,6 +37,7 @@ local QM_hud_names = {
 	"Kubikiribocho",
 	"Kabutowari",
 	"Samehada",
+	"Hiramekarei",
 	"Shibuki",
 	"Salamandre\nQui tourne",
 	"Ruée de la\nSalamandre",
@@ -46,8 +47,7 @@ local QM_hud_names = {
 	"Attaque\n2 Chiens",
 	"Danse du\nFaucheur",
 	"Shuriken\nFûma",
-	"Zone\nd'Ombre",
-	"Fleur du\nLotus"
+	"Zone\nd'Ombre"
 }
 local QM_OpenKey = KEY_X
 
