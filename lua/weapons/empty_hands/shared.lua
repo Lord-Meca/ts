@@ -25,12 +25,19 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
+SWEP.ChargeTime = 1 
+
 function SWEP:Initialize()
     self:SetHoldType( "none" )
 	self.plyindirction = false
 	self.duringattacktime = 0
     self.duringattack = false
 	self.dodgetime = 0
+
+    self.IsCharge = false
+    self.ChargeStartTime = 0
+
+
 end
 
 
@@ -160,3 +167,119 @@ hook.Add("PlayerButtonDown", "openWeaponMenu", function(ply, button)
 
     end
 end)
+
+function shootRasendan(ply, self)
+    if not SERVER then return end
+
+end
+
+function SWEP:PrimaryAttack()
+
+    local ply = self.Owner
+
+    if not self.IsCharge then
+
+        self:SetHoldType("sword_parade")
+        ply:SetAnimation(PLAYER_ATTACK1)
+
+        self.IsCharge = true
+        self.ChargeStartTime = CurTime()
+
+        if not SERVER then return end
+            
+        local startPos = ply:GetShootPos()
+        local aimDir = ply:GetAimVector()
+        
+        local damage = 75
+        local speed = 100
+        local velocity = aimDir * speed  
+    
+        local ent = ents.Create("prop_physics")
+        ent:SetModel("models/hunter/misc/sphere025x025.mdl")
+        ent:SetPos(startPos + ply:EyeAngles():Forward()*100)
+        ent:SetModelScale(0.4)
+        ent:SetMaterial("grey_textures/endocore")
+        ent:Spawn()
+    
+        util.SpriteTrail(ent, 0, Color(15,252,252), false, 30, 30, 1, 50, "trails/laser.vmt")
+    
+        local phys = ent:GetPhysicsObject()
+        if IsValid(phys) then
+            phys:EnableGravity(false)
+            phys:EnableMotion(true)
+            phys:SetVelocity(velocity)
+        end
+    
+        hook.Add("Think", "rasendanMove" , function()
+            local trace = util.TraceLine({
+                start = ent:GetPos(),
+                endpos = ent:GetPos() + velocity * 0.2,
+                filter = ent
+            })
+    
+            if trace.Hit then
+                local effectdata = EffectData()
+                effectdata:SetOrigin(trace.HitPos)
+                effectdata:SetNormal(trace.HitNormal)
+                ParticleEffect("ice_breath_target",trace.HitPos, Angle(0,0,0),nil)
+    
+    
+    
+                -- for _, ent in ipairs(ents.FindInSphere(trace.HitPos, 200)) do
+                --     if ent:IsPlayer() or ent:IsNPC() and ent ~= ply then
+                -- 		ply:EmitSound(AttackHit1, 50, 100, 0.5)
+                -- 		local damageInfo = DamageInfo()
+                -- 		damageInfo:SetDamage(damage) 
+                -- 		damageInfo:SetAttacker(ent) 
+                -- 		damageInfo:SetInflictor(self) 
+                -- 		ent:TakeDamageInfo(damageInfo)
+    
+                          
+                -- 		net.Start("DisplayDamage")
+                -- 		net.WriteInt(damage, 32)
+                -- 		net.WriteEntity(ent)
+                -- 		net.WriteColor(Color(51,125,255,255))
+                -- 		net.Send(ply)
+    
+                --         break
+                --     end
+                -- end
+    
+                ent:Remove()
+                hook.Remove("Think", "rasendanMove" )
+            else
+                ent:SetPos(ent:GetPos() + velocity * FrameTime())
+            end
+        end)
+
+    end
+end
+
+function SWEP:Think()
+    if self.IsCharge then
+        local ply = self.Owner
+
+        if not ply:KeyDown(IN_ATTACK) then
+ 
+            self.IsCharge = false
+            return
+        end
+
+        local elapsedTime = CurTime() - self.ChargeStartTime
+        local percentage = math.Clamp((elapsedTime / self.ChargeTime) * 100, 0, 100)
+
+        ply:PrintMessage(HUD_PRINTCENTER, math.floor(percentage) .. "%")
+
+        if elapsedTime >= self.ChargeTime then
+          
+
+            ply:SetAnimation(PLAYER_RELOAD)
+      
+            self.IsCharge = false
+
+            
+      
+        end
+    end
+end
+

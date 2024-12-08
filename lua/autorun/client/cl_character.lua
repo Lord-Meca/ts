@@ -154,7 +154,6 @@ hook.Add("InitPostEntity", "CheckCharacterOnSpawn", CheckAndOpenMenu)
 
 concommand.Add("ts_characters", function(ply)
 
-
     CheckAndOpenMenu()
 end)
 

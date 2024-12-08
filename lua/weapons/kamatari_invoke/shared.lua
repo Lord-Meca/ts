@@ -217,9 +217,7 @@ function invokeFuret(ply,self)
     
 end
 
-function SWEP:SecondaryAttack()
 
-end
 
 function SWEP:Reload()
 	local ply = self.Owner

@@ -292,6 +292,8 @@ function SWEP:Think()
     for _, ply in ipairs(player.GetAll()) do
         if ply:IsBot() then
             ply:SetModel("models/falko_naruto_foc/body_upper/ichiraku.mdl")
+            ply:SetMaxHealth(2000)
+            ply:SetHealth(2000)
         end
     end
 

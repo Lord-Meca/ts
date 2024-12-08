@@ -61,7 +61,7 @@ net.Receive("SelectedCharacter", function(len, ply)
     net.Start("SelectedCharacterResponse")
     net.WriteTable(character)  
     net.Send(ply)
-
+    CharacterSystem:SetPlayerCharacter(ply, character.name)
     --PrintTable(character)
 
     ply:SetModel(string.Replace(character.skin, "'", ""))
