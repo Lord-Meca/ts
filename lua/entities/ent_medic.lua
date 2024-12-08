@@ -55,7 +55,8 @@ function ENT:Use(activator, caller)
             return
         end
 
-        activator:SetHealth(activator:GetMaxHealth())
+        activator:SetHealth(1000)
+        activator:SetMaxHealth(1000)
         activator:EmitSound("HealthKit.Touch") 
         self.NextUseTime = CurTime() + cooldown
 
