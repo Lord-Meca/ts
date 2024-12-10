@@ -13,7 +13,7 @@ DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "cwalk_all"
 DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_all"
 DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_warwax_extra_3" 
 DATA.Translations[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= "foc_warwax_extra_3" 
-DATA.Translations[ ACT_MP_RELOAD_STAND ]				= "foc_warwax_extra_3"
+DATA.Translations[ ACT_MP_RELOAD_STAND ]				= "foc_warwax_extra_4"
 
 DATA.Translations[ ACT_MP_JUMP ]						= "jump_dual"
 

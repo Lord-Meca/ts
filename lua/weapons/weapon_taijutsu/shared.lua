@@ -226,7 +226,7 @@ function SWEP:SecondaryAttack()
 	ply:SetPos(targetPos)
 
 	timer.Simple(0.5, function()
-	
+        
 		target:SetVelocity(force)
 		ply:SetVelocity(force)
 		
@@ -335,7 +335,7 @@ function SWEP:DoCombo(hitsound, combonumber, force, freezetime, attackdelay, ani
     self.back = false
     self.combo = combonumber
 
-    if anim ~= "taijutsu4_bourrasque" then
+    if anim ~= "taijutsu4_bourrasque" and anim ~= "taijutsu4_sonido" then
         self:SetHoldType(string.Replace(anim, "_talon", ""))
         ply:SetAnimation(attacktype)
     end
@@ -347,7 +347,7 @@ function SWEP:DoCombo(hitsound, combonumber, force, freezetime, attackdelay, ani
     self.duringattacktime = CurTime() + stuntime
  
     if self.specialMoveActive then
-        if not string.find(anim, "_bourrasque") and not string.find(anim, "_talon") then
+        if not string.find(anim, "_bourrasque") and not string.find(anim, "_talon") and not string.find(anim, "_sonido") then
             force = force *3
             primarystuntime = 0.3
         end
@@ -406,6 +406,17 @@ function SWEP:DoCombo(hitsound, combonumber, force, freezetime, attackdelay, ani
                             forceTalon = 350
                         end
                         v:SetVelocity(Vector(0, 0, forceTalon))
+                    end
+
+                    
+                    if anim == "taijutsu4_sonido" then
+                      
+                        local forceSonido = 1000
+                        if self.specialMoveActive then
+                            forceSonido = 650
+                        end
+                        v:SetVelocity(Vector(0, 0, forceSonido))
+                
                     end
 
                     ply:EmitSound(sound)
@@ -640,7 +651,7 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
                             net.Send(ply)
                         end
             
-                        print(entity)
+                        
                     end
                 else
     
@@ -669,8 +680,127 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
                 ply:GetActiveWeapon():DoCombo( AttackHit1, 11, bourrasqueDmg, 1.2, 0.16, "taijutsu4_bourrasque", PLAYER_ATTACK1, Angle(3, -3, 0),0.5, 0.7, AttackHit1, 0.14, false, true, 150, 0.2,false)
             end)
 
-        end
+        
+
+        -- elseif button == KEY_Q then
+
+        --     local pos = ply:GetPos()
+        --     local forward = ply:GetForward()
+
+        --     local dashDistance = 1000
+        --     local endPos = pos + forward * dashDistance
+            
+        --     local chargeDmg = 20
+        --     local sonidoDmg = 80
+        --     if ply:GetActiveWeapon().specialMoveActive then
+        --         chargeDmg = chargeDmg*2
+        --         sonidoDmg = sonidoDmg*2
+        --     end
+
+        --     timer.Simple(0.2, function()
+        --         local margin = 50 
+        --         local traceStart = pos
+        --         local traceEnd = endPos
+
+        --         local function checkPathForEntities(start, finish)
+        --             local directions = {
+        --                 Vector(0, 0, 0),
+        --                 Vector(margin, margin, 0),
+        --                 Vector(-margin, margin, 0), 
+        --                 Vector(margin, -margin, 0),
+        --                 Vector(-margin, -margin, 0)
+        --             }
+                    
+        --             for _, offset in pairs(directions) do
+        --                 local trace = util.TraceLine({
+        --                     start = start + offset,
+        --                     endpos = finish + offset,
+        --                     filter = ply
+        --                 })
+
+        --                 if trace.Hit then
+        --                     return trace
+        --                 end
+        --             end
+        --             return nil
+        --         end
+
+        --         local traceResult = checkPathForEntities(traceStart, traceEnd)
+            
+        --         if traceResult then
+        --             local entity = traceResult.Entity
+                    
                 
+        --             if entity:IsPlayer() and IsValid(entity) then
+        --                 ply:EmitSound(Sound("content/fleurlotus.wav"))
+                        
+    
+        --                 local distanceBeforeImpact = 100
+        --                 local stopPos = traceResult.HitPos - forward * distanceBeforeImpact
+            
+    
+        --                 ply:SetPos(stopPos)
+            
+                
+        --                 local dmg = DamageInfo()
+        --                 dmg:SetDamage(chargeDmg)
+        --                 dmg:SetDamageType(DMG_SLASH)
+        --                 dmg:SetAttacker(ply)
+        --                 dmg:SetInflictor(ply)
+        --                 entity:TakeDamageInfo(dmg)
+            
+            
+        --                 if SERVER then
+        --                     net.Start("DisplayDamage")
+        --                     net.WriteInt(chargeDmg, 32)
+        --                     net.WriteEntity(entity)
+        --                     net.WriteColor(Color(249, 148, 6, 255))
+        --                     net.Send(ply)
+        --                 end
+  
+        --                 timer.Simple(0.5, function()
+        --                     local dmg = DamageInfo()
+        --                     dmg:SetDamage(sonidoDmg)
+        --                     dmg:SetDamageType(DMG_SLASH)
+        --                     dmg:SetAttacker(ply)
+        --                     dmg:SetInflictor(ply)
+        --                     entity:TakeDamageInfo(dmg)
+                
+                
+        --                     if SERVER then
+        --                         net.Start("DisplayDamage")
+        --                         net.WriteInt(sonidoDmg, 32)
+        --                         net.WriteEntity(entity)
+        --                         net.WriteColor(Color(249, 148, 6, 255))
+        --                         net.Send(ply)
+        --                     end
+
+        --                     local forceSonido = 1650
+                           
+        
+        --                     local lookDirection = ply:EyeAngles():Forward()
+                            
+                       
+        --                     local upwardBoost = Vector(0, 0, 600)
+       
+        --                     local dashVelocity = (lookDirection * forceSonido) + upwardBoost
+                
+        --                     entity:SetVelocity(dashVelocity)
+                            
+                            
+        --                 end)
+
+        --             end
+        --         else
+
+        --             ply:SetPos(traceEnd)
+        --         end
+                
+        --         ply:GetActiveWeapon():SetHoldType("taijutsu4")
+        --         ply:SetAnimation(PLAYER_RELOAD)
+        --     end)
+
+        end
     end
 end)
 
