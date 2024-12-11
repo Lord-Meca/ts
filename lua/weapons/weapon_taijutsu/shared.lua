@@ -27,7 +27,12 @@ SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
+SWEP.NextChargeMove = 0
+SWEP.NextPorteMove = 0
+SWEP.NextTalonMove = 0
 SWEP.specialMoveActive = false
+
+SWEP.particlesPorteList = {"izoxfoc_taijutsu_porte_red", "izoxfoc_taijutsu_respiration_orange", "izoxfoc_taijutsu_bonification_violet"}
 
 local Roll = Sound( "npc/combine_soldier/gear2.wav")
 local AttackHit2 = Sound( "content/hitsound1.wav")
@@ -87,10 +92,10 @@ function SWEP:Think()
     if self.specialMoveActive then
 
         for _, ply in ipairs(player.GetAll()) do
-            if self.specialMoveActive then
+            if ply:GetActiveWeapon().specialMoveActive then
               
-                if CurTime() - self.lastDamageTime >= 1 then
-                    self.lastDamageTime = CurTime()
+                if CurTime() - ply:GetActiveWeapon().lastDamageTime >= 1 then
+                    ply:GetActiveWeapon().lastDamageTime = CurTime()
 
                     if ply:Alive() then 
                         ply:SetHealth(math.max(ply:Health() - 2, 0)) 
@@ -133,8 +138,8 @@ function SWEP:Think()
     if ply:KeyDown(IN_SPEED) then 
         if self.specialMoveActive then
     
-            ply:SetWalkSpeed(800)
-            ply:SetRunSpeed(800)
+            ply:SetWalkSpeed(650)
+            ply:SetRunSpeed(650)
         else
             ply:SetWalkSpeed( 250 )
             ply:SetRunSpeed( 450 )
@@ -208,6 +213,9 @@ function SWEP:SecondaryAttack()
 
     if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then return end
     
+    if CurTime() < (self.NextSpecialMove or 0) then return end
+    self.NextSpecialMove = CurTime() + 15
+
     local dmglotus = 120
     if self.specialMoveActive then
         dmglotus = dmglotus*2
@@ -533,8 +541,8 @@ end
 function SWEP:Reload()
     local ply = self.Owner
 
-    if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 3
+    if CurTime() < (self.NextPorteMove or 0) then return end
+    self.NextPorteMove = CurTime() + 3
 
     if self.specialMoveActive then
 
@@ -552,8 +560,8 @@ function SWEP:Reload()
         for i = 5,6 do
             ParticleEffectAttach("[0]_senju_renfo", PATTACH_POINT_FOLLOW, ply, i)
         end
-
-        ParticleEffectAttach("izoxfoc_taijutsu_respiration_orange", PATTACH_ABSORIGIN_FOLLOW, ply, 0)
+        
+        ParticleEffectAttach(self.particlesPorteList[math.random(1, #self.particlesPorteList)], PATTACH_ABSORIGIN_FOLLOW, ply, 0)
         self:SetHoldType("taijutsu1")
 
         self.specialMoveActive = true
@@ -565,6 +573,9 @@ end
 hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
     if ply:GetActiveWeapon():GetClass() == "weapon_taijutsu" then
         if button == KEY_E then 
+
+            if CurTime() < (ply:GetActiveWeapon().NextTalonMove or 0) then return end
+            ply:GetActiveWeapon().NextTalonMove = CurTime() + 7
 
             local talonDmg = 95
             if ply:GetActiveWeapon().specialMoveActive then
@@ -578,6 +589,9 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
 
 
         elseif button == KEY_F then
+
+            if CurTime() < (ply:GetActiveWeapon().NextChargeMove or 0) then return end
+            ply:GetActiveWeapon().NextChargeMove = CurTime() + 5
 
             local pos = ply:GetPos()
             local forward = ply:GetForward()

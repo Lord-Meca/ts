@@ -159,8 +159,8 @@ end
 if ply:KeyDown(IN_SPEED) then 
 	if self.specialMoveActive then
 
-		ply:SetWalkSpeed(800)
-		ply:SetRunSpeed(800)
+		ply:SetWalkSpeed(650)
+		ply:SetRunSpeed(650)
 	else
 		ply:SetWalkSpeed( 250 )
 		ply:SetRunSpeed( 450 )
