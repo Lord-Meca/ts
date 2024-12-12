@@ -177,7 +177,7 @@ if CLIENT then
                         return
                     end
                     
-
+                    ply:EmitSound("buttons/button14.wav")
                     resetBar()
                 else
                     ply:EmitSound(Sound("ambient/explosions/explode_4.wav"))
