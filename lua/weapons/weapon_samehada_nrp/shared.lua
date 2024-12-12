@@ -43,7 +43,7 @@ SWEP.LowegreenAngles = Angle(60, 60, 60)
 SWEP.IronSightPos = Vector(0, 0, 0)
 SWEP.IronSightAng = Vector(0, 0, 0)
 SWEP.NextSpecialMove = 0
-SWEP.NextFinalSpecialMove = 0
+SWEP.NextVines = 0
 SWEP.canParry = false
 
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
@@ -70,7 +70,8 @@ function SWEP:Deploy()
 	-- 	self.Owner:SetHealth(self.Owner:GetMaxHealth())
 	-- end
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_tenue_capuche_4.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_custom_gama_01.mdl")
+
 	self.Owner:ConCommand( "thirdperson_etp 1" )
 		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
 			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
@@ -378,6 +379,7 @@ ply:EmitSound(Cloth)
 end
 if self.Owner:IsOnGround() then	
 	local k, v
+	if v == nil then return end
 	v:TakeDamageInfo( dmg )
 		local dmg = DamageInfo()
 			dmg:SetDamage( 15 ) 
@@ -1029,7 +1031,7 @@ function SWEP:SecondaryAttack()
 	ply:SetAnimation(PLAYER_RELOAD)
 
 	local targetPos = target:GetPos() + target:GetAngles():Forward() * 50
-	ply:EmitSound("physics/body/body_medium_break2.wav", 50, 100, 0.5)
+	ply:EmitSound(Sound( "content/fleurlotus.wav"))
 	ply:SetPos(targetPos)
 
 	timer.Simple(0.5, function()
@@ -1061,7 +1063,7 @@ function SWEP:SecondaryAttack()
 					if SERVER then
 						if IsValid(target) and target:IsPlayer() then
 							local damageInfo = DamageInfo()
-							damageInfo:SetDamage(10) 
+							damageInfo:SetDamage(100) 
 							damageInfo:SetAttacker(ply) 
 							damageInfo:SetInflictor(self)
 							target:TakeDamageInfo(damageInfo)
@@ -1069,7 +1071,7 @@ function SWEP:SecondaryAttack()
 						
 		
 						net.Start("DisplayDamage")
-						net.WriteInt(10, 32)
+						net.WriteInt(100, 32)
 						net.WriteEntity(target)
 						net.WriteColor(Color(249,148,6,255))
 						net.Send(ply)
@@ -1116,7 +1118,7 @@ function SWEP:Reload()
 		
 	timer.Simple(0.7, function()
 
-		self:DoCombo( AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true, true)
+		self:DoCombo( AttackHit1, 11, 275, 0, 0.16, "weapon_art", Angle(3, -3, 0),0, 0, Combo1, 0.14, false, false, 0, 0,false,true, true)
 
 		-- if attachment then
 		-- 	ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
@@ -1129,3 +1131,131 @@ function SWEP:Reload()
     end)
 
 end
+
+local function spawnVine(target,ply)
+
+	local targetPos = target:GetPos()
+	local modelEntity = ents.Create("prop_physics")
+	if IsValid(modelEntity) then
+		modelEntity:SetModel("models/narutorp/gonzo/vines.mdl")
+
+		local startPos = targetPos - Vector(0, 0, 30)
+		local endPos = targetPos + Vector(0, 0, -10)
+		
+		modelEntity:SetPos(startPos)
+		modelEntity:SetAngles(Angle(0, math.random(0, 180), 0))
+		modelEntity:SetModelScale(1)
+		modelEntity:SetColor(Color(math.random(0, 255), math.random(0, 255), math.random(0, 255)))
+
+		modelEntity:SetCollisionGroup(COLLISION_GROUP_NONE)
+		modelEntity:SetKeyValue("solid", "6")
+		modelEntity:SetMoveType(MOVETYPE_NONE)
+		
+		modelEntity:Spawn()
+
+		local startAngle = modelEntity:GetAngles()
+		local endAngle = startAngle + Angle(0, 100, 0)
+
+		local physObj = modelEntity:GetPhysicsObject()
+		if IsValid(physObj) then
+			physObj:EnableMotion(false)
+			physObj:Wake()
+		end
+
+		ply:EmitSound(Sound( "content/fleurlotus.wav"))
+
+		local particleName = "nrp_sub_healthgreen"
+		local particleEffect = ents.Create("info_particle_system")
+		if IsValid(particleEffect) then
+			particleEffect:SetKeyValue("effect_name", particleName)
+			particleEffect:SetKeyValue("start_active", "1")
+			particleEffect:SetPos(startPos)
+			particleEffect:Spawn()
+			particleEffect:Activate()
+		end
+
+		local animationDuration = 0.2
+		local startTime = CurTime()
+
+		timer.Create("AnimateEntity_" .. modelEntity:EntIndex(), 0.02, animationDuration / 0.02, function()
+			if not IsValid(modelEntity) then return end
+			if not IsValid(particleEffect) then return end
+
+			local elapsed = CurTime() - startTime
+			local progress = math.Clamp(elapsed / animationDuration, 0, 1)
+
+			local newPos = LerpVector(progress, startPos, endPos)
+			local newAngle = LerpAngle(progress, startAngle, endAngle)
+			modelEntity:SetAngles(newAngle)
+			modelEntity:SetPos(newPos)
+	
+
+			particleEffect:SetPos(newPos - Vector(0, 0, 30))
+
+			if progress >= 1 then
+				timer.Remove("AnimateEntity_" .. modelEntity:EntIndex())
+
+				timer.Simple(0.1, function()
+					if IsValid(particleEffect) then
+						particleEffect:Remove()
+					end
+				end)
+
+				ply:EmitSound(AttackHit1, 50, 100, 0.5)
+
+				local damageInfo = DamageInfo()
+				damageInfo:SetDamage(150) 
+				damageInfo:SetAttacker(modelEntity) 
+				damageInfo:SetInflictor(ply) 
+				target:TakeDamageInfo(damageInfo)
+
+				net.Start("DisplayDamage")
+				net.WriteInt(150, 32)
+				net.WriteEntity(target)
+				net.WriteColor(Color(249,148,6,255))
+				net.Send(ply)
+			end
+		end)
+
+		timer.Simple(3, function()
+			if IsValid(modelEntity) then
+				modelEntity:Remove()
+				target:Freeze(false)
+			end
+		end)
+	end
+end
+
+
+hook.Add("PlayerButtonDown", "samehadaSweps", function(ply, button)
+    if ply:GetActiveWeapon():GetClass() == "weapon_samehada_nrp" then
+        if button == KEY_E then 
+
+			if CurTime() < (ply:GetActiveWeapon().NextVines or 0) then return end
+            ply:GetActiveWeapon().NextVines = CurTime() + 2
+
+			local maxDistance = 1800
+			local trace = ply:GetEyeTrace()
+			local target = trace.Entity
+		
+			if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+				return
+			end
+			   
+			target:Freeze(true)
+
+			ply:GetActiveWeapon():SetHoldType("anim_ninjutsu1")
+			ply:SetAnimation(PLAYER_RELOAD)
+		
+		
+			timer.Simple(0.5, function()
+				if SERVER then
+					spawnVine(target,ply)
+					ply:GetActiveWeapon():SetHoldType("a_combo1")
+				
+				end
+			end)
+
+		end
+	end
+end)
