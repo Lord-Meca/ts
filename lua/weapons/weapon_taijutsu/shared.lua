@@ -571,27 +571,34 @@ function SWEP:Reload()
 end
 
 hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
-    if ply:GetActiveWeapon():GetClass() == "weapon_taijutsu" then
+
+	local activeWeapon = ply:GetActiveWeapon()
+
+	if not IsValid(activeWeapon) then
+		return
+	end
+
+    if activeWeapon:GetClass() == "weapon_taijutsu" then
         if button == KEY_E then 
 
-            if CurTime() < (ply:GetActiveWeapon().NextTalonMove or 0) then return end
-            ply:GetActiveWeapon().NextTalonMove = CurTime() + 7
+            if CurTime() < (activeWeapon.NextTalonMove or 0) then return end
+            activeWeapon.NextTalonMove = CurTime() + 7
 
             local talonDmg = 95
-            if ply:GetActiveWeapon().specialMoveActive then
+            if activeWeapon.specialMoveActive then
                 talonDmg = talonDmg*2
             end
             
-            ply:GetActiveWeapon():DoCombo( AttackHit1, 11, talonDmg, 1.2, 0.16, "taijutsu3_talon", PLAYER_ATTACK1, Angle(3, -3, 0),0.5, 0.7, AttackHit1, 0.14, false, true, 150, 0.2,false)
-            ply:GetActiveWeapon():SetHoldType("taijutsu3")
+            activeWeapon:DoCombo( AttackHit1, 11, talonDmg, 1.2, 0.16, "taijutsu3_talon", PLAYER_ATTACK1, Angle(3, -3, 0),0.5, 0.7, AttackHit1, 0.14, false, true, 150, 0.2,false)
+            activeWeapon:SetHoldType("taijutsu3")
             ply:SetAnimation(PLAYER_ATTACK1)
             
 
 
         elseif button == KEY_F then
 
-            if CurTime() < (ply:GetActiveWeapon().NextChargeMove or 0) then return end
-            ply:GetActiveWeapon().NextChargeMove = CurTime() + 5
+            if CurTime() < (activeWeapon.NextChargeMove or 0) then return end
+            activeWeapon.NextChargeMove = CurTime() + 5
 
             local pos = ply:GetPos()
             local forward = ply:GetForward()
@@ -600,7 +607,7 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
             local endPos = pos + forward * dashDistance
             
             local chargeDmg = 110
-            if ply:GetActiveWeapon().specialMoveActive then
+            if activeWeapon.specialMoveActive then
                 chargeDmg = chargeDmg*2
             end
 
@@ -672,7 +679,7 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
                     ply:SetPos(traceEnd)
                 end
             
-                ply:GetActiveWeapon():SetHoldType("taijutsu3")
+                activeWeapon:SetHoldType("taijutsu3")
                 ply:SetAnimation(PLAYER_RELOAD)
             end)
             
@@ -682,16 +689,16 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
         elseif button == KEY_G then
             
             local bourrasqueDmg = 60
-            if ply:GetActiveWeapon().specialMoveActive then
+            if activeWeapon.specialMoveActive then
                 bourrasqueDmg = bourrasqueDmg*2
             end
 
            
-            ply:GetActiveWeapon():SetHoldType("taijutsu4")
+            activeWeapon:SetHoldType("taijutsu4")
             ply:SetAnimation(PLAYER_ATTACK1)
 
             timer.Simple(0.5, function()
-                ply:GetActiveWeapon():DoCombo( AttackHit1, 11, bourrasqueDmg, 1.2, 0.16, "taijutsu4_bourrasque", PLAYER_ATTACK1, Angle(3, -3, 0),0.5, 0.7, AttackHit1, 0.14, false, true, 150, 0.2,false)
+                activeWeapon:DoCombo( AttackHit1, 11, bourrasqueDmg, 1.2, 0.16, "taijutsu4_bourrasque", PLAYER_ATTACK1, Angle(3, -3, 0),0.5, 0.7, AttackHit1, 0.14, false, true, 150, 0.2,false)
             end)
 
         
