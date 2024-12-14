@@ -13,7 +13,7 @@ SWEP.Spawnable = true
 SWEP.AdminSpawnable = false
 
 SWEP.ViewModel = "models/weapons/c_arms.mdl"
-SWEP.WorldModel = ""
+SWEP.WorldModel = "models/naruto/epee/epee10/foc_nr_epee10_bane.mdl"
 
 SWEP.Primary.ClipSize = 10
 SWEP.Primary.DefaultClip = 10
@@ -26,6 +26,17 @@ SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
 
 SWEP.ChargeTime = 1 
+SWEP.NextModelRemoved = 0
+SWEP.modelDos = nil
+
+function SWEP:Deploy()
+    local ply = self.Owner
+
+
+	ply:SetModel("models/falko_naruto_foc/body_upper/man_coat_07_b.mdl")
+
+    self:SetNoDraw(true)    
+end
 
 function SWEP:Initialize()
     self:SetHoldType( "none" )
@@ -36,6 +47,9 @@ function SWEP:Initialize()
 
     self.IsCharge = false
     self.ChargeStartTime = 0
+
+    self.modelRemoved = false
+
 
 
 end
@@ -162,20 +176,17 @@ hook.Add("PlayerButtonDown", "openWeaponMenu", function(ply, button)
     if button == KEY_F4 then 
 
 		OpenWeaponMenu()
-		
-
 
     end
 end)
 
-function shootRasendan(ply, self)
-    if not SERVER then return end
 
-end
 
 function SWEP:PrimaryAttack()
 
     local ply = self.Owner
+
+    self.Weapon:SetNextPrimaryFire(CurTime() + 1 )
 
     if not self.IsCharge then
 
@@ -254,7 +265,6 @@ function SWEP:PrimaryAttack()
 
     end
 end
-
 function SWEP:Think()
     if self.IsCharge then
         local ply = self.Owner
@@ -283,3 +293,75 @@ function SWEP:Think()
     end
 end
 
+function SWEP:Reload()
+
+    local ply = self.Owner
+
+    if CurTime() < (self.NextModelRemoved or 0) then return end
+    self.NextModelRemoved = CurTime() + 2
+
+    if IsValid(ply.modelDos) then
+
+        ply.modelDos:Remove()
+        self.modelRemoved = true
+
+        self:SetHoldType("a_combo1")
+        self:SetNoDraw(false)  
+    else
+        if self.modelRemoved then
+           
+            self.modelRemoved = false
+            self:SetHoldType("none")
+            self:SetNoDraw(true)  
+        end
+    end
+end
+
+hook.Add("PostPlayerDraw", "WeaponHolster", function(ply)
+    if ply:GetActiveWeapon():GetClass() ~= "empty_hands" then
+        return
+    end
+
+    if IsValid(ply) and ply:Alive() then
+        local arme = ply:GetActiveWeapon()
+        if not IsValid(arme) then
+            return
+        end
+
+        if arme.modelRemoved then
+            return
+        end
+
+        if not IsValid(ply.modelDos) then
+            local model = ClientsideModel("models/naruto/epee/epee10/foc_nr_epee10_bane.mdl")
+            if IsValid(model) then
+                model:SetNoDraw(true)
+                ply.modelDos = model
+            end
+        end
+
+        local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
+        if not bone then
+            return
+        end
+
+        local matrix = ply:GetBoneMatrix(bone)
+        if not matrix then
+            return
+        end
+
+        local pos = matrix:GetTranslation()
+        local ang = matrix:GetAngles()
+
+        pos = pos + ang:Forward() * 40 + ang:Up() * 25 + ang:Right() * -18
+        ang:RotateAroundAxis(ang:Forward(), 180)
+        ang:RotateAroundAxis(ang:Right(), 30)
+        ang:RotateAroundAxis(ang:Up(), 180)
+
+        if IsValid(ply.modelDos) then
+            ply.modelDos:SetRenderOrigin(pos)
+            ply.modelDos:SetRenderAngles(ang)
+            ply.modelDos:DrawModel()
+        end
+    end
+end)
