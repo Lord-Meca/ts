@@ -27,7 +27,7 @@ SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 SWEP.NextTP = 0
 
-SWEP.StrangleTime = 3 
+SWEP.StrangleTime = 1 
 SWEP.RagdollTime = 5 
 
 function SWEP:Deploy()
@@ -342,7 +342,7 @@ function SWEP:Reload()
     if not self.shurikenLaunched then
 
         if CurTime() < (self.NextSpecialMove or 0) then return end
-        self.NextSpecialMove = CurTime() + 15
+        self.NextSpecialMove = CurTime() + 7
 
         ply:SetAnimation(PLAYER_ATTACK1)
 

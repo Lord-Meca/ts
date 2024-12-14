@@ -43,14 +43,14 @@ local Hitground = Sound( "physics/concrete/concrete_break3.wav")
 
 function SWEP:Deploy()
     local ply = self.Owner
-	if IsValid(ply) then
+	-- if IsValid(ply) then
 
-		if ply:GetMaxHealth() != 2000 then 
+	-- 	if ply:GetMaxHealth() != 2000 then 
 
-			ply:SetMaxHealth(2000)
-			ply:SetHealth(ply:GetMaxHealth())
-		end
-	end
+	-- 		ply:SetMaxHealth(2000)
+	-- 		ply:SetHealth(ply:GetMaxHealth())
+	-- 	end
+	-- end
 
 	ply:SetModel("models/falko_naruto_foc/body_upper/sogeki_man_armorbandana_suna01.mdl")
 	ply:ConCommand( "thirdperson_etp 1" )
@@ -216,7 +216,7 @@ function SWEP:SecondaryAttack()
     if CurTime() < (self.NextSpecialMove or 0) then return end
     self.NextSpecialMove = CurTime() + 15
 
-    local dmglotus = 120
+    local dmglotus = 100
     if self.specialMoveActive then
         dmglotus = dmglotus*2
     end
@@ -556,7 +556,7 @@ function SWEP:Reload()
 
         self:SetHoldType("anim_nuibari")
         ply:SetAnimation(PLAYER_ATTACK1)	
-     
+   
         for i = 5,6 do
             ParticleEffectAttach("[0]_senju_renfo", PATTACH_POINT_FOLLOW, ply, i)
         end
@@ -817,7 +817,6 @@ hook.Add("PlayerButtonDown", "taijutsuSweps", function(ply, button)
         end
     end
 end)
-
 
 
 
