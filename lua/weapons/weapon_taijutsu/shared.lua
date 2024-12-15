@@ -221,8 +221,8 @@ function SWEP:SecondaryAttack()
         dmglotus = dmglotus*2
     end
 
-	ply:Freeze(true)
-	target:Freeze(true)
+    ply:SetNWBool("freezePlayer", true)
+    target:SetNWBool("freezePlayer", true)
 
     ply:EmitSound(Sound("content/fleurlotus.wav",100,100,5))
 
@@ -242,7 +242,7 @@ function SWEP:SecondaryAttack()
 		timer.Simple(0.5, function()
 			self:SetHoldType("anim_launch")
 			ply:SetAnimation(PLAYER_RELOAD)
-			ply:Freeze(false)
+            ply:SetNWBool("freezePlayer", false)
 		
 			timer.Simple(0.5, function()
 			
@@ -271,7 +271,7 @@ function SWEP:SecondaryAttack()
 						net.Send(ply)
 
 						timer.Simple(0.6,function()
-							target:Freeze(false)
+                            target:SetNWBool("freezePlayer", false)
 							self:SetHoldType("taijutsu1")
 						end)
 				

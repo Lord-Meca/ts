@@ -1,6 +1,7 @@
 if (SERVER) then
 	AddCSLuaFile()
     util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("Eventail_State")
 end
 
 if (CLIENT) then
@@ -48,7 +49,7 @@ SWEP.NextHolsterWeapon = 0
 SWEP.NextRepulsiveTornadoMove = 0
 SWEP.NextAttractiveTornadoMove = 0
 --SWEP.eventailModelHolster = nil
-SWEP.eventailHolstered = false
+SWEP.eventailHolstered = true
 
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
@@ -68,20 +69,18 @@ local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
 	
+	self:SetNoDraw(true)
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/storm_1gax.mdl")
+	if SERVER then
+		net.Start("Eventail_State")
+		net.WriteEntity(self.Owner)
+		net.WriteBool(self.eventailHolstered)
+		net.Broadcast()
+	end
 
-	self.Owner:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
-			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
-				return ( speed - 826.5 ) * ( 100 / 896 )
-			end
-			
-			return 0
-		end)
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_coat_03.mdl")
 
-
-	self:SetNoDraw(true)   
+ 
 end
 
 
@@ -111,7 +110,11 @@ end
 
 function SWEP:Think()
 	local ply = self.Owner
-	--print(self.eventailHolstered)
+
+	if self.eventailHolstered then
+		self:SetHoldType("normal")
+	end
+
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
 if IsValid(self) and self.Owner:IsOnGround() then
@@ -889,7 +892,10 @@ end
 
 function SWEP:PrimaryAttack()
 
---if not self.eventailHolstered then return end
+if self.eventailHolstered then
+	return
+end
+
 
 self.Weapon:SetNextSecondaryFire(CurTime() + 0.6 )
 if self.combo == 0 then
@@ -979,7 +985,9 @@ end
  
 function SWEP:SecondaryAttack()
 
-
+	if self.eventailHolstered then
+		return
+	end
 
     local ply = self.Owner
 
@@ -1024,8 +1032,8 @@ function SWEP:SecondaryAttack()
 		return
     end
 
-	ply:Freeze(true)
-	target:Freeze(true)
+	ply:SetNWBool("freezePlayer", true )
+	target:SetNWBool("freezePlayer", true )
 
 	self:SetNoDraw(true)
 
@@ -1045,7 +1053,7 @@ function SWEP:SecondaryAttack()
 		timer.Simple(0.5, function()
 			self:SetHoldType("anim_launch")
 			ply:SetAnimation(PLAYER_RELOAD)
-			ply:Freeze(false)
+			ply:SetNWBool("freezePlayer", false)
 			self:SetNoDraw(false)
 
 			timer.Simple(0.5, function()
@@ -1065,7 +1073,7 @@ function SWEP:SecondaryAttack()
 					if SERVER then
 						if IsValid(target) and target:IsPlayer() then
 							local damageInfo = DamageInfo()
-							damageInfo:SetDamage(100) 
+							damageInfo:SetDamage(50) 
 							damageInfo:SetAttacker(ply) 
 							damageInfo:SetInflictor(self)
 							target:TakeDamageInfo(damageInfo)
@@ -1073,13 +1081,13 @@ function SWEP:SecondaryAttack()
 						
 		
 						net.Start("DisplayDamage")
-						net.WriteInt(100, 32)
+						net.WriteInt(50, 32)
 						net.WriteEntity(target)
 						net.WriteColor(Color(249,148,6,255))
 						net.Send(ply)
 
 						timer.Simple(0.4,function()
-							target:Freeze(false)
+							target:SetNWBool("freezePlayer", false)
 							self:SetHoldType("a_combo1")
 						end)
 				
@@ -1101,28 +1109,18 @@ function SWEP:Holster()
 	self.combo = 11
 	self.DownSlashed = true
 
-	self.eventailHolstered = false
+	self.eventailHolstered = true
 	self:SetHoldType("none")
 	self:SetNoDraw(true)  
 
 	return true
 end
 
-hook.Add("PostPlayerDraw", "EventailWeaponHolster", function(ply)
-    if ply:GetActiveWeapon():GetClass() ~= "weapon_eventail" then
-        return
-    end
+hook.Add("PostPlayerDraw", "EventailModelInBack", function(ply)
+    local activeWeapon = ply:GetActiveWeapon()
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_eventail" then return end
 
-    if IsValid(ply) and ply:Alive() then
-        local activeWeapon = ply:GetActiveWeapon()
-        if not IsValid(activeWeapon) then
-            return
-        end
-
-        if activeWeapon.eventailHolstered then
-            return
-        end
-
+    if activeWeapon.eventailHolstered then
         if not IsValid(ply.eventailModelHolster) then
             local model = ClientsideModel("models/silverhawks/foc_arme_epouventail_close_shigi.mdl")
             if IsValid(model) then
@@ -1132,14 +1130,10 @@ hook.Add("PostPlayerDraw", "EventailWeaponHolster", function(ply)
         end
 
         local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
-        if not bone then
-            return
-        end
+        if not bone then return end
 
         local matrix = ply:GetBoneMatrix(bone)
-        if not matrix then
-            return
-        end
+        if not matrix then return end
 
         local pos = matrix:GetTranslation()
         local ang = matrix:GetAngles()
@@ -1154,12 +1148,18 @@ hook.Add("PostPlayerDraw", "EventailWeaponHolster", function(ply)
             ply.eventailModelHolster:SetRenderAngles(ang)
             ply.eventailModelHolster:DrawModel()
         end
+    else
+        if IsValid(ply.eventailModelHolster) then
+            ply.eventailModelHolster:Remove()
+        end
     end
 end)
 
+
+
 function spawnTornado(ply, isAttractive)
     local modelEntity = ents.Create("prop_dynamic")
-    local moveTimeLeft = 5
+    local moveTimeLeft = 2
     local damage = 150
     local affectedNearbyEntities = {}
 
@@ -1425,6 +1425,10 @@ end
 function SWEP:Reload()
     local ply = self.Owner
 
+	if self.eventailHolstered then
+		return
+	end
+
     if CurTime() < (self.NextSpecialMove or 0) then return end
     self.NextSpecialMove = CurTime() + 25
 
@@ -1438,8 +1442,6 @@ function SWEP:Reload()
 	ParticleEffect("nrp_tool_invocation", ply:GetPos(), Angle(0,0,0), nil)
 	timer.Simple(0.7, function()
 
-
-
 		if SERVER then
 			invokeFuret(ply,self)
 		end
@@ -1452,85 +1454,119 @@ function SWEP:Reload()
 	end)
 end
 
+
+
 hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
 
 	local activeWeapon = ply:GetActiveWeapon()
 
-	if not IsValid(activeWeapon) then
-		return
-	end
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_eventail" then
+        return
+    end
 
-    if activeWeapon:GetClass() == "weapon_eventail" then
-        if button == MOUSE_MIDDLE then 
+    if button == MOUSE_MIDDLE then
 
-			if CurTime() < activeWeapon.NextHolsterWeapon then return end
-			activeWeapon.NextHolsterWeapon = CurTime() + 0.5
+        if CurTime() < activeWeapon.NextHolsterWeapon then return end
+        activeWeapon.NextHolsterWeapon = CurTime() + 0.5
 
-			if IsValid(ply.eventailModelHolster) then
+        activeWeapon.eventailHolstered = not activeWeapon.eventailHolstered
 
-				ply.eventailModelHolster:Remove()
-				activeWeapon.eventailHolstered = true
-		
-				activeWeapon:SetHoldType("g_combo1")
-				activeWeapon:SetNoDraw(false)  
-			else
-				if activeWeapon.eventailHolstered then
-				   
-					activeWeapon.eventailHolstered = false
-					activeWeapon:SetHoldType("none")
-					activeWeapon:SetNoDraw(true)  
-		
-					
-				end
-			end
-		elseif button == KEY_E then
-			if CurTime() < activeWeapon.NextRepulsiveTornadoMove then return end
-			activeWeapon.NextRepulsiveTornadoMove = CurTime() + 15
+        if SERVER then
+            net.Start("Eventail_State")
+            net.WriteEntity(ply)
+            net.WriteBool(activeWeapon.eventailHolstered)
+            net.Broadcast()
+        end
+    
+	elseif button == KEY_E then
 
-			activeWeapon:SetHoldType("weapon_art")
-			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
-			activeWeapon:SetModel(activeWeapon.WorldModel)
-			ply:SetAnimation(PLAYER_ATTACK1)
-
-		
-		
-			timer.Simple(0.7, function()
-		
-		
-				if SERVER then
-					spawnTornado(ply, false)
-				end
-				
-				activeWeapon:StopParticles()
-				   
-				activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
-				activeWeapon:SetModel(activeWeapon.WorldModel) 
-				
-			end)
-		elseif button == KEY_F then
-			if CurTime() < activeWeapon.NextAttractiveTornadoMove then return end
-			activeWeapon.NextAttractiveTornadoMove = CurTime() + 15
-
-			activeWeapon:SetHoldType("weapon_art")
-			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
-			activeWeapon:SetModel(activeWeapon.WorldModel)
-			ply:SetAnimation(PLAYER_ATTACK1)
-
-		
-		
-			timer.Simple(0.7, function()
-		
-		
-				if SERVER then
-					spawnTornado(ply, true)
-				end
-				
-				activeWeapon:StopParticles()
-				   
-				activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
-				activeWeapon:SetModel(activeWeapon.WorldModel) 
-				
-			end)
+		if activeWeapon.eventailHolstered then
+			return
 		end
+
+		if CurTime() < activeWeapon.NextRepulsiveTornadoMove then return end
+		activeWeapon.NextRepulsiveTornadoMove = CurTime() + 5
+
+		activeWeapon:SetHoldType("weapon_art")
+		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
+		activeWeapon:SetModel(activeWeapon.WorldModel)
+		ply:SetAnimation(PLAYER_ATTACK1)
+
+		
+		for i = 1,6 do
+			ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, i)
+		end
+		
+	
+		timer.Simple(0.7, function()
+	
+			ply:StopParticles()
+			if SERVER then
+				spawnTornado(ply, false)
+			end
+			
+			activeWeapon:StopParticles()
+			   
+			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
+			activeWeapon:SetModel(activeWeapon.WorldModel) 
+			
+		end)
+	elseif button == KEY_F then
+
+		if activeWeapon.eventailHolstered then
+			return
+		end
+
+		if CurTime() < activeWeapon.NextAttractiveTornadoMove then return end
+		activeWeapon.NextAttractiveTornadoMove = CurTime() + 5
+
+		activeWeapon:SetHoldType("weapon_art")
+		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
+		activeWeapon:SetModel(activeWeapon.WorldModel)
+		ply:SetAnimation(PLAYER_ATTACK1)
+
+		for i = 1,6 do
+			ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, i)
+		end
+		
+	
+		timer.Simple(0.7, function()
+	
+			ply:StopParticles()
+			if SERVER then
+				spawnTornado(ply, true)
+			end
+			
+			activeWeapon:StopParticles()
+			   
+			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
+			activeWeapon:SetModel(activeWeapon.WorldModel) 
+			
+		end)
 	end
+
+	
 end)
+
+if CLIENT then
+    net.Receive("Eventail_State", function()
+        local ply = net.ReadEntity()
+        local holstered = net.ReadBool()
+
+        if not IsValid(ply) or not ply:IsPlayer() then return end
+        local activeWeapon = ply:GetActiveWeapon()
+
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_eventail" then
+            activeWeapon.eventailHolstered = holstered
+
+            if holstered then
+                activeWeapon:SetHoldType("none")
+                activeWeapon:SetNoDraw(true)
+            else
+                activeWeapon:SetHoldType("g_combo1")
+                activeWeapon:SetNoDraw(false)
+
+            end
+        end
+    end)
+end

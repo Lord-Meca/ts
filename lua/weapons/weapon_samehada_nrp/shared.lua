@@ -1022,8 +1022,8 @@ function SWEP:SecondaryAttack()
 		return
     end
 
-	ply:Freeze(true)
-	target:Freeze(true)
+	target:SetNWBool("freezePlayer", true)
+	ply:SetNWBool("freezePlayer", true)
 
 	self:SetNoDraw(true)
 
@@ -1043,7 +1043,7 @@ function SWEP:SecondaryAttack()
 		timer.Simple(0.5, function()
 			self:SetHoldType("anim_launch")
 			ply:SetAnimation(PLAYER_RELOAD)
-			ply:Freeze(false)
+			target:SetNWBool("freezePlayer", false)
 			self:SetNoDraw(false)
 
 			timer.Simple(0.5, function()
@@ -1077,7 +1077,7 @@ function SWEP:SecondaryAttack()
 						net.Send(ply)
 
 						timer.Simple(0.4,function()
-							target:Freeze(false)
+							target:SetNWBool("freezePlayer", false)
 							self:SetHoldType("a_combo1")
 						end)
 				
@@ -1228,34 +1228,39 @@ end
 
 
 hook.Add("PlayerButtonDown", "samehadaSweps", function(ply, button)
-    if ply:GetActiveWeapon():GetClass() == "weapon_samehada_nrp" then
-        if button == KEY_E then 
 
-			if CurTime() < (ply:GetActiveWeapon().NextVines or 0) then return end
-            ply:GetActiveWeapon().NextVines = CurTime() + 2
+	local activeWeapon = ply:GetActiveWeapon()
 
-			local maxDistance = 1800
-			local trace = ply:GetEyeTrace()
-			local target = trace.Entity
-		
-			if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-				return
-			end
-			   
-			target:Freeze(true)
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_samehada_nrp" then
+        return
+    end
+	
+	if button == KEY_E then 
 
-			ply:GetActiveWeapon():SetHoldType("anim_ninjutsu1")
-			ply:SetAnimation(PLAYER_RELOAD)
-		
-		
-			timer.Simple(0.5, function()
-				if SERVER then
-					spawnVine(target,ply)
-					ply:GetActiveWeapon():SetHoldType("a_combo1")
-				
-				end
-			end)
+		if CurTime() < (ply:GetActiveWeapon().NextVines or 0) then return end
+		ply:GetActiveWeapon().NextVines = CurTime() + 2
 
+		local maxDistance = 1800
+		local trace = ply:GetEyeTrace()
+		local target = trace.Entity
+	
+		if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
+			return
 		end
+		   
+		target:SetNWBool("freezePlayer", true)
+
+		ply:GetActiveWeapon():SetHoldType("anim_ninjutsu1")
+		ply:SetAnimation(PLAYER_RELOAD)
+	
+	
+		timer.Simple(0.5, function()
+			if SERVER then
+				spawnVine(target,ply)
+				ply:GetActiveWeapon():SetHoldType("a_combo1")
+			
+			end
+		end)
+
 	end
 end)
