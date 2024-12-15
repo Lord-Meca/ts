@@ -1043,7 +1043,7 @@ function SWEP:SecondaryAttack()
 		timer.Simple(0.5, function()
 			self:SetHoldType("anim_launch")
 			ply:SetAnimation(PLAYER_RELOAD)
-			target:SetNWBool("freezePlayer", false)
+			ply:SetNWBool("freezePlayer", false)
 			self:SetNoDraw(false)
 
 			timer.Simple(0.5, function()
@@ -1220,7 +1220,7 @@ local function spawnVine(target,ply)
 		timer.Simple(3, function()
 			if IsValid(modelEntity) then
 				modelEntity:Remove()
-				target:Freeze(false)
+				target:SetNWBool("freezePlayer", false )
 			end
 		end)
 	end

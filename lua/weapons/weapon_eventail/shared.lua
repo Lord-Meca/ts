@@ -1159,7 +1159,7 @@ end)
 
 function spawnTornado(ply, isAttractive)
     local modelEntity = ents.Create("prop_dynamic")
-    local moveTimeLeft = 2
+    local moveTimeLeft = 1
     local damage = 150
     local affectedNearbyEntities = {}
 
@@ -1485,7 +1485,7 @@ hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
 		end
 
 		if CurTime() < activeWeapon.NextRepulsiveTornadoMove then return end
-		activeWeapon.NextRepulsiveTornadoMove = CurTime() + 5
+		activeWeapon.NextRepulsiveTornadoMove = CurTime() + 20
 
 		activeWeapon:SetHoldType("weapon_art")
 		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
@@ -1518,7 +1518,7 @@ hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
 		end
 
 		if CurTime() < activeWeapon.NextAttractiveTornadoMove then return end
-		activeWeapon.NextAttractiveTornadoMove = CurTime() + 5
+		activeWeapon.NextAttractiveTornadoMove = CurTime() + 20
 
 		activeWeapon:SetHoldType("weapon_art")
 		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"

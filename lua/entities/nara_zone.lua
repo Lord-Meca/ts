@@ -75,7 +75,7 @@ function ENT:FreezeNearbyPlayers()
     local radius = 400 
     for _, player in ipairs(ents.FindInSphere(self:GetPos(), radius)) do
         if player:IsPlayer() and player ~= self.Owner and not table.HasValue(self.playersFrozen, player) then
-            player:Freeze(true)
+            player:SetNWBool("freezePlayer", true)
             table.insert(self.playersFrozen, player)
         end
     end
@@ -87,7 +87,7 @@ function ENT:startTimer()
 
         for _, player in ipairs(self.playersFrozen or {}) do
             if IsValid(player) then
-                player:Freeze(false)
+                player:SetNWBool("freezePlayer", false)
             end
         end
 

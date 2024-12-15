@@ -107,6 +107,7 @@ end
 function SWEP:Think()
 	local ply = self.Owner
 
+
 	if self.clawsHolstered then
 		self:SetHoldType("normal")
 	end
@@ -1097,6 +1098,11 @@ function SWEP:SecondaryAttack()
 					target:SetPos(ply:GetPos()+Vector(0,0,-100))
 					target:SetVelocity(-force*100)
 			
+					if not table_contains(self.listTargetPlayers, target) then
+
+						table.insert(self.listTargetPlayers, target)
+					
+					end
 
 					ply:EmitSound("ambient/explosions/explode_9.wav",50,100,0.5)
 					ParticleEffect("[5]_blackexplosion8", target:GetPos(), Angle(0, 0, 0), nil)
@@ -1357,14 +1363,14 @@ function SWEP:Reload()
 		
 						if IsValid(target) and target:IsPlayer() then
 							local damageInfo = DamageInfo()
-							damageInfo:SetDamage(5) 
+							damageInfo:SetDamage(150) 
 							damageInfo:SetAttacker(ply) 
 							damageInfo:SetInflictor(self)
 							target:TakeDamageInfo(damageInfo)
 						end
 		
 						net.Start("DisplayDamage")
-						net.WriteInt(50, 32)
+						net.WriteInt(150, 32)
 						net.WriteEntity(target)
 						net.WriteColor(Color(249, 148, 6, 255))
 						net.Send(ply)
