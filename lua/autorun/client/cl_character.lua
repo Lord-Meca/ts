@@ -2,45 +2,12 @@
 local characterSelected = {}
 
 local function OpenCharacterCreationMenu(ply)
-    local frame = vgui.Create("DFrame")
-    frame:SetSize(400, 600)
-    frame:Center()
-    frame:SetTitle("Nouveau personnage")
-    frame:MakePopup()
+    surface.CreateFont("Large", {
+        font = "Ninja Naruto",
+        size = 30,
+        weight = 500,
+    })
 
-    local nameEntry = vgui.Create("DTextEntry", frame)
-    nameEntry:SetPos(50, 50)
-    nameEntry:SetSize(300, 30)
-    nameEntry:SetPlaceholderText("Nom")
-
-    local submitButton = vgui.Create("DButton", frame)
-    submitButton:SetPos(150, 500)
-    submitButton:SetSize(100, 30)
-    submitButton:SetText("Valider")
-    submitButton.DoClick = function()
-        local playerName = nameEntry:GetValue()
-
-        if playerName == "" then
-            return
-        end
-
-        characterSelected = {steamid = ply:SteamID(), name = playerName, skin = "models/falko_naruto_foc/body_upper/man_amefullbody_01_kusa.mdl", weaponsName = "empty_hands"}
-
-        net.Start("SaveOrUpdateCharacterData")
-        net.WriteString(playerName) 
-        net.WriteString(ply:GetModel())
-        net.WriteString("empty_hands")
-        net.SendToServer()
-
-        net.Start("SelectedCharacter")
-        net.WriteTable(characterSelected)
-        net.SendToServer()
-
-        frame:Close()
-    end
-end
-
-local function OpenCharacterSelectionMenu(characters, ply)
     local frame = vgui.Create("DFrame")
     frame:SetSize(ScrW(), ScrH())
     frame:SetPos(0, 0)
@@ -50,85 +17,196 @@ local function OpenCharacterSelectionMenu(characters, ply)
     frame:ShowCloseButton(false)
 
     frame.Paint = function(self, w, h)
-        draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 255)) 
-        draw.SimpleText("Sélectionner un personnage", "DermaLarge", w / 2, (h/2)-200, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP)
+        draw.RoundedBox(0, 0, 0, w, h, Color(21,21,21, 255)) 
     end
 
-    local buttonStartY = (ScrH()/2)-100
-    local buttonSpacing = 80
+    local modelPanel = vgui.Create("DModelPanel", frame)
+    modelPanel:SetPos(ScrW() / 4, ScrH() /14)
+    modelPanel:SetSize(ScrW() / 2, ScrH())
+    modelPanel:SetModel("models/falko_naruto_foc/body_upper/man_amefullbody_01_kusa.mdl")
+
+    modelPanel:SetCamPos(Vector(50, 50, 50)) 
+    modelPanel:SetLookAt(Vector(0, 0, 40))
+    modelPanel:SetFOV(70)
+
+    local backButton = vgui.Create("DButton", frame)
+    backButton:SetPos(ScrW()/4 - 470, ScrH()/4 -240)
+    backButton:SetSize(100,50)
+    backButton:SetText("Retour")
+    backButton:SetFont("DermaLarge")
+    backButton:SetTextColor(Color(255, 255, 255))
+
+    backButton.Paint = function(self, w, h)
+        local bgColor = Color(51, 51, 51)
+        if self:IsHovered() then
+            bgColor = Color(32, 32, 32)
+        end
+        draw.RoundedBox(10, 0, 0, w, h, bgColor)
+    end
+
+    backButton.DoClick = function()
+        frame:Close()
+    end
+  
+    local rightPanel = vgui.Create("DPanel", frame)
+    rightPanel:SetPos(ScrW() / 3.5 * 2.5, ScrH() / 4)
+    rightPanel:SetSize(ScrW() / 4, ScrH()-350)
+    rightPanel.Paint = function(self, w, h)
+        draw.RoundedBox(10, 0, 0, w, h, Color(26,26,26, 255))
+    end
+
+    local nameEntry = vgui.Create("DTextEntry", rightPanel)
+    nameEntry:SetPos(20, 50)
+    nameEntry:SetSize(rightPanel:GetWide() - 40, 40)
+    nameEntry:SetPlaceholderText("Nom de personnage")
+    nameEntry:SetFont("DermaLarge")
+    nameEntry:SetTextColor(Color(0,0,0))
+
+    local submitButton = vgui.Create("DButton", rightPanel)
+    submitButton:SetPos(50, rightPanel:GetTall() - 80)
+    submitButton:SetSize(rightPanel:GetWide() - 100, 40)
+    submitButton:SetText("Valider")
+    submitButton:SetFont("DermaLarge")
+    submitButton:SetTextColor(Color(255, 255, 255))
+
+    submitButton.Paint = function(self, w, h)
+        local bgColor = Color(51, 51, 51)
+        if self:IsHovered() then
+            bgColor = Color(32, 32, 32)
+        end
+        draw.RoundedBox(10, 0, 0, w, h, bgColor)
+    end
+
+    submitButton.DoClick = function()
+        local playerName = nameEntry:GetValue()
+
+        if playerName == "" then
+            return
+        end
+
+        characterSelected = {
+            steamid = ply:SteamID(),
+            name = playerName,
+            skin = "models/falko_naruto_foc/body_upper/man_amefullbody_01_kusa.mdl",
+            weaponsName = "empty_hands"
+        }
+
+        net.Start("SaveOrUpdateCharacterData")
+        net.WriteString(playerName)
+        net.WriteString(characterSelected.skin)
+        net.WriteString("empty_hands")
+        net.SendToServer()
+
+        net.Start("SelectedCharacter")
+        net.WriteTable(characterSelected)
+        net.SendToServer()
+
+        ply:EmitSound("buttons/lightswitch2.wav")
+
+        frame:Close()
+    end
+end
+
+
+local function OpenCharacterSelectionMenu(characters, ply)
+
+    surface.CreateFont("Large", {
+        font = "Ninja Naruto",
+        size = 100,
+        weight = 500,
+    })
+
+    local frame = vgui.Create("DFrame")
+    frame:SetSize(ScrW(), ScrH())
+    frame:SetPos(0, 0)
+    frame:SetTitle("")
+    frame:MakePopup()
+    frame:SetDraggable(false)
+    frame:ShowCloseButton(false)
+
+    frame.Paint = function(self, w, h)
+        draw.RoundedBox(0, 0, 0, w, h, Color(21, 21, 21, 255))
+    end
+
+    local buttonStartY = (ScrH() / 2) - 200 
+    local buttonSpacing = 400
     local maxButtons = 3
+    local buttonStartX = (ScrW() / 2) - (maxButtons * buttonSpacing / 2 -50) 
 
-    if #characters == 0 then
-        local createButton = vgui.Create("DButton", frame)
-        createButton:SetPos(ScrW() / 2 - 150, buttonStartY)
-        createButton:SetSize(300, 50)
-        createButton:SetText("Créer personnage")
-        createButton:SetFont("DermaLarge")
-        createButton:SetTextColor(Color(255, 255, 255))
+    for i = 1, maxButtons do
+        local character = characters[i]
 
-        createButton.Paint = function(self, w, h)
-            local bgColor = Color(100, 200, 100)  
-            if self:IsHovered() then
-                bgColor = Color(120, 220, 120)  
-            end
-            draw.RoundedBox(10, 0, 0, w, h, bgColor) 
-        end
+        if character then
         
-        createButton.DoClick = function()
-            frame:Close()
-            OpenCharacterCreationMenu(ply) 
-        end
-    else
-        for i = 1, math.min(#characters, maxButtons) do
-            local character = characters[i]
             local characterButton = vgui.Create("DButton", frame)
-            characterButton:SetPos(ScrW() / 2 - 150, buttonStartY + (i - 1) * buttonSpacing)
-            characterButton:SetSize(300, 50)
-            characterButton:SetText(character.name)
-            characterButton:SetFont("DermaLarge")
-            characterButton:SetTextColor(Color(255, 255, 255))
-      
+            characterButton:SetPos(buttonStartX + (i - 1) * buttonSpacing, buttonStartY)
+            characterButton:SetSize(300, 400)
+            characterButton:SetText("")
             characterButton.Paint = function(self, w, h)
-                local bgColor = Color(100, 62, 62) 
+                local bgColor = Color(26, 26, 26)
                 if self:IsHovered() then
-                    bgColor = Color(34, 21, 21) 
+                    bgColor = Color(10, 10, 10)
                 end
-                draw.RoundedBox(10, 0, 0, w, h, bgColor) 
+                draw.RoundedBox(10, 0, 0, w, h, bgColor)
+                draw.SimpleText(
+                    character.name,
+                    "DermaLarge",
+                    w / 2,
+                    h - 40,
+                    Color(255, 255, 255),
+                    TEXT_ALIGN_CENTER,
+                    TEXT_ALIGN_CENTER
+                )
             end
-            characterButton.DoClick = function()
 
+            characterButton.DoClick = function()
                 characterSelected = character
 
                 net.Start("SelectedCharacter")
                 net.WriteTable(character)
                 net.SendToServer()
+
+                ply:EmitSound("buttons/button14.wav")
+
                 frame:Close()
             end
-        end
-    end
 
-    if #characters < maxButtons then
-        local createButton = vgui.Create("DButton", frame)
-        createButton:SetPos(ScrW() / 2 - 150, buttonStartY + #characters * buttonSpacing)
-        createButton:SetSize(300, 50)
-        createButton:SetText("+")
-        createButton:SetFont("DermaLarge")
-        createButton:SetTextColor(Color(255, 255, 255))
+            local modelPanel = vgui.Create("DModelPanel", characterButton)
+            modelPanel:SetPos(10, 10)
+            modelPanel:SetSize(280, 280)
+            modelPanel:SetModel(string.Replace(character.skin, "'", ""))
 
-        createButton.Paint = function(self, w, h)
-            local bgColor = Color(108, 125, 161)
-            if self:IsHovered() then
-                bgColor = Color(55, 63, 82) 
+            modelPanel:SetCamPos(Vector(50, 50, 50)) 
+            modelPanel:SetLookAt(Vector(0, 0, 40))
+            modelPanel:SetFOV(70)
+
+        else
+          
+            local createButton = vgui.Create("DButton", frame)
+            createButton:SetPos(buttonStartX + (i - 1) * buttonSpacing, buttonStartY)
+            createButton:SetSize(300, 400)
+            createButton:SetText("+")
+            createButton:SetFont("DermaLarge")
+            createButton:SetTextColor(Color(255, 255, 255))
+
+            createButton.Paint = function(self, w, h)
+                local bgColor = Color(51, 51, 51)
+                if self:IsHovered() then
+                    bgColor = Color(32, 32, 32)
+                end
+                draw.RoundedBox(10, 0, 0, w, h, bgColor)
             end
-            draw.RoundedBox(10, 0, 0, w, h, bgColor) 
-        end
 
-        createButton.DoClick = function()
-            frame:Close()
-            OpenCharacterCreationMenu(ply)
+            createButton.DoClick = function()
+                frame:Close()
+                OpenCharacterCreationMenu(ply)
+                ply:EmitSound("buttons/lightswitch2.wav")
+            end
         end
     end
 end
+
+
 
 local function CheckAndOpenMenu()
     net.Start("CheckCharacter")
