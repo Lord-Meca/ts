@@ -156,7 +156,7 @@ local function invokeAkamarus(ply,self)
                         modelEntity:SetPlaybackRate(1)
         
                         net.Start("DisplayDamage")
-                        net.WriteInt(3<&0, 32)
+                        net.WriteInt(30, 32)
                         net.WriteEntity(target)
                         net.WriteColor(Color(249, 148, 6, 255))
                         net.Send(ply)
