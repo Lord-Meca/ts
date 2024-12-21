@@ -1480,7 +1480,7 @@ hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
     
 	elseif button == KEY_E then
 
-		if activeWeapon.eventailHolstered then
+		if activeWeapon.eventailHolstered or ply:GetNWBool("freezePlayer") then
 			return
 		end
 
@@ -1513,7 +1513,7 @@ hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
 		end)
 	elseif button == KEY_F then
 
-		if activeWeapon.eventailHolstered then
+		if activeWeapon.eventailHolstered or ply:GetNWBool("freezePlayer") then
 			return
 		end
 

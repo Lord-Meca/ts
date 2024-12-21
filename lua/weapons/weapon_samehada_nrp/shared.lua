@@ -1237,7 +1237,7 @@ hook.Add("PlayerButtonDown", "samehadaSweps", function(ply, button)
 	
 	if button == KEY_E then 
 
-		if CurTime() < (ply:GetActiveWeapon().NextVines or 0) then return end
+		if CurTime() < (ply:GetActiveWeapon().NextVines or 0) or ply:GetNWBool("freezePlayer") then return end
 		ply:GetActiveWeapon().NextVines = CurTime() + 2
 
 		local maxDistance = 1800

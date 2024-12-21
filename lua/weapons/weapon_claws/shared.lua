@@ -14,8 +14,6 @@ if (CLIENT) then
 
 end
 
-
-
 SWEP.ViewModelFOV = 77
 SWEP.UseHands = false
 SWEP.Category = "TypeShit | Armes"
@@ -1195,97 +1193,6 @@ end)
 
 
 
-function spawnTornado(ply, isAttractive)
-    local modelEntity = ents.Create("prop_dynamic")
-    local moveTimeLeft = 2
-    local damage = 150
-    local affectedNearbyEntities = {}
-
-    if not IsValid(modelEntity) then return end
-
-    modelEntity:SetModel("models/foc/foc_wind.mdl")
-
-    local spawnPos = ply:GetPos()
-    modelEntity:SetPos(spawnPos)
-    modelEntity:SetAngles(Angle(0, 0, 0))
-    modelEntity:SetModelScale(1)
-    modelEntity:Spawn()
-
-    ply:EmitSound(Sound("ambient/explosions/explode_5.wav"))
-
-    local animID = modelEntity:LookupSequence("idle")
-    if animID < 0 then return end
-
-    modelEntity:SetSequence(animID)
-    modelEntity:SetCycle(0)
-    modelEntity:SetPlaybackRate(1)
-
-    local currentScale = isAttractive and 15 or 1
-    local targetScale = isAttractive and 0.5 or 15
-    local scaleIncrement = (targetScale - currentScale) / (moveTimeLeft * 10)
-
-    timer.Create("TornadoEffect_"..modelEntity:EntIndex(), 0.03, moveTimeLeft * 10, function()
-        if IsValid(modelEntity) then
- 
-            currentScale = currentScale + scaleIncrement
-            modelEntity:SetModelScale(currentScale, 0)
-
-            for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 60 * currentScale)) do
-                if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) then
-                    if entity ~= ply and not affectedNearbyEntities[entity] then
-                        local plyPos = ply:GetPos() + Vector(0, 0, 150)
-                        local entityPos = entity:GetPos()
-						local direction
-						if isAttractive then
-					
-							direction = (plyPos - entityPos):GetNormalized()
-							entity:SetVelocity(direction*1700)
-
-						else
-						
-							direction = (entityPos - plyPos):GetNormalized()
-							local horizontalBoost = 2000 
-							local verticalBoost = 800 
-							local finalVelocity = direction * horizontalBoost
-							finalVelocity.z = verticalBoost 
-							entity:SetVelocity(finalVelocity)
-						end
-                    
-                        local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(damage)
-                        damageInfo:SetDamageType(DMG_BLAST)
-                        damageInfo:SetAttacker(ply)
-                        damageInfo:SetInflictor(ply)
-
-                        entity:TakeDamageInfo(damageInfo)
-
-                        affectedNearbyEntities[entity] = true
-
-                  
-                        net.Start("DisplayDamage")
-                        net.WriteInt(damage, 32)
-                        net.WriteEntity(entity)
-                        net.WriteColor(Color(51, 125, 255, 255))
-                        net.Send(ply)
-                    end
-                end
-            end
-        else
-            timer.Remove("TornadoEffect_"..modelEntity:EntIndex())
-        end
-    end)
-
-    timer.Simple(moveTimeLeft, function()
-        if IsValid(modelEntity) then
-            timer.Simple(1, function()
-                if IsValid(modelEntity) then
-                    modelEntity:Remove()
-                end
-                timer.Remove("TornadoEffect_"..modelEntity:EntIndex())
-            end)
-        end
-    end)
-end
 
 local function CreatePlayerTrail(ply, attachment, color, duration)
     if not ply:IsValid() then return end
@@ -1329,7 +1236,7 @@ function SWEP:Reload()
 
 
 	end
-	timer.Simple(2, function()
+	timer.Simple(1, function()
 
 		-- local maxDistance = 2000
 
@@ -1363,14 +1270,14 @@ function SWEP:Reload()
 		
 						if IsValid(target) and target:IsPlayer() then
 							local damageInfo = DamageInfo()
-							damageInfo:SetDamage(150) 
+							damageInfo:SetDamage(950) 
 							damageInfo:SetAttacker(ply) 
 							damageInfo:SetInflictor(self)
 							target:TakeDamageInfo(damageInfo)
 						end
 		
 						net.Start("DisplayDamage")
-						net.WriteInt(150, 32)
+						net.WriteInt(950, 32)
 						net.WriteEntity(target)
 						net.WriteColor(Color(249, 148, 6, 255))
 						net.Send(ply)

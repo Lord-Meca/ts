@@ -1153,7 +1153,7 @@ function growCorals(ply, self, max,damage)
                     particleEffect:Activate()
                 end
 
-                local animationDuration = 1
+                local animationDuration = 0.5
                 local startTime = CurTime()
 
                 timer.Create("AnimateEntity_" .. modelEntity:EntIndex(), 0.02, animationDuration / 0.02, function()
