@@ -46,7 +46,7 @@ local function substitutionJutsu(ply)
     if not IsValid(modelEntity) then return end
 
     modelEntity:SetModel("models/foc_props_jutsu/jutsu_substitution/foc_jutsu_substitution.mdl")
-    modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 50))
+    modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 100))
     modelEntity:SetModelScale(1)
     modelEntity:Spawn()
     modelEntity:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
