@@ -62,9 +62,10 @@ local function substitutionJutsu(ply)
 end
 
 hook.Add("EntityTakeDamage", "SubstitutionJutsuTrigger", function(target, dmginfo)
-    if not target:IsPlayer() or not target:GetActiveWeapon() then return end
+    if not target:IsPlayer() or not target:GetActiveWeapon() or not target:Alive() then return end
 
     local weapon = target:GetActiveWeapon()
+
     if weapon:GetClass() ~= "substitution" then return end 
 
     if dmginfo:GetDamage() >= 10 and CurTime() > weapon.NextSpecialMove then
