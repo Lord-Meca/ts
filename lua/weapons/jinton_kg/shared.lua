@@ -43,7 +43,7 @@ end
 function SWEP:SecondaryAttack()
 end
 
-local function cubeJinton(ply, self,cubePos,onPlayer,duration,damage)
+local function cubeJinton(ply, self,cubePos,onPlayer,duration,damage,targetScale)
     if not IsValid(ply) then return end
 
     local affectedNearbyEntities = {}
@@ -84,7 +84,6 @@ local function cubeJinton(ply, self,cubePos,onPlayer,duration,damage)
     modelCube:SetMoveType(MOVETYPE_NOCLIP)
 
     local currentScale = 0.1
-    local targetScale = 6
     local scaleIncrement = (targetScale - currentScale) / (duration * 10)
 
     timer.Create("CubeJintonEffect_" .. modelCube:EntIndex(), 0.1, duration * 10, function()
@@ -132,10 +131,11 @@ local function cubeJinton(ply, self,cubePos,onPlayer,duration,damage)
     end)
 
     timer.Simple(duration, function()
-        if IsValid(ply) then
-            ply:SetMoveType(MOVETYPE_WALK)
+        if onPlayer then
+            if IsValid(ply) then
+                ply:SetMoveType(MOVETYPE_WALK)
+            end
         end
-
         if IsValid(modelCube) then
             modelCube:Remove()
             if onPlayer then
@@ -152,7 +152,7 @@ end
 local function cylindreLaserJinton(ply, self)
     if not IsValid(ply) then return end
 
-    local duration = 2
+    local duration = 1
     local damage = 100
     local maxDistance = 1000
     local forward = 700
@@ -225,7 +225,7 @@ local function cylindreLaserJinton(ply, self)
                      
                       
 
-                        cubeJinton(ply, self,modelCylindre:GetPos(),false,5,600)
+                        cubeJinton(ply, self,modelCylindre:GetPos(),false,5,600,6)
                         modelCylindre:Remove()
                         timer.Remove("CylindreLaserImpact_" .. modelCylindre:EntIndex())
                     end
@@ -241,6 +241,224 @@ local function cylindreLaserJinton(ply, self)
     end)
 
 
+end
+
+
+
+local function launchConeJintonMode(ply, self,damage)
+    if not IsValid(ply) then return end
+
+    local duration = 10
+    local initialScale = 0.1
+    local laserVelocity = ply:EyeAngles():Forward() * 1500
+    local spawnPos = ply:GetPos() + Vector(0, 0, 50) + ply:EyeAngles():Forward() * 200
+
+    local modelCone = ents.Create("prop_physics")
+    if not IsValid(modelCone) then return end
+
+    modelCone:SetModel("models/fsc/billy/conejinton.mdl")
+    modelCone:SetPos(spawnPos)
+    modelCone:SetAngles(ply:EyeAngles() + Angle(0, 0, 90))
+    modelCone:SetModelScale(initialScale)
+    modelCone:Spawn()
+    modelCone:SetMoveType(MOVETYPE_NOCLIP)
+
+    modelCone:SetVelocity(laserVelocity)
+
+
+    local function checkImpact()
+        if not IsValid(modelCone) then return end
+
+
+        local traceImpact = util.TraceLine({
+            start = modelCone:GetPos(),
+            endpos = modelCone:GetPos() + laserVelocity * 0.1,
+            filter = modelCone
+        })
+
+      
+        if traceImpact.Hit then
+    
+            local hitEntity = traceImpact.Entity
+            if IsValid(hitEntity) and (hitEntity:IsPlayer() or hitEntity:IsNPC()) then
+                local damageInfo = DamageInfo()
+                damageInfo:SetDamage(damage)
+                damageInfo:SetDamageType(DMG_BLAST)
+                damageInfo:SetAttacker(ply)
+                damageInfo:SetInflictor(ply)
+
+                hitEntity:TakeDamageInfo(damageInfo)
+
+                net.Start("DisplayDamage")
+                net.WriteInt(damage, 32)
+                net.WriteEntity(hitEntity)
+                net.WriteColor(Color(51, 125, 255, 255))
+                net.Send(ply)
+                modelCone:Remove()
+            else
+
+                if IsValid(modelCone) then
+                    cubeJinton(ply, self, modelCone:GetPos(), false, 5, 150,3)
+                    modelCone:Remove()
+                end
+            end
+        end
+    end
+
+    timer.Create("launchConeJinton_" .. modelCone:EntIndex(), 0.1, duration * 10, checkImpact)
+
+    timer.Simple(duration, function()
+        if IsValid(modelCone) then
+            modelCone:Remove()
+        end
+        timer.Remove("launchConeJinton_" .. modelCone:EntIndex()) 
+    end)
+end
+
+local function cubeLaserJintonMode(ply, self)
+    if not IsValid(ply) then return end
+
+    local duration = 10
+    local maxScale = 5
+    local initialScale = 0.1
+    local scaleStep = (maxScale - initialScale) / (duration * 10)
+   
+    local spawnPos = ply:GetPos() + Vector(0, 0, 150)
+    local cubeModelPath = "models/fsc/billy/cubeonoki.mdl"
+    local trailMaterial = "trails/laser.vmt"
+
+    local modelCube = ents.Create("prop_physics")
+    if not IsValid(modelCube) then return end
+
+    modelCube:SetModel(cubeModelPath)
+    modelCube:SetPos(spawnPos)
+    modelCube:SetModelScale(initialScale)
+    modelCube:Spawn()
+    modelCube:SetMoveType(MOVETYPE_NOCLIP)
+
+    ply:SetNWBool("freezePlayer", true)
+
+    local function finalizeCube()
+        if not IsValid(modelCube) then return end
+        local laserVelocity = ply:EyeAngles():Forward() * 1500
+        ply:SetNWBool("freezePlayer", false)
+
+        util.SpriteTrail(modelCube, 0, Color(255, 255, 255), false, 10, 10, 1, 50, trailMaterial)
+        modelCube:SetVelocity(laserVelocity)
+
+        timer.Create("CubeLaserJintonImpact_" .. modelCube:EntIndex(), 0.1, 0, function()
+            if not IsValid(modelCube) then
+                timer.Remove("CubeLaserJintonImpact_" .. modelCube:EntIndex())
+                return
+            end
+
+            local traceImpact = util.TraceLine({
+                start = modelCube:GetPos(),
+                endpos = modelCube:GetPos() + laserVelocity * 0.1,
+                filter = modelCube
+            })
+
+            if traceImpact.Hit then
+                cubeJinton(ply, self, modelCube:GetPos(), false, 2, 750,10)
+                modelCube:Remove()
+                timer.Remove("CubeLaserJintonImpact_" .. modelCube:EntIndex())
+            end
+        end)
+    end
+
+    timer.Create("CubeLaserJintonScale_" .. modelCube:EntIndex(), 0.1, duration * 10, function()
+        if not IsValid(modelCube) then
+            timer.Remove("CubeLaserJintonScale_" .. modelCube:EntIndex())
+            return
+        end
+
+        local newScale = modelCube:GetModelScale() + scaleStep
+        modelCube:SetModelScale(newScale, 0)
+
+        local newAngles = modelCube:GetAngles() + Angle(10, 10, 10)
+        modelCube:SetAngles(newAngles)
+
+        if newScale >= 1 then
+            finalizeCube()
+            timer.Remove("CubeLaserJintonScale_" .. modelCube:EntIndex())
+        end
+    end)
+end
+
+local function growCylindreJintonMode(ply, self, max)
+    if not SERVER then return end
+
+    local modelPath = "models/fsc/billy/cylindreonoki.mdl"
+    local animationDuration = 0.5
+    local entityLifetime = 5
+    local interval = 0.1
+    local verticalOffset = Vector(0, 0, 100)
+
+    for i = 1, max do
+        timer.Simple(i * interval, function()
+            if not IsValid(ply) then return end
+
+            local traceStart = ply:GetPos() + ply:EyeAngles():Forward() * 150 * i + verticalOffset
+            local traceEnd = traceStart - Vector(0, 0, 400)
+
+            local traceData = {
+                start = traceStart,
+                endpos = traceEnd,
+                filter = ply
+            }
+
+            local traceResult = util.TraceLine(traceData)
+            if not traceResult.Hit then return end
+
+            local modelEntity = ents.Create("prop_physics")
+            if not IsValid(modelEntity) then return end
+
+            modelEntity:SetModel(modelPath)
+            modelEntity:SetPos(traceResult.HitPos - Vector(0, 0, 200))
+            modelEntity:SetAngles(Angle(0, 0, 90))
+            modelEntity:SetModelScale(1)
+            modelEntity:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+            modelEntity:Spawn()
+
+            local physObj = modelEntity:GetPhysicsObject()
+            if IsValid(physObj) then
+                physObj:EnableMotion(false)
+            end
+
+            local startPos = modelEntity:GetPos()
+            local endPos = traceResult.HitPos + Vector(0, 0, 20)
+            local startTime = CurTime()
+
+            timer.Create("AnimateEntity_" .. modelEntity:EntIndex(), 0.02, animationDuration / 0.02, function()
+                if not IsValid(modelEntity) then
+                    timer.Remove("AnimateEntity_" .. modelEntity:EntIndex())
+                    return
+                end
+
+                local elapsed = CurTime() - startTime
+                local progress = math.Clamp(elapsed / animationDuration, 0, 1)
+
+                modelEntity:SetPos(LerpVector(progress, startPos, endPos))
+                ply:SetAnimation(PLAYER_ATTACK1)
+
+                if progress >= 1 then
+                    timer.Remove("AnimateEntity_" .. modelEntity:EntIndex())
+
+                    for _, entity in ipairs(ents.FindInSphere(modelEntity:GetPos(), 250)) do
+                        if (entity:IsPlayer() and entity ~= ply) or entity:IsNPC() then
+                            entity:SetVelocity(Vector(0, 0, 600))
+                        end
+                    end
+                end
+            end)
+
+            timer.Simple(entityLifetime, function()
+                if IsValid(modelEntity) then
+                    modelEntity:Remove()
+                end
+            end)
+        end)
+    end
 end
 
 -- local function chainConeJinton(ply, self)
@@ -460,10 +678,12 @@ end
 
 
 
+
+
 function SWEP:Reload()
     local ply = self.Owner
 
-    if CurTime() < self.NextSpecialMove then return end
+    if CurTime() < self.NextSpecialMove or ply:GetNWBool("jintonModePlayer") then return end
     self.NextSpecialMove = CurTime() + 2
 
     self:SetHoldType("anim_ninjutsu2")
@@ -481,7 +701,7 @@ function SWEP:Reload()
     end
 
     if SERVER then
-        cubeJinton(ply, self,cubePos,true,3,300)
+        cubeJinton(ply, self,cubePos,true,3,300,6)
     end
 end
 
@@ -499,6 +719,17 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 			return
 		end
         activeWeapon.NextJintonLaser = CurTime() + 5
+        
+        if ply:GetNWBool("jintonModePlayer") then
+            activeWeapon:SetHoldType("anim_ninjutsu3")
+            ply:SetAnimation(PLAYER_ATTACK1)
+            if SERVER then
+                cubeLaserJintonMode(ply,self)
+            end
+
+            return
+        end
+        
         activeWeapon:SetHoldType("weapon_art2")
         ply:SetAnimation(PLAYER_RELOAD)
         if SERVER then
@@ -512,6 +743,23 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 		end
 
         activeWeapon.NextJintonPrison = CurTime() + 5
+
+        if ply:GetNWBool("jintonModePlayer") then
+            activeWeapon:SetHoldType("anim_invoke")
+            ply:SetAnimation(PLAYER_RELOAD)
+            if SERVER then
+
+                for i = 1,4 do
+                    timer.Simple(0.3*i, function()
+                        launchConeJintonMode(ply, self,50)
+                    end)
+                end
+            
+            end
+          
+            return
+        end
+
         local maxDistance = 2000
         local radius = 300
 
@@ -551,6 +799,14 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 
         activeWeapon.NextJintonZone = CurTime() + 5
 
+        if ply:GetNWBool("jintonModePlayer") then
+            activeWeapon:SetHoldType("weapon_art2")
+            ply:SetAnimation(PLAYER_ATTACK1)
+            growCylindreJintonMode(ply, activeWeapon, 10)
+            return
+        end
+        
+
         activeWeapon:SetHoldType("anim_ninjutsu2") 
         ply:SetAnimation(PLAYER_ATTACK1)
     
@@ -569,27 +825,23 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
         end
 	elseif button == KEY_C then
 
-        -- Invoque 6 formes
-
-        -- 2 carrés : Attaque moyen rapide et puissante à grande distance et range (donc bien pour toucher plusieurs cibles)
-
-        -- 2 cônes : Attaque rapide et précise sur une cible très puissante avec de l'immobilisation courte
-
-        -- 2 cylindres : Vague de cylindre qui sorte et qui expulse dans le ciel les joueurs (voir kurabu)
-
-
-
         if ply:GetNWBool("freezePlayer") or CurTime() < activeWeapon.NextJintonFinal then
             return
         end
 
         activeWeapon.NextJintonFinal = CurTime() + 5
 
+        if ply:GetNWBool("jintonModePlayer") then
+            ply:StopParticles()
+            ply:SetNWBool("jintonModePlayer", false)
+            return 
+        end
+
         activeWeapon:SetHoldType("anim_jashin") 
         ply:SetAnimation(PLAYER_RELOAD)
-        
+        ply:SetNWBool("jintonModePlayer", true)
         timer.Simple(1.5, function()
-            ParticleEffectAttach("okushi_blood", PATTACH_POINT_FOLLOW, ply, 3)
+            ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, 3)
             activeWeapon:SetHoldType("normal") 
             ply:SetAnimation(PLAYER_ATTACK1)
             
