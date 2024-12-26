@@ -36,10 +36,10 @@ DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "couch_idle"
 DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_melee1"
 DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "kisame_ninjutsu_sharkbomb_charge_loop" 
 DATA.Translations[ ACT_MP_ATTACK_CROUCH_PRIMARYFIRE ]	= "kisame_ninjutsu_sharkbomb_charge_loop"
---DATA.Translations[ ACT_MP_RELOAD_STAND ]				= IdleActivity + 6
---DATA.Translations[ ACT_MP_RELOAD_CROUCH ]				= IdleActivity + 6
+DATA.Translations[ ACT_MP_RELOAD_STAND ]				= "foc_mitsuki_ninjutsu_sagemode"
+
 DATA.Translations[ ACT_MP_JUMP ]						= "wos_judge_a_idle"
---DATA.Translations[ ACT_MP_SWIM ]						= IdleActivity + 9
+
 DATA.Translations[ ACT_LAND ]							= "wos_bs_shared_jump_land"
 
 wOS.AnimExtension:RegisterHoldtype( DATA )

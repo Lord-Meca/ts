@@ -26,6 +26,8 @@ SWEP.Secondary.Ammo = "none"
 SWEP.NextSpecialMove = 0
 SWEP.NextJintonLaser = 0
 SWEP.NextJintonPrison = 0
+SWEP.NextJintonZone = 0
+SWEP.NextJintonFinal = 0
 
 function SWEP:Deploy()
     self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_ym_ohnoki.mdl")
@@ -413,7 +415,7 @@ local function prisonConeJinton(ply, self, target)
                 damageInfo:SetDamage(tickDamage)
                 damageInfo:SetDamageType(DMG_BLAST)
                 damageInfo:SetAttacker(ply)
-                damageInfo:SetInflictor(ply)
+                damageInfo:SetInflictor(self)
 
                 target:TakeDamageInfo(damageInfo)
 
@@ -496,7 +498,7 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 		if ply:GetNWBool("freezePlayer") or CurTime() < activeWeapon.NextJintonLaser then
 			return
 		end
-        activeWeapon.NextJintonLaser = CurTime() + 2
+        activeWeapon.NextJintonLaser = CurTime() + 5
         activeWeapon:SetHoldType("weapon_art2")
         ply:SetAnimation(PLAYER_RELOAD)
         if SERVER then
@@ -509,7 +511,7 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 			return
 		end
 
-        activeWeapon.NextJintonPrison = CurTime() + 2
+        activeWeapon.NextJintonPrison = CurTime() + 5
         local maxDistance = 2000
         local radius = 300
 
@@ -541,7 +543,59 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
             prisonConeJinton(ply,activeWeapon,target)
         end
 	
-	end
+	elseif button == KEY_G then
+
+		if ply:GetNWBool("freezePlayer") or CurTime() < activeWeapon.NextJintonZone then
+			return
+		end
+
+        activeWeapon.NextJintonZone = CurTime() + 5
+
+        activeWeapon:SetHoldType("anim_ninjutsu2") 
+        ply:SetAnimation(PLAYER_ATTACK1)
+    
+        if SERVER then
+    
+            local entity = ents.Create("jinton_zone")
+            if not IsValid(entity) then return end
+        
+            entity:SetPos(ply:GetPos()) 
+            entity:Spawn()
+            entity:Activate()
+    
+            entity.Owner = ply
+    
+    
+        end
+	elseif button == KEY_C then
+
+        -- Invoque 6 formes
+
+        -- 2 carrés : Attaque moyen rapide et puissante à grande distance et range (donc bien pour toucher plusieurs cibles)
+
+        -- 2 cônes : Attaque rapide et précise sur une cible très puissante avec de l'immobilisation courte
+
+        -- 2 cylindres : Vague de cylindre qui sorte et qui expulse dans le ciel les joueurs (voir kurabu)
+
+
+
+        if ply:GetNWBool("freezePlayer") or CurTime() < activeWeapon.NextJintonFinal then
+            return
+        end
+
+        activeWeapon.NextJintonFinal = CurTime() + 5
+
+        activeWeapon:SetHoldType("anim_jashin") 
+        ply:SetAnimation(PLAYER_RELOAD)
+        
+        timer.Simple(1.5, function()
+            ParticleEffectAttach("okushi_blood", PATTACH_POINT_FOLLOW, ply, 3)
+            activeWeapon:SetHoldType("normal") 
+            ply:SetAnimation(PLAYER_ATTACK1)
+            
+        end)
+    
+    end
 
 	
 end)
