@@ -439,6 +439,7 @@ local function growCylindreJintonMode(ply, self, max)
                 local progress = math.Clamp(elapsed / animationDuration, 0, 1)
 
                 modelEntity:SetPos(LerpVector(progress, startPos, endPos))
+                self:SetHoldType("normal")
                 ply:SetAnimation(PLAYER_ATTACK1)
 
                 if progress >= 1 then
@@ -841,7 +842,7 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
         ply:SetAnimation(PLAYER_RELOAD)
         ply:SetNWBool("jintonModePlayer", true)
         timer.Simple(1.5, function()
-            ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, 3)
+            --ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, 3)
             activeWeapon:SetHoldType("normal") 
             ply:SetAnimation(PLAYER_ATTACK1)
             
