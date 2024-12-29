@@ -275,7 +275,7 @@ function SWEP:Reload()
     if not ply:IsOnGround() then return end
 
 	if CurTime() < self.NextSpecialMove then return end
-	self.NextSpecialMove = CurTime() + 1
+	self.NextSpecialMove = CurTime() + 2
 
 	local particleName = "nrp_tool_invocation"
 	local attachment = ply:LookupBone("ValveBiped.Bip01_R_Foot")
@@ -283,41 +283,39 @@ function SWEP:Reload()
     local currentState = self:GetPlayerState(ply)
 
     if currentState == 0 or currentState == nil then
-        local trace = ply:GetEyeTrace()
-        local target = trace.Entity
-        if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-
-            local hitPos = trace.HitPos
-            for _, ent in ipairs(ents.FindInSphere(hitPos, radius)) do
-                if ent:IsPlayer() and ent ~= ply then
-                    target = ent
-                    break
-                end
-            end
-
-            if not (IsValid(target) and target:IsPlayer()) then
-                return
-            end
+        local trace = util.TraceHull({
+            start = ply:GetShootPos(),
+            endpos = ply:GetShootPos() + ply:GetAimVector() * 3000,
+            filter = function(ent)
+                return (ent:IsPlayer() or ent:IsNPC()) and ent ~= ply
+            end,
+            mins = Vector(-32, -32, -32),
+            maxs = Vector(32, 32, 32), 
+        })
+        
+    
+        if trace.Entity and trace.Entity:IsValid() then
+    
+            self.targetPlayer = trace.Entity
         end
-        --DrawRadius3D(target, radius)
-        self.targetPlayer = target
-
-
-        self:SetHoldType("anim_invoke")
-        ply:SetAnimation(PLAYER_RELOAD)
-        timer.Simple(1, function()
-            self:SetHoldType("anim_invoke")
-            ply:SetAnimation(PLAYER_ATTACK1)
-        end)
-
+        
+        if not IsValid(self.targetPlayer) then return end
+       
+  
 
 
         if SERVER then
 
             util.AddNetworkString("DisplayDamage")
-
+            self:SetHoldType("anim_invoke")
+            ply:SetAnimation(PLAYER_RELOAD)
+            timer.Simple(1, function()
+                self:SetHoldType("anim_invoke")
+                ply:SetAnimation(PLAYER_ATTACK1)
+            end)
+    
             timer.Simple(1.5, function()
-                ply:Freeze(true)
+                ply:SetNWBool("freezePlayer", true)
                 ply:EmitSound("ambient/explosions/explode_9.wav")
                 if attachment then
                     ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
@@ -353,7 +351,7 @@ function SWEP:Reload()
                         timer.Simple(0.7, function() 
                             if IsValid(ply) then
                                 ply:StopParticles()
-                                ply:Freeze(false)
+                                ply:SetNWBool("freezePlayer", false)
                             end
 
                             if IsValid(modelEntity) then

@@ -743,7 +743,7 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
 			return
 		end
 
-        activeWeapon.NextJintonPrison = CurTime() + 5
+        activeWeapon.NextJintonPrison = CurTime() + 0.5
 
         if ply:GetNWBool("jintonModePlayer") then
             activeWeapon:SetHoldType("anim_invoke")
@@ -761,36 +761,35 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
             return
         end
 
-        local maxDistance = 2000
-        local radius = 300
-
-        local trace = ply:GetEyeTrace()
-        local target = trace.Entity
-        if not (IsValid(target) and target:IsPlayer() and trace.HitPos:DistToSqr(ply:GetPos()) <= maxDistance ^ 2) then
-
-            local hitPos = trace.HitPos
-            for _, ent in ipairs(ents.FindInSphere(hitPos, radius)) do
-                if ent:IsPlayer() and ent ~= ply then
-                    target = ent
-             
-                    break
-                end
-            end
-
-            if not (IsValid(target) and target:IsPlayer()) then
-                return
-            end
-        end
-
+        local targetEntity = nil
+        
+        local trace = util.TraceHull({
+            start = ply:GetShootPos(),
+            endpos = ply:GetShootPos() + ply:GetAimVector() * 1000,
+            filter = function(ent)
+                return (ent:IsPlayer() or ent:IsNPC()) and ent ~= ply
+            end,
+            mins = Vector(-32, -32, -32),
+            maxs = Vector(32, 32, 32), 
+        })
+        
     
-       
-        activeWeapon:SetHoldType("anim_invoke")
-        ply:SetAnimation(PLAYER_ATTACK1)
-
-
-        if SERVER then
-            prisonConeJinton(ply,activeWeapon,target)
+        if trace.Entity and trace.Entity:IsValid() then
+    
+            targetEntity = trace.Entity
         end
+
+        if(IsValid(targetEntity)) then
+            activeWeapon:SetHoldType("anim_invoke")
+            ply:SetAnimation(PLAYER_ATTACK1)
+    
+    
+            if SERVER then
+                prisonConeJinton(ply,activeWeapon,targetEntity)
+            end
+        end
+       
+      
 	
 	elseif button == KEY_G then
 
