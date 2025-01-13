@@ -1159,9 +1159,29 @@ hook.Add("PostPlayerDraw", "ClawsModelInBack", function(ply)
     if activeWeapon.clawsHolstered then
         if not IsValid(ply.clawsModelHolster) then
             local model = ClientsideModel("models/naruto/unique_props/unique_props10/foc_nr_unique_props10_bane.mdl")
+            --local model = ClientsideModel("models/attaque_v11/foc_attaque4.mdl")
             if IsValid(model) then
                 model:SetNoDraw(true)
+				model:SetModelScale(1)
+				--model:SetMaterial("grey_textures/smoothconcrete")
                 ply.clawsModelHolster = model
+
+				local damagInfo = DamageInfo()
+				damagInfo:SetDamage(0)
+				damagInfo:SetDamageType(DMG_GENERIC)
+				damagInfo:SetAttacker(ply)
+				damagInfo:SetInflictor(activeWeapon)
+				model:TakeDamageInfo(damagInfo)
+
+				net.Start("DisplayDamage")
+				net.WriteInt(30, 32)
+				net.WriteEntity(ply)
+				net.WriteColor(Color(249,148,6,255))
+				net.Send(ply)
+
+				-- model:SetSequence(model:LookupSequence("atk_idle_eff2"))
+				-- model:SetCycle(0)
+				-- model:SetPlaybackRate(0.5)
             end
         end
 
@@ -1176,13 +1196,18 @@ hook.Add("PostPlayerDraw", "ClawsModelInBack", function(ply)
 
         pos = pos + ang:Forward() + ang:Up()*2 + ang:Right() * 6
         ang:RotateAroundAxis(ang:Right(), 90)
-
         ang:RotateAroundAxis(ang:Up()*50, -190)
+
+   		-- pos = pos + ang:Forward()*-40 + ang:Up() + ang:Right() * 10
+        -- ang:RotateAroundAxis(ang:Right(), -90)
+        -- ang:RotateAroundAxis(ang:Up(), 90)
 
         if IsValid(ply.clawsModelHolster) then
             ply.clawsModelHolster:SetRenderOrigin(pos)
             ply.clawsModelHolster:SetRenderAngles(ang)
             ply.clawsModelHolster:DrawModel()
+
+
         end
     else
         if IsValid(ply.clawsModelHolster) then
@@ -1190,6 +1215,7 @@ hook.Add("PostPlayerDraw", "ClawsModelInBack", function(ply)
         end
     end
 end)
+
 
 
 

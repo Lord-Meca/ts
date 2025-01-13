@@ -363,8 +363,7 @@ function SWEP:SoulBlade(ply, condition)
         for _, ent in ipairs(lentities) do
         
             if ( !IsValid(ent) or !SERVER ) then return end 
-            --ent:EmitSound("heavenlyrestriction/soulblade/ding.wav", 400, math.random(100,150), 1, CHAN_STATIC)
-
+          
 
         end
         timer.Simple(0.5, function()
@@ -374,8 +373,7 @@ function SWEP:SoulBlade(ply, condition)
                     if ( !IsValid(ent) or !SERVER ) then return end 
                     ParticleEffect( "nrp_kenjutsu_slash", ent:GetPos() + Vector(math.random(-40,40), math.random(-40,40), math.random(-40,40)), Angle(math.random(0,360),math.random(0,360),math.random(0,360)), ply )
                     ParticleEffect( "nrp_kenjutsu_slash", ent:GetPos() + Vector(math.random(-40,40), math.random(-40,40), math.random(-40,40)), Angle(0,0,0), ply )
-                    --ent:EmitSound("heavenlyrestriction/soulblade/heavy_hit.wav", 340, math.random(100,150), 1, CHAN_STATIC)
-
+                  
                     util.ScreenShake(ent:GetPos(), 10, 40, 0.5, 600, true)
 
                     ent:TakeDamage((ent:Health()*0.003) + damage, ply, self)
@@ -392,7 +390,7 @@ function SWEP:SoulBlade(ply, condition)
                 SafeRemoveEntity(trail)
             end)
         end
-        --ply:EmitSound("heavenlyrestriction/soulblade/steel.wav", 500, math.random(100,150), 1, CHAN_STATIC)
+   
 
         timer.Simple(0.1, function()
             ply:SetPos(trace1.HitPos)
@@ -400,10 +398,6 @@ function SWEP:SoulBlade(ply, condition)
         end)
         
 
-        timer.Simple(0.3, function()
-            --ParticleEffect( "nrp_kenjutsu_slash", ply:GetPos(), Angle(0,0,0), ent )
-    
-        end)
  
     end
 end

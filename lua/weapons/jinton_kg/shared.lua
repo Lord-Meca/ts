@@ -23,6 +23,7 @@ SWEP.Secondary.ClipSize = -1
 SWEP.Secondary.DefaultClip = -1
 SWEP.Secondary.Automatic = false
 SWEP.Secondary.Ammo = "none"
+
 SWEP.NextSpecialMove = 0
 SWEP.NextJintonLaser = 0
 SWEP.NextJintonPrison = 0
@@ -462,113 +463,6 @@ local function growCylindreJintonMode(ply, self, max)
     end
 end
 
--- local function chainConeJinton(ply, self)
---     if not IsValid(ply) then return end
-
---     local coneCount = 5
---     local coneDistance = 200 
---     local coneModel = "models/fsc/billy/conejinton.mdl"
---     local coneScale = 0.3 
---     local ropeWidth = 1 
---     local ropeMaterial = "cable/cable2"
---     local lifetime = 5 
---     local spawnDelay = 0.3 
---     local coneEntities = {}
-
---     local function spawnCones()
---         for i = 1, coneCount do
---             timer.Simple(spawnDelay * i, function()
---                 if not IsValid(ply) then return end
-
---                 local forwardOffset = ply:EyeAngles():Forward() * (coneDistance * i)
---                 local spawnPos = ply:GetPos() + forwardOffset + Vector(0, 0, 50)
-
---                 local cone = ents.Create("prop_physics")
---                 if IsValid(cone) then
---                     cone:SetModel(coneModel)
---                     cone:SetPos(spawnPos)
---                     cone:SetAngles(Angle(0, 0, 0))
---                     cone:SetModelScale(coneScale)
---                     cone:Spawn()
---                     cone:SetMoveType(MOVETYPE_NOCLIP)
---                     table.insert(coneEntities, cone)
-
---                     if i > 1 and IsValid(coneEntities[i - 1]) then
---                         constraint.Rope(
---                             coneEntities[i - 1],
---                             cone,
---                             0,
---                             0,
---                             Vector(0, 0, 0),
---                             Vector(0, 0, 0),
---                             coneDistance,
---                             100,
---                             0,
---                             ropeWidth,
---                             ropeMaterial,
---                             Color(255, 255, 255)
---                         )
---                     end
-
---                     if i == 1 then
---                         constraint.Rope(
---                             cone,
---                             ply,
---                             0,
---                             0,
---                             Vector(0, 0, 0),
---                             Vector(0, 0, 50),
---                             coneDistance,
---                             100,
---                             0,
---                             ropeWidth,
---                             ropeMaterial,
---                             Color(255, 255, 255)
---                         )
---                     end
---                 end
---             end)
---         end
---     end
-
---     local function activateConeMovement()
---         local followTimerName = "FollowConeDirection_" .. ply:EntIndex()
---         timer.Create(followTimerName, 0.5, lifetime / 0.05, function()
---             if not IsValid(ply) then
---                 timer.Remove(followTimerName)
---                 return
---             end
-
---             local forwardDir = ply:EyeAngles():Forward()
---             for i, cone in ipairs(coneEntities) do
---                 if IsValid(cone) then
-                   
---                     local randomOffset = Vector(
---                         math.random(-60, 70),
---                         math.random(-60, 70),
---                         math.random(-20, 25)
---                     )
---                     local targetPos = ply:GetPos() + forwardDir * (coneDistance * i) + Vector(0, 0, 50) + randomOffset
---                     cone:SetPos(targetPos)
---                 end
---             end
---         end)
-
---         timer.Simple(lifetime, function()
---             timer.Remove(followTimerName)
---             for _, cone in ipairs(coneEntities) do
---                 if IsValid(cone) then
---                     cone:Remove()
---                 end
---             end
---         end)
---     end
-
---     spawnCones()
---     timer.Simple(coneCount * spawnDelay + 0.1, function()
---         activateConeMovement()
---     end)
--- end
 
 local function prisonConeJinton(ply, self, target)
     if not IsValid(target) then return end
@@ -841,7 +735,7 @@ hook.Add("PlayerButtonDown", "jintonSweps", function(ply, button)
         ply:SetAnimation(PLAYER_RELOAD)
         ply:SetNWBool("jintonModePlayer", true)
         timer.Simple(1.5, function()
-            --ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, 3)
+  
             activeWeapon:SetHoldType("normal") 
             ply:SetAnimation(PLAYER_ATTACK1)
             

@@ -1,14 +1,14 @@
 if (SERVER) then
 	AddCSLuaFile()
     util.AddNetworkString("DisplayDamage")
-	util.AddNetworkString("Eventail_State")
+	util.AddNetworkString("Sword_Tobirama_State")
 end
 
 if (CLIENT) then
 	SWEP.Slot = 0
 	SWEP.SlotPos = 0
 	SWEP.DrawAmmo = false
-	SWEP.PrintName = "Eventail"
+	SWEP.PrintName = "Epée du Dieu de la Foudre"
 	SWEP.DrawCrosshair = true
 
 
@@ -23,7 +23,7 @@ SWEP.Purpose = ""
 SWEP.Contact = ""
 SWEP.Author = "Lord_Meca"
 SWEP.ViewModel = "models/weapons/c_pistol.mdl"
-SWEP.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
+SWEP.WorldModel = "models/naruto/unique/unique15/foc_nr_unique15_bane.mdl"
 SWEP.AdminSpawnable = false
 SWEP.Spawnable = true
 SWEP.Primary.NeverRaised = true
@@ -46,10 +46,8 @@ SWEP.IronSightAng = Vector(0, 0, 0)
 
 SWEP.NextSpecialMove = 0
 SWEP.NextHolsterWeapon = 0
-SWEP.NextRepulsiveTornadoMove = 0
-SWEP.NextAttractiveTornadoMove = 0
---SWEP.eventailModelHolster = nil
-SWEP.eventailHolstered = true
+
+SWEP.swordHolstered = true
 
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
@@ -72,13 +70,13 @@ function SWEP:Deploy()
 	self:SetNoDraw(true)
 
 	if SERVER then
-		net.Start("Eventail_State")
+		net.Start("Sword_Tobirama_State")
 		net.WriteEntity(self.Owner)
-		net.WriteBool(self.eventailHolstered)
+		net.WriteBool(self.swordHolstered)
 		net.Broadcast()
 	end
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_coat_03.mdl")
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_armor_03.mdl")
 
  
 end
@@ -111,7 +109,7 @@ end
 function SWEP:Think()
 	local ply = self.Owner
 
-	if self.eventailHolstered then
+	if self.swordHolstered then
 		self:SetHoldType("normal")
 	end
 
@@ -892,7 +890,7 @@ end
 
 function SWEP:PrimaryAttack()
 
-if self.eventailHolstered then
+if self.swordHolstered then
 	return
 end
 
@@ -985,7 +983,7 @@ end
  
 function SWEP:SecondaryAttack()
 
-	if self.eventailHolstered then
+	if self.swordHolstered then
 		return
 	end
 
@@ -1109,23 +1107,23 @@ function SWEP:Holster()
 	self.combo = 11
 	self.DownSlashed = true
 
-	self.eventailHolstered = true
+	self.swordHolstered = true
 	self:SetHoldType("none")
 	self:SetNoDraw(true)  
 
 	return true
 end
 
-hook.Add("PostPlayerDraw", "EventailModelInBack", function(ply)
+hook.Add("PostPlayerDraw", "SwordModelInBack", function(ply)
     local activeWeapon = ply:GetActiveWeapon()
-    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_eventail" then return end
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_tobirama" then return end
 
-    if activeWeapon.eventailHolstered then
-        if not IsValid(ply.eventailModelHolster) then
-            local model = ClientsideModel("models/silverhawks/foc_arme_epouventail_close_shigi.mdl")
+    if activeWeapon.swordHolstered then
+        if not IsValid(ply.swordModelHolster) then
+            local model = ClientsideModel("models/naruto/unique/unique15/foc_nr_unique15_bane.mdl")
             if IsValid(model) then
                 model:SetNoDraw(true)
-                ply.eventailModelHolster = model
+                ply.swordModelHolster = model
             end
         end
 
@@ -1138,330 +1136,148 @@ hook.Add("PostPlayerDraw", "EventailModelInBack", function(ply)
         local pos = matrix:GetTranslation()
         local ang = matrix:GetAngles()
 
-        pos = pos + ang:Forward() * -10 + ang:Up() * 20 + ang:Right() * 4
+        pos = pos + ang:Forward() * 40 + ang:Up() * 25 + ang:Right() * -17
         ang:RotateAroundAxis(ang:Forward(), 180)
         ang:RotateAroundAxis(ang:Right(), 30)
         ang:RotateAroundAxis(ang:Up(), 180)
 
-        if IsValid(ply.eventailModelHolster) then
-            ply.eventailModelHolster:SetRenderOrigin(pos)
-            ply.eventailModelHolster:SetRenderAngles(ang)
-            ply.eventailModelHolster:DrawModel()
+        if IsValid(ply.swordModelHolster) then
+            ply.swordModelHolster:SetRenderOrigin(pos)
+            ply.swordModelHolster:SetRenderAngles(ang)
+            ply.swordModelHolster:DrawModel()
         end
     else
-        if IsValid(ply.eventailModelHolster) then
-            ply.eventailModelHolster:Remove()
+        if IsValid(ply.swordModelHolster) then
+            ply.swordModelHolster:Remove()
         end
     end
 end)
 
 
 
-function spawnTornado(ply, isAttractive)
-    local modelEntity = ents.Create("prop_dynamic")
-    local moveTimeLeft = 1
-    local damage = 150
-    local affectedNearbyEntities = {}
+function swordTobiramaDash(ply)
+    if !IsValid(ply) then return end
 
-    if not IsValid(modelEntity) then return end
+	local range = 500
+	local damage = 50
+	local affectedNearbyEntities = {}
 
-    modelEntity:SetModel("models/foc/foc_wind.mdl")
+	ply:EmitSound("ambient/levels/labs/electric_explosion5.wav", 100, 100)
 
-    local spawnPos = ply:GetPos()
-    modelEntity:SetPos(spawnPos)
-    modelEntity:SetAngles(Angle(0, 0, 0))
-    modelEntity:SetModelScale(1)
-    modelEntity:Spawn()
+	local trace1 = util.TraceHull({
+		start = ply:GetShootPos(),
+		endpos = ply:GetShootPos() + (ply:GetAimVector() * range*2),
+		filter = function(ent) return ( ent:GetClass() == "prop_physics" ) end,
+		maxs = {45, 45, 45},
+		mins = {-45, -45, -45}
+	})
 
-    ply:EmitSound(Sound("ambient/explosions/explode_5.wav"))
-
-    local animID = modelEntity:LookupSequence("idle")
-    if animID < 0 then return end
-
-    modelEntity:SetSequence(animID)
-    modelEntity:SetCycle(0)
-    modelEntity:SetPlaybackRate(1)
-
-    local currentScale = isAttractive and 15 or 1
-    local targetScale = isAttractive and 0.5 or 15
-    local scaleIncrement = (targetScale - currentScale) / (moveTimeLeft * 10)
-
-    timer.Create("TornadoEffect_"..modelEntity:EntIndex(), 0.03, moveTimeLeft * 10, function()
-        if IsValid(modelEntity) then
- 
-            currentScale = currentScale + scaleIncrement
-            modelEntity:SetModelScale(currentScale, 0)
-
-            for _, entity in pairs(ents.FindInSphere(modelEntity:GetPos(), 60 * currentScale)) do
-                if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) then
-                    if entity ~= ply and not affectedNearbyEntities[entity] then
-                        local plyPos = ply:GetPos() + Vector(0, 0, 150)
-                        local entityPos = entity:GetPos()
-						local direction
-						if isAttractive then
-					
-							direction = (plyPos - entityPos):GetNormalized()
-							entity:SetVelocity(direction*1700)
-
-						else
-						
-							direction = (entityPos - plyPos):GetNormalized()
-							local horizontalBoost = 2000 
-							local verticalBoost = 800 
-							local finalVelocity = direction * horizontalBoost
-							finalVelocity.z = verticalBoost 
-							entity:SetVelocity(finalVelocity)
-						end
-                    
-                        local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(damage)
-                        damageInfo:SetDamageType(DMG_BLAST)
-                        damageInfo:SetAttacker(ply)
-                        damageInfo:SetInflictor(ply)
-
-                        entity:TakeDamageInfo(damageInfo)
-
-                        affectedNearbyEntities[entity] = true
-
-                  
-                        net.Start("DisplayDamage")
-                        net.WriteInt(damage, 32)
-                        net.WriteEntity(entity)
-                        net.WriteColor(Color(51, 125, 255, 255))
-                        net.Send(ply)
-                    end
-                end
-            end
-        else
-            timer.Remove("TornadoEffect_"..modelEntity:EntIndex())
-        end
-    end)
-
-    timer.Simple(moveTimeLeft, function()
-        if IsValid(modelEntity) then
-            timer.Simple(1, function()
-                if IsValid(modelEntity) then
-                    modelEntity:Remove()
-                end
-                timer.Remove("TornadoEffect_"..modelEntity:EntIndex())
-            end)
-        end
-    end)
-end
+	local trace2 = util.TraceHull({
+		start = ply:GetShootPos(),
+		endpos = ply:GetShootPos() + (ply:GetAimVector() * range),
+		filter = ply,
+		maxs = {45, 45, 45},
+		mins = {-45, -45, -45}
+	})
 
 
-function invokeFuret(ply,self)
-
-	local startPos = ply:GetShootPos()
-    local aimDir = ply:GetAimVector()
-
-    ply:EmitSound("content/shukaku_scream2.wav",39,100,5)
-
-	local speed = 1500
-    local velocity = aimDir * speed  
-    local affectedNearbyEntities = {}
-	local kamatari = ents.Create("prop_dynamic")
-	kamatari:SetModel("models/fsc/billy/furetprout.mdl")
-	kamatari:SetPos(startPos + ply:EyeAngles():Forward() * 200)
-	kamatari:SetModelScale(2)
-	kamatari:SetAngles(aimDir:Angle()+Angle(0,0,60))
-	kamatari:Spawn()
-
-	local kusarigama = ents.Create("prop_physics")
-	kusarigama:SetModel("models/warwax_et_tsu/foc/naruto/faux_kusarigama2.mdl")
-	kusarigama:SetModelScale(2)
-	kusarigama:SetAngles(aimDir:Angle()+Angle(0,70,60))
-	kusarigama:Spawn()
-
-
-	local offset = Vector(-120,-20,-40) 
-	local offset = Vector(-120,-20,-30) 
-	local furetAngles = kamatari:GetAngles()
-	local attachedPos = kamatari:GetPos() + furetAngles:Forward() * offset.x + furetAngles:Right() * offset.y + furetAngles:Up() * offset.z
-	kusarigama:SetPos(attachedPos)
-
-	constraint.Weld(kamatari, kusarigama, 0, 0, 0, true)
+	local entities = ents.FindInSphere(trace2.HitPos, range)
+	local lentities  = {} 
   
-
-	util.SpriteTrail(kamatari, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
-	util.SpriteTrail(kusarigama, 0, Color(255,255,255), false, 50, 50, 1, 50, "trails/laser.vmt")
-
-	local phys = kamatari:GetPhysicsObject()
-	if IsValid(phys) then
-		phys:EnableGravity(false)
-		phys:EnableMotion(true) 
-		phys:SetVelocity(velocity)
+	for _, ent in ipairs(entities) do
+		if IsValid(ent) and ent ~= ply and ( !ent:IsWorld() and ent:IsSolid() and !ent:GetNWBool("barrier") ) then
+			table.insert(lentities, ent)
+		end
 	end
 
-    hook.Add("Think", "kamatariMove" .. kamatari:EntIndex(), function()
-        if not IsValid(kamatari) or not IsValid(kusarigama) then return end
-    
-        local currentAngles = kamatari:GetAngles()
-        local newAngles = currentAngles + Angle(0, 500 * FrameTime(), 0)
-        kamatari:SetAngles(newAngles)
-    
-        local kusarigamaAngles = kusarigama:GetAngles()
-        local newkusarigamaAngles = kusarigamaAngles + Angle(300 * FrameTime(), 0, 0)
-        kusarigama:SetAngles(newkusarigamaAngles)
-
-        local trace = util.TraceLine({
-            start = kamatari:GetPos(),
-            endpos = kamatari:GetPos() + velocity * 0.2,
-            filter = kamatari
-        })
-    
-        if trace.Hit then
-     
-            if trace.Entity == kamatari or trace.Entity == kusarigama then
-                return
-            end
-
-            local effectdata = EffectData()
-            effectdata:SetOrigin(trace.HitPos)
-            effectdata:SetNormal(trace.HitNormal)
-            ParticleEffect("nrp_tool_invocation", kamatari:GetPos(), Angle(0, 0, 0), nil)
-            ply:EmitSound("ambient/explosions/explode_9.wav", 50, 100, 0.5)
-    
-            for _, entity in ipairs(ents.FindInSphere(trace.HitPos, 350)) do
-                if entity:IsPlayer() or entity:IsNPC() then
-                    if entity ~= ply then
-                    
-                        ParticleEffect("nrp_kenjutsu_tranchant", kamatari:GetPos(),kamatari:GetAngles(), nil)
-                        ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
-           
-                        local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(350) 
-                        damageInfo:SetAttacker(kamatari) 
-                        damageInfo:SetInflictor(self)
-                        entity:TakeDamageInfo(damageInfo)
-    
-          
-                        net.Start("DisplayDamage")
-                        net.WriteInt(350, 32)
-                        net.WriteEntity(entity)
-                        net.WriteColor(Color(249, 148, 6, 255))
-                        net.Send(ply)
-						
-                    end
-                end
-            end
-    
-
-            kamatari:Remove()
-            kusarigama:Remove()
-            hook.Remove("Think", "kamatariMove" .. kamatari:EntIndex())
-        else
-   
-            kamatari:SetPos(kamatari:GetPos() + velocity * FrameTime())
-            kusarigama:SetPos(kusarigama:GetPos() + velocity * FrameTime())
-
-            for _, entity in ipairs(ents.FindInSphere(kamatari:GetPos(), 200)) do
-                if entity:IsPlayer() or entity:IsNPC() then
-                    if entity ~= ply and not affectedNearbyEntities[entity] then
-
-                        ply:EmitSound("physics/body/body_medium_break3.wav", 50, 100, 0.5)
-                        local damageInfo = DamageInfo()
-                        damageInfo:SetDamage(100)
-                        damageInfo:SetAttacker(kamatari)
-                        damageInfo:SetInflictor(self)
-                        entity:TakeDamageInfo(damageInfo)
-
-                        net.Start("DisplayDamage")
-                        net.WriteInt(100, 32)
-                        net.WriteEntity(entity)
-                        net.WriteColor(Color(249, 148, 6, 255))
-                        net.Send(ply)
  
-                        affectedNearbyEntities[entity] = true
+	for _, ent in ipairs(lentities) do
+	
+		if ( !IsValid(ent) or !SERVER ) then return end 
+	  
 
-                        ParticleEffect("nrp_kenjutsu_slash", kamatari:GetPos(), kamatari:GetAngles(), nil)
-                        ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
-                      
-                    end
-                end
-            end
-        end
-    end)
+	end
+	timer.Simple(0.5, function()
+		timer.Create("sword_tobirama_swing", 0.01, 25, function()
+			for _, ent in ipairs(lentities) do
+		
+				if IsValid(ent) and (ent:IsPlayer() or ent:IsNPC()) then
+					if ent ~= ply and not affectedNearbyEntities[ent] then
+						ParticleEffect( "nrp_kenjutsu_slash", ent:GetPos(), Angle(math.random(0,360),math.random(0,360),math.random(0,360)), ply )
+						
+						util.ScreenShake(ent:GetPos(), 10, 40, 0.5, 600, true)
 
-    timer.Simple(5, function()
+						ent:TakeDamage(damage, self)
+						ply:EmitSound(AttackHit1)
 
-        if not IsValid(ent) then return end
+						affectedNearbyEntities[ent] = true
 
-        ParticleEffect("nrp_tool_invocation", kamatari:GetPos(), Angle(0, 0, 0), nil)
-        ply:EmitSound("ambient/explosions/explode_9.wav", 50, 100, 0.5)
+						net.Start("DisplayDamage")
+						net.WriteInt(damage, 32)
+						net.WriteEntity(ent)
+						net.WriteColor(Color(249,148,6,255))
+						net.Send(ply)
+					end
+				end
+			end
+		end)
+	end)
 
-        for _, entity in ipairs(ents.FindInSphere(kamatari:GetPos(), 350)) do
-            if entity:IsPlayer() or entity:IsNPC() then
-                if entity ~= ply then
+ 
+	local eye = ply:EyeAngles()
 
-                
-                    ParticleEffect("blood_advisor_puncture_withdraw", entity:GetPos(), Angle(0, 45, 0), nil)
+	if IsValid(ply) and SERVER then
+		local trail = util.SpriteTrail( ply, 3, Color( 223, 189, 38), false, 50, 50, 4, 1 / ( 150 + 1 ) * 0.5, "trails/electric" )
+		timer.Simple(0.4, function()
+			SafeRemoveEntity(trail)
+		end)
+	end
 
-       
-                    local damageInfo = DamageInfo()
-                    damageInfo:SetDamage(350) 
-                    damageInfo:SetAttacker(kamatari) 
-                    damageInfo:SetInflictor(self)
-                    entity:TakeDamageInfo(damageInfo)
 
-      
-                    net.Start("DisplayDamage")
-                    net.WriteInt(350, 32)
-                    net.WriteEntity(entity)
-                    net.WriteColor(Color(249, 148, 6, 255))
-                    net.Send(ply)
-                end
-            end
-        end
-
-        kamatari:Remove()
-        kusarigama:Remove()
-        hook.Remove("Think", "kamatariMove" .. kamatari:EntIndex())
-
-    end)
-    
+	timer.Simple(0.1, function()
+		ply:SetPos(trace1.HitPos)
+	
+	end)
 end
+
+
 
 
 function SWEP:Reload()
     local ply = self.Owner
 
-	if self.eventailHolstered then
+	if self.swordHolstered then
 		return
 	end
 
     if CurTime() < (self.NextSpecialMove or 0) then return end
-    self.NextSpecialMove = CurTime() + 25
+    self.NextSpecialMove = CurTime() + 3
 
-	self:SetHoldType("weapon_art")
-	self.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
+	self:SetHoldType("anim_ninjutsu3")
+	self.WorldModel = "models/naruto/unique_props/unique_props15/foc_nr_unique_props15_bane_wrl.mdl"
 	self:SetModel(self.WorldModel)
-	ply:SetAnimation(PLAYER_ATTACK1)
+	ply:SetAnimation(PLAYER_RELOAD)
 
+	swordTobiramaDash(ply)
+	self:SetHoldType("g_combo1")
 
-	ply:EmitSound("ambient/explosions/explode_9.wav")
-	ParticleEffect("nrp_tool_invocation", ply:GetPos(), Angle(0,0,0), nil)
-	timer.Simple(0.7, function()
+	timer.Simple(3, function()
 
-		if SERVER then
-			invokeFuret(ply,self)
-		end
-		
-		self:StopParticles()
 		   
-		self.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
+		self.WorldModel = "models/naruto/unique/unique15/foc_nr_unique15_bane.mdl"
 		self:SetModel(self.WorldModel) 
+	
 		
 	end)
 end
 
 
 
-hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
+hook.Add("PlayerButtonDown", "swordTobiramaSweps", function(ply, button)
 
 	local activeWeapon = ply:GetActiveWeapon()
 
-    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_eventail" then
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_tobirama" then
         return
     end
 
@@ -1470,95 +1286,28 @@ hook.Add("PlayerButtonDown", "eventailSweps", function(ply, button)
         if CurTime() < activeWeapon.NextHolsterWeapon then return end
         activeWeapon.NextHolsterWeapon = CurTime() + 0.5
 
-        activeWeapon.eventailHolstered = not activeWeapon.eventailHolstered
+        activeWeapon.swordHolstered = not activeWeapon.swordHolstered
 
         if SERVER then
-            net.Start("Eventail_State")
+            net.Start("Sword_Tobirama_State")
             net.WriteEntity(ply)
-            net.WriteBool(activeWeapon.eventailHolstered)
+            net.WriteBool(activeWeapon.swordHolstered)
             net.Broadcast()
         end
     
-	elseif button == KEY_E then
-
-		if activeWeapon.eventailHolstered or ply:GetNWBool("freezePlayer") then
-			return
-		end
-
-		if CurTime() < activeWeapon.NextRepulsiveTornadoMove then return end
-		activeWeapon.NextRepulsiveTornadoMove = CurTime() + 20
-
-		activeWeapon:SetHoldType("weapon_art")
-		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
-		activeWeapon:SetModel(activeWeapon.WorldModel)
-		ply:SetAnimation(PLAYER_ATTACK1)
-
-		
-		for i = 1,6 do
-			ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, i)
-		end
-		
-	
-		timer.Simple(0.7, function()
-	
-			ply:StopParticles()
-			if SERVER then
-				spawnTornado(ply, false)
-			end
-			
-			activeWeapon:StopParticles()
-			   
-			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
-			activeWeapon:SetModel(activeWeapon.WorldModel) 
-			
-		end)
-	elseif button == KEY_F then
-
-		if activeWeapon.eventailHolstered or ply:GetNWBool("freezePlayer") then
-			return
-		end
-
-		if CurTime() < activeWeapon.NextAttractiveTornadoMove then return end
-		activeWeapon.NextAttractiveTornadoMove = CurTime() + 20
-
-		activeWeapon:SetHoldType("weapon_art")
-		activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_shigi.mdl"
-		activeWeapon:SetModel(activeWeapon.WorldModel)
-		ply:SetAnimation(PLAYER_ATTACK1)
-
-		for i = 1,6 do
-			ParticleEffectAttach("[4]_kitsushi_aura", PATTACH_POINT_FOLLOW, ply, i)
-		end
-		
-	
-		timer.Simple(0.7, function()
-	
-			ply:StopParticles()
-			if SERVER then
-				spawnTornado(ply, true)
-			end
-			
-			activeWeapon:StopParticles()
-			   
-			activeWeapon.WorldModel = "models/silverhawks/foc_arme_epouventail_close_shigi.mdl"
-			activeWeapon:SetModel(activeWeapon.WorldModel) 
-			
-		end)
 	end
-
 	
 end)
-
 if CLIENT then
-    net.Receive("Eventail_State", function()
+    net.Receive("Sword_Tobirama_State", function()
         local ply = net.ReadEntity()
         local holstered = net.ReadBool()
 
         if not IsValid(ply) or not ply:IsPlayer() then return end
         local activeWeapon = ply:GetActiveWeapon()
 
-        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_eventail" then
-            activeWeapon.eventailHolstered = holstered
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_tobirama" then
+            activeWeapon.swordHolstered = holstered
 
             if holstered then
                 activeWeapon:SetHoldType("none")
