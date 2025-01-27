@@ -23,7 +23,7 @@ SWEP.Purpose = ""
 SWEP.Contact = ""
 SWEP.Author = "Lord_Meca"
 SWEP.ViewModel = "models/weapons/c_pistol.mdl"
-SWEP.WorldModel = "models/naruto/unique/unique15/foc_nr_unique15_bane.mdl"
+SWEP.WorldModel = "models/naruto/unique_props/unique_props15/foc_nr_unique_props15_bane_wrl.mdl"
 SWEP.AdminSpawnable = false
 SWEP.Spawnable = true
 SWEP.Primary.NeverRaised = true
@@ -47,7 +47,7 @@ SWEP.IronSightAng = Vector(0, 0, 0)
 SWEP.NextSpecialMove = 0
 SWEP.NextHolsterWeapon = 0
 
-SWEP.swordHolstered = true
+SWEP.tobiramaSwordHolstered = true
 
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
@@ -72,7 +72,7 @@ function SWEP:Deploy()
 	if SERVER then
 		net.Start("Sword_Tobirama_State")
 		net.WriteEntity(self.Owner)
-		net.WriteBool(self.swordHolstered)
+		net.WriteBool(self.tobiramaSwordHolstered)
 		net.Broadcast()
 	end
 
@@ -109,7 +109,7 @@ end
 function SWEP:Think()
 	local ply = self.Owner
 
-	if self.swordHolstered then
+	if self.tobiramaSwordHolstered then
 		self:SetHoldType("normal")
 	end
 
@@ -821,7 +821,7 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 			end
 		end)
 
-
+		
 
 		net.Start("DisplayDamage")
 		net.WriteInt(force, 32)
@@ -890,7 +890,7 @@ end
 
 function SWEP:PrimaryAttack()
 
-if self.swordHolstered then
+if self.tobiramaSwordHolstered then
 	return
 end
 
@@ -983,7 +983,7 @@ end
  
 function SWEP:SecondaryAttack()
 
-	if self.swordHolstered then
+	if self.tobiramaSwordHolstered then
 		return
 	end
 
@@ -1107,23 +1107,23 @@ function SWEP:Holster()
 	self.combo = 11
 	self.DownSlashed = true
 
-	self.swordHolstered = true
+	self.tobiramaSwordHolstered = true
 	self:SetHoldType("none")
 	self:SetNoDraw(true)  
 
 	return true
 end
 
-hook.Add("PostPlayerDraw", "SwordModelInBack", function(ply)
+hook.Add("PostPlayerDraw", "TobiramaSwordModelInBack", function(ply)
     local activeWeapon = ply:GetActiveWeapon()
     if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_tobirama" then return end
 
-    if activeWeapon.swordHolstered then
-        if not IsValid(ply.swordModelHolster) then
+    if activeWeapon.tobiramaSwordHolstered then
+        if not IsValid(ply.tobiramaSwordModelHolstered) then
             local model = ClientsideModel("models/naruto/unique/unique15/foc_nr_unique15_bane.mdl")
             if IsValid(model) then
                 model:SetNoDraw(true)
-                ply.swordModelHolster = model
+                ply.tobiramaSwordModelHolstered = model
             end
         end
 
@@ -1141,14 +1141,14 @@ hook.Add("PostPlayerDraw", "SwordModelInBack", function(ply)
         ang:RotateAroundAxis(ang:Right(), 30)
         ang:RotateAroundAxis(ang:Up(), 180)
 
-        if IsValid(ply.swordModelHolster) then
-            ply.swordModelHolster:SetRenderOrigin(pos)
-            ply.swordModelHolster:SetRenderAngles(ang)
-            ply.swordModelHolster:DrawModel()
+        if IsValid(ply.tobiramaSwordModelHolstered) then
+            ply.tobiramaSwordModelHolstered:SetRenderOrigin(pos)
+            ply.tobiramaSwordModelHolstered:SetRenderAngles(ang)
+            ply.tobiramaSwordModelHolstered:DrawModel()
         end
     else
-        if IsValid(ply.swordModelHolster) then
-            ply.swordModelHolster:Remove()
+        if IsValid(ply.tobiramaSwordModelHolstered) then
+            ply.tobiramaSwordModelHolstered:Remove()
         end
     end
 end)
@@ -1209,6 +1209,7 @@ function swordTobiramaDash(ply)
 
 						ent:TakeDamage(damage, self)
 						ply:EmitSound(AttackHit1)
+						ent:SetNWBool("freezePlayer", true)
 
 						affectedNearbyEntities[ent] = true
 
@@ -1217,6 +1218,12 @@ function swordTobiramaDash(ply)
 						net.WriteEntity(ent)
 						net.WriteColor(Color(249,148,6,255))
 						net.Send(ply)
+
+						timer.Simple(1.5, function()
+							if IsValid(ent) then
+								ent:SetNWBool("freezePlayer", false)
+							end
+						end)
 					end
 				end
 			end
@@ -1227,7 +1234,7 @@ function swordTobiramaDash(ply)
 	local eye = ply:EyeAngles()
 
 	if IsValid(ply) and SERVER then
-		local trail = util.SpriteTrail( ply, 3, Color( 223, 189, 38), false, 50, 50, 4, 1 / ( 150 + 1 ) * 0.5, "trails/electric" )
+		local trail = util.SpriteTrail( ply, 3, Color( 223, 189, 38), false, 100, 1, 4, 1 / ( 150 + 1 ) * 0.5, "trails/electric" )
 		timer.Simple(0.4, function()
 			SafeRemoveEntity(trail)
 		end)
@@ -1246,7 +1253,7 @@ end
 function SWEP:Reload()
     local ply = self.Owner
 
-	if self.swordHolstered then
+	if self.tobiramaSwordHolstered then
 		return
 	end
 
@@ -1254,21 +1261,12 @@ function SWEP:Reload()
     self.NextSpecialMove = CurTime() + 3
 
 	self:SetHoldType("anim_ninjutsu3")
-	self.WorldModel = "models/naruto/unique_props/unique_props15/foc_nr_unique_props15_bane_wrl.mdl"
-	self:SetModel(self.WorldModel)
+
 	ply:SetAnimation(PLAYER_RELOAD)
 
 	swordTobiramaDash(ply)
 	self:SetHoldType("g_combo1")
 
-	timer.Simple(3, function()
-
-		   
-		self.WorldModel = "models/naruto/unique/unique15/foc_nr_unique15_bane.mdl"
-		self:SetModel(self.WorldModel) 
-	
-		
-	end)
 end
 
 
@@ -1286,12 +1284,12 @@ hook.Add("PlayerButtonDown", "swordTobiramaSweps", function(ply, button)
         if CurTime() < activeWeapon.NextHolsterWeapon then return end
         activeWeapon.NextHolsterWeapon = CurTime() + 0.5
 
-        activeWeapon.swordHolstered = not activeWeapon.swordHolstered
+        activeWeapon.tobiramaSwordHolstered = not activeWeapon.tobiramaSwordHolstered
 
         if SERVER then
             net.Start("Sword_Tobirama_State")
             net.WriteEntity(ply)
-            net.WriteBool(activeWeapon.swordHolstered)
+            net.WriteBool(activeWeapon.tobiramaSwordHolstered)
             net.Broadcast()
         end
     
@@ -1307,7 +1305,7 @@ if CLIENT then
         local activeWeapon = ply:GetActiveWeapon()
 
         if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_tobirama" then
-            activeWeapon.swordHolstered = holstered
+            activeWeapon.tobiramaSwordHolstered = holstered
 
             if holstered then
                 activeWeapon:SetHoldType("none")

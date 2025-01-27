@@ -15,7 +15,7 @@ SWEP.Spawnable = true
 SWEP.AdminSpawnable = false
 
 SWEP.ViewModel = "models/weapons/c_arms.mdl"
-SWEP.WorldModel = ""
+SWEP.WorldModel = "models/narutorp/gonzo/boxing_gloves.mdl"
 
 SWEP.Primary.ClipSize = 10
 SWEP.Primary.DefaultClip = 10

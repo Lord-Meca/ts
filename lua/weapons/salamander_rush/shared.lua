@@ -78,7 +78,7 @@ local function invokeSalamander(ply)
     modelEntity:SetPlaybackRate(2)
 
     local direction = playerAngles:Forward()
-    local moveDistancePerSecond = 500
+    local moveDistancePerSecond = 1000  
 
     local function getGroundPos(pos)
         local trace = util.TraceLine({
@@ -176,7 +176,7 @@ function SWEP:Reload()
 
 
 		timer.Simple(1.5, function()
-			ply:Freeze(true)
+			ply:SetNWBool("freezePlayer", true)
 			ply:EmitSound("ambient/explosions/explode_9.wav")
 			if attachment then
 				ParticleEffectAttach(particleName, PATTACH_ABSORIGIN_FOLLOW, ply, attachment)
@@ -185,12 +185,12 @@ function SWEP:Reload()
 
 			local modelEntity = ents.Create("prop_physics")
 			if IsValid(modelEntity) then
-				modelEntity:SetModel("models/foc_props_jutsu/jutsu_sceau_piege/foc_jutsu_sceau_piege.mdl")
+				modelEntity:SetModel("models/foc_props_jutsu/jutsu_invocation/foc_jutsu_invocation.mdl")
 				
-				modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 0)) 
-				modelEntity:SetAngles(Angle(0, 0, 0))
+				modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 4)) 
+				modelEntity:SetAngles(Angle(180, 0, 0))
 				modelEntity:SetColor(Color(0,0,0,255))
-				modelEntity:SetModelScale(4)
+				modelEntity:SetModelScale(1)
 				modelEntity:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE) 
 				modelEntity:SetRenderMode(RENDERMODE_TRANSCOLOR)
 				modelEntity:SetKeyValue("solid", "0")
@@ -210,7 +210,7 @@ function SWEP:Reload()
                     timer.Simple(0.7, function() 
                         if IsValid(ply) then
                             ply:StopParticles()
-                            ply:Freeze(false)
+                            ply:SetNWBool("freezePlayer", false)
                         end
 
                         if IsValid(modelEntity) then
