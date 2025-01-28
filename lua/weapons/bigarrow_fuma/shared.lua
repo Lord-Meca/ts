@@ -50,7 +50,7 @@ function shootArrow(ply, self, startPos)
     if not SERVER then return end
 
     util.AddNetworkString("DisplayDamage")
-
+    ply:EmitSound("ambient/levels/citadel/portal_beam_shoot5.wav")
     local aimDir = ply:GetAimVector()
     local damage = 50
     local speed = 5000
@@ -95,6 +95,9 @@ function shootArrow(ply, self, startPos)
         })
     
         if tr.Hit then
+
+            --ParticleEffect("[5]_blackexplosion8", tr.HitPos, tr.HitNormal:Angle(), nil)
+            
             ent:Remove() 
             hook.Remove("Think", "bigArrowMove" .. ent:EntIndex())
             return
