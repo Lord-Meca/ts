@@ -1,6 +1,7 @@
 if (SERVER) then
 	AddCSLuaFile()
 	util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("Kabutowari_State")
 end
 
 if (CLIENT) then
@@ -45,6 +46,9 @@ SWEP.IronSightAng = Vector(0, 0, 0)
 SWEP.NextSpecialMove = 0
 SWEP.canParry = false
 
+SWEP.kabutowariHolstered = true
+SWEP.NextHolsterWeapon = 0
+
 local AttackHit2 = Sound( "physics/body/body_meeum_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
 local Hitground2 = Sound( "physics/concrete/concrete_break2.wav")
@@ -62,20 +66,16 @@ local Combo4 = Sound( "physics/body/body_medium_break2.wav")
 local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
-	-- if IsValid(self.Owner) then
+	self:SetNoDraw(true)
 
-	-- 	self.Owner:SetMaxHealth(500)
-	-- 	self.Owner:SetHealth(self.Owner:GetMaxHealth())
-	-- end
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_anbublackops_ame_hood_03.mdl")
-	self.Owner:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
-			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
-				return ( speed - 826.5 ) * ( 100 / 896 )
-			end
-			
-			return 0
-		end)
+	if SERVER then
+		net.Start("Kabutowari_State")
+		net.WriteEntity(self.Owner)
+		net.WriteBool(self.kabutowariHolstered)
+		net.Broadcast()
+	end
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_custom_armor_nass_02.mdl")
+
 
 
 
@@ -84,7 +84,7 @@ end
 
 function SWEP:Initialize()
 	self.combo = 11
-	self:SetHoldType("g_combo1")
+
 	self.duringattack = false
 	self.backtime = 0
 	self.duringattacktime = 0
@@ -108,7 +108,9 @@ end
 
 function SWEP:Think()
 	local ply = self.Owner
-
+	if self.kabutowariHolstered then
+		self:SetHoldType("normal")
+	end
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
 if IsValid(self) and self.Owner:IsOnGround() then
@@ -886,6 +888,9 @@ function SWEP:DoCombo( hitsound, combonumber, force, freezetime, attackdelay, an
 end
 
 function SWEP:PrimaryAttack()
+if self.kabutowariHolstered then
+	return
+end
 self.Weapon:SetNextSecondaryFire(CurTime() + 0.6 )
 if self.combo == 0 then
 
@@ -973,6 +978,9 @@ end
 
  
 function SWEP:SecondaryAttack()
+	if self.kabutowariHolstered then
+		return
+	end
 	local ply = self.Owner
 	if not ply:IsOnGround() then
 		self:SlashDown()
@@ -1016,6 +1024,9 @@ function SWEP:Holster()
 end
 
 function SWEP:Reload()
+	if self.kabutowariHolstered then
+		return
+	end
     local ply = self.Owner
     local cooldownTime = 10
 
@@ -1035,3 +1046,92 @@ function SWEP:Reload()
     end)
 end
 
+hook.Add("PostPlayerDraw", "KabutowariModelInBack", function(ply)
+    local activeWeapon = ply:GetActiveWeapon()
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_kabutowari_nrp" then return end
+
+    if activeWeapon.kabutowariHolstered then
+        if not IsValid(ply.kabutowariModelHolster) then
+            local model = ClientsideModel("models/naruto/unique_props/unique_props3/foc_nr_unique_props3_bane.mdl")
+            if IsValid(model) then
+                model:SetNoDraw(true)
+                ply.kabutowariModelHolster = model
+            end
+        end
+
+        local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
+        if not bone then return end
+
+        local matrix = ply:GetBoneMatrix(bone)
+        if not matrix then return end
+
+        local pos = matrix:GetTranslation()
+        local ang = matrix:GetAngles()
+
+        pos = pos + ang:Forward() * 5 + ang:Up() * 0 + ang:Right() * 15
+        ang:RotateAroundAxis(ang:Forward(), 90)
+
+        ang:RotateAroundAxis(ang:Up(), 180)
+
+        if IsValid(ply.kabutowariModelHolster) then
+            ply.kabutowariModelHolster:SetRenderOrigin(pos)
+            ply.kabutowariModelHolster:SetRenderAngles(ang)
+            ply.kabutowariModelHolster:DrawModel()
+        end
+    else
+        if IsValid(ply.kabutowariModelHolster) then
+            ply.kabutowariModelHolster:Remove()
+        end
+    end
+end)
+
+
+hook.Add("PlayerButtonDown", "kabutowariSweps", function(ply, button)
+
+	local activeWeapon = ply:GetActiveWeapon()
+
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_kabutowari_nrp" then
+        return
+    end
+
+    if button == MOUSE_MIDDLE then
+
+        if CurTime() < activeWeapon.NextHolsterWeapon then return end
+        activeWeapon.NextHolsterWeapon = CurTime() + 0.5
+
+        activeWeapon.kabutowariHolstered = not activeWeapon.kabutowariHolstered
+
+        if SERVER then
+            net.Start("Kabutowari_State")
+            net.WriteEntity(ply)
+            net.WriteBool(activeWeapon.kabutowariHolstered)
+            net.Broadcast()
+        end
+    
+	end
+
+	
+end)
+
+if CLIENT then
+    net.Receive("Kabutowari_State", function()
+        local ply = net.ReadEntity()
+        local holstered = net.ReadBool()
+
+        if not IsValid(ply) or not ply:IsPlayer() then return end
+        local activeWeapon = ply:GetActiveWeapon()
+
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_kabutowari_nrp" then
+            activeWeapon.kabutowariHolstered = holstered
+
+            if holstered then
+                activeWeapon:SetHoldType("none")
+                activeWeapon:SetNoDraw(true)
+            else
+                activeWeapon:SetHoldType("g_combo1")
+                activeWeapon:SetNoDraw(false)
+
+            end
+        end
+    end)
+end

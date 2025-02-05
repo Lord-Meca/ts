@@ -1,6 +1,7 @@
 if (SERVER) then
 	AddCSLuaFile()
     util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("Samehada_State")
 end
 
 if (CLIENT) then
@@ -46,6 +47,10 @@ SWEP.NextSpecialMove = 0
 SWEP.NextVines = 0
 SWEP.canParry = false
 
+
+SWEP.samehadaHolstered = true
+SWEP.NextHolsterWeapon = 0
+
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
 local Hitground2 = Sound( "physics/concrete/concrete_break2.wav")
@@ -64,23 +69,16 @@ local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
 	
-	-- if IsValid(self.Owner) then
+	self:SetNoDraw(true)
 
-	-- 	self.Owner:SetMaxHealth(500)
-	-- 	self.Owner:SetHealth(self.Owner:GetMaxHealth())
-	-- end
+	if SERVER then
+		net.Start("Samehada_State")
+		net.WriteEntity(self.Owner)
+		net.WriteBool(self.samehadaHolstered)
+		net.Broadcast()
+	end
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_custom_gama_01.mdl")
-
-	self.Owner:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
-			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
-				return ( speed - 826.5 ) * ( 100 / 896 )
-			end
-			
-			return 0
-		end)
-
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_firecoat_01.mdl")
 
 
 end
@@ -88,7 +86,7 @@ end
 
 function SWEP:Initialize()
 	self.combo = 11
-	self:SetHoldType("g_combo1")
+
 	self.duringattack = false
 	self.backtime = 0
 	self.duringattacktime = 0
@@ -112,7 +110,9 @@ end
 
 function SWEP:Think()
 	local ply = self.Owner
-
+	if self.samehadaHolstered then
+		self:SetHoldType("normal")
+	end
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
 if IsValid(self) and self.Owner:IsOnGround() then
@@ -890,7 +890,9 @@ end
 
 function SWEP:PrimaryAttack()
 
-if self.canParry then return end
+if self.samehadaHolstered then
+	return
+end
 
 self.Weapon:SetNextSecondaryFire(CurTime() + 0.6 )
 if self.combo == 0 then
@@ -980,7 +982,9 @@ end
  
 function SWEP:SecondaryAttack()
 
-	--if self.canParry then return end
+	if self.samehadaHolstered then
+		return
+	end
 	local force = Vector(0, 0, 750)
 	
     local maxDistance = 800
@@ -1104,6 +1108,9 @@ end
 
 
 function SWEP:Reload()
+	if self.samehadaHolstered then
+		return
+	end
     local ply = self.Owner
 
     if CurTime() < self.NextSpecialMove then return end
@@ -1262,5 +1269,85 @@ hook.Add("PlayerButtonDown", "samehadaSweps", function(ply, button)
 			end
 		end)
 
+	elseif button == MOUSE_MIDDLE then
+
+        if CurTime() < activeWeapon.NextHolsterWeapon then return end
+        activeWeapon.NextHolsterWeapon = CurTime() + 0.5
+
+        activeWeapon.samehadaHolstered = not activeWeapon.samehadaHolstered
+
+        if SERVER then
+            net.Start("Samehada_State")
+            net.WriteEntity(ply)
+            net.WriteBool(activeWeapon.samehadaHolstered)
+            net.Broadcast()
+        end
+    
 	end
 end)
+
+hook.Add("PostPlayerDraw", "SamehadaModelInBack", function(ply)
+    local activeWeapon = ply:GetActiveWeapon()
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_samehada_nrp" then return end
+
+    if activeWeapon.samehadaHolstered then
+        if not IsValid(ply.samehadaModelHolster) then
+            local model = ClientsideModel("models/naruto/unique/unique14/foc_nr_unique14_bane.mdl")
+            if IsValid(model) then
+                model:SetNoDraw(true)
+                ply.samehadaModelHolster = model
+            end
+        end
+
+        local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
+        if not bone then return end
+
+        local matrix = ply:GetBoneMatrix(bone)
+        if not matrix then return end
+
+        local pos = matrix:GetTranslation()
+        local ang = matrix:GetAngles()
+
+        pos = pos + ang:Forward() * 40 + ang:Up() * 5 + ang:Right() * -27
+        ang:RotateAroundAxis(ang:Forward(), 150)
+        ang:RotateAroundAxis(ang:Right(), 30)
+        ang:RotateAroundAxis(ang:Up(), 170)
+
+        if IsValid(ply.samehadaModelHolster) then
+            ply.samehadaModelHolster:SetRenderOrigin(pos)
+            ply.samehadaModelHolster:SetRenderAngles(ang)
+            ply.samehadaModelHolster:DrawModel()
+        end
+    else
+        if IsValid(ply.samehadaModelHolster) then
+            ply.samehadaModelHolster:Remove()
+        end
+    end
+end)
+
+
+
+
+if CLIENT then
+    net.Receive("Samehada_State", function()
+        local ply = net.ReadEntity()
+        local holstered = net.ReadBool()
+
+        if not IsValid(ply) or not ply:IsPlayer() then return end
+        local activeWeapon = ply:GetActiveWeapon()
+
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_samehada_nrp" then
+            activeWeapon.samehadaHolstered = holstered
+
+            if holstered then
+                activeWeapon:SetHoldType("none")
+                activeWeapon:SetNoDraw(true)
+            else
+                activeWeapon:SetHoldType("g_combo1")
+                activeWeapon:SetNoDraw(false)
+
+            end
+        end
+    end)
+end
+

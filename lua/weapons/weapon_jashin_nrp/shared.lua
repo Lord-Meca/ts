@@ -1,6 +1,7 @@
 if (SERVER) then
 	AddCSLuaFile()
     util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("Jashin_State")
 end
 
 if (CLIENT) then
@@ -47,6 +48,9 @@ SWEP.NextFinalSpecialMove = 0
 SWEP.canParry = false
 SWEP.bleedEntityIndex = 0
 
+SWEP.jashinHolstered = true
+SWEP.NextHolsterWeapon = 0
+
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
 local Hitground2 = Sound( "physics/concrete/concrete_break2.wav")
@@ -65,21 +69,16 @@ local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
 	
-	-- if IsValid(self.Owner) then
+	self:SetNoDraw(true)
 
-	-- 	self.Owner:SetMaxHealth(500)
-	-- 	self.Owner:SetHealth(self.Owner:GetMaxHealth())
-	-- end
+	if SERVER then
+		net.Start("Jashin_State")
+		net.WriteEntity(self.Owner)
+		net.WriteBool(self.jashinHolstered)
+		net.Broadcast()
+	end
 
-	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_tenue_capuche_3.mdl")
-	self.Owner:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..self.Owner:GetName(), function(ply, speed)
-			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
-				return ( speed - 826.5 ) * ( 100 / 896 )
-			end
-			
-			return 0
-		end)
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_armor_01_black.mdl")
 
 
 
@@ -88,7 +87,7 @@ end
 
 function SWEP:Initialize()
 	self.combo = 11
-	self:SetHoldType("g_combo1")
+
 	self.duringattack = false
 	self.backtime = 0
 	self.duringattacktime = 0
@@ -117,6 +116,11 @@ function SWEP:Think()
 	
 	if not IsValid(entity) then
 		self.bleedEntityIndex = 0
+	end
+
+	
+	if self.jashinHolstered then
+		self:SetHoldType("normal")
 	end
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
@@ -896,7 +900,9 @@ end
 
 function SWEP:PrimaryAttack()
 
-if self.canParry then return end
+if self.jashinHolstered then
+	return
+end
 
 self.Weapon:SetNextSecondaryFire(CurTime() + 0.6 )
 if self.combo == 0 then
@@ -986,7 +992,9 @@ end
  
 function SWEP:SecondaryAttack()
 
-	if self.canParry then return end
+	if self.jashinHolstered then
+		return
+	end
 
 	local ply = self.Owner
 	if not ply:IsOnGround() then
@@ -1028,12 +1036,16 @@ function SWEP:Holster()
 	self.Owner:SetSlowWalkSpeed( 120 )
 	self.combo = 11
 	self.DownSlashed = true
+
 	return true
 end
 
 
 
 function SWEP:Reload()
+	if self.jashinHolstered then
+		return
+	end
     local ply = self.Owner
 	local entity = Entity(self.bleedEntityIndex)
 
@@ -1119,3 +1131,94 @@ function SWEP:Reload()
     end)
 
 end
+
+hook.Add("PostPlayerDraw", "JashinModelInBack", function(ply)
+    local activeWeapon = ply:GetActiveWeapon()
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_jashin_nrp" then return end
+
+    if activeWeapon.jashinHolstered then
+        if not IsValid(ply.jashinModelHolster) then
+            local model = ClientsideModel("models/naruto/unique/unique6/foc_nr_unique6_bane.mdl")
+            if IsValid(model) then
+                model:SetNoDraw(true)
+                ply.jashinModelHolster = model
+            end
+        end
+
+        local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
+        if not bone then return end
+
+        local matrix = ply:GetBoneMatrix(bone)
+        if not matrix then return end
+
+        local pos = matrix:GetTranslation()
+        local ang = matrix:GetAngles()
+
+        pos = pos + ang:Forward() * 40 + ang:Up() * 5 + ang:Right() * -27
+        ang:RotateAroundAxis(ang:Forward(), 150)
+        ang:RotateAroundAxis(ang:Right(), 30)
+        ang:RotateAroundAxis(ang:Up(), 170)
+
+        if IsValid(ply.jashinModelHolster) then
+            ply.jashinModelHolster:SetRenderOrigin(pos)
+            ply.jashinModelHolster:SetRenderAngles(ang)
+            ply.jashinModelHolster:DrawModel()
+        end
+    else
+        if IsValid(ply.jashinModelHolster) then
+            ply.jashinModelHolster:Remove()
+        end
+    end
+end)
+
+
+hook.Add("PlayerButtonDown", "jashinSweps", function(ply, button)
+
+	local activeWeapon = ply:GetActiveWeapon()
+
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_jashin_nrp" then
+        return
+    end
+
+    if button == MOUSE_MIDDLE then
+
+        if CurTime() < activeWeapon.NextHolsterWeapon then return end
+        activeWeapon.NextHolsterWeapon = CurTime() + 0.5
+
+        activeWeapon.jashinHolstered = not activeWeapon.jashinHolstered
+
+        if SERVER then
+            net.Start("Jashin_State")
+            net.WriteEntity(ply)
+            net.WriteBool(activeWeapon.jashinHolstered)
+            net.Broadcast()
+        end
+    
+	end
+
+	
+end)
+
+if CLIENT then
+    net.Receive("Jashin_State", function()
+        local ply = net.ReadEntity()
+        local holstered = net.ReadBool()
+
+        if not IsValid(ply) or not ply:IsPlayer() then return end
+        local activeWeapon = ply:GetActiveWeapon()
+
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_jashin_nrp" then
+            activeWeapon.jashinHolstered = holstered
+
+            if holstered then
+                activeWeapon:SetHoldType("none")
+                activeWeapon:SetNoDraw(true)
+            else
+                activeWeapon:SetHoldType("g_combo1")
+                activeWeapon:SetNoDraw(false)
+
+            end
+        end
+    end)
+end
+

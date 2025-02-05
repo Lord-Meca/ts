@@ -1,6 +1,7 @@
 if (SERVER) then
 	AddCSLuaFile()
 	util.AddNetworkString("DisplayDamage")
+	util.AddNetworkString("Kubikiribocho_State")
 end
 
 if (CLIENT) then
@@ -45,6 +46,9 @@ SWEP.IronSightAng = Vector(0, 0, 0)
 SWEP.NextSpecialMove = 0
 SWEP.canParry = false
 
+SWEP.kubikiribochoHolstered = true
+SWEP.NextHolsterWeapon = 0
+
 local AttackHit2 = Sound( "physics/body/body_medium_break3.wav")
 local AttackHit1 = Sound( "physics/body/body_medium_break2.wav")
 local Hitground2 = Sound( "physics/concrete/concrete_break2.wav")
@@ -62,26 +66,18 @@ local Combo4 = Sound( "physics/body/body_medium_break2.wav")
 local SwordTrail = Sound ( "sound/custom characters/sword_trail.mp3" )
 
 function SWEP:Deploy()
-	local ply = self.Owner
-	-- if IsValid(ply) then
+	self:SetNoDraw(true)
 
-	-- 	if ply:GetMaxHealth() != 1000 then 
+	if SERVER then
+		net.Start("Kubikiribocho_State")
+		net.WriteEntity(self.Owner)
+		net.WriteBool(self.kubikiribochoHolstered)
+		net.Broadcast()
+	end
 
-	-- 		ply:SetMaxHealth(1000)
-	-- 		ply:SetHealth(ply:GetMaxHealth())
-	-- 	end
-	-- end
 
-	ply:SetModel("models/falko_naruto_foc/body_upper/man_custom_nass_01_hood.mdl")
-	ply:ConCommand( "thirdperson_etp 1" )
-		hook.Add("GetFallDamage", "RemoveFallDamage"..ply:GetName(), function(ply, speed)
-			if( GetConVarNumber( "mp_falldamage" ) > 0 ) then
-				return ( speed - 826.5 ) * ( 100 / 896 )
-			end
-			
-			return 0
-		end)
-
+	self.Owner:SetModel("models/falko_naruto_foc/body_upper/man_finalcoat_01.mdl")
+	
 
 
 end
@@ -111,6 +107,10 @@ end
 
 function SWEP:Think()
 	local ply = self.Owner
+
+	if self.kubikiribochoHolstered then
+		self:SetHoldType("normal")
+	end
 
 --====================--
 if self.Owner:KeyDown( IN_WALK ) and self.Owner:KeyDown( IN_ATTACK ) and self.duringattack == true and self.Owner:KeyDown( IN_FORWARD ) then
@@ -943,7 +943,9 @@ end
 
 function SWEP:PrimaryAttack()
 
-if self.canParry then return end
+if self.kubikiribochoHolstered then
+	return
+end
 
 self.Weapon:SetNextSecondaryFire(CurTime() + 0.6 )
 if self.combo == 0 then
@@ -1033,7 +1035,9 @@ end
  
 function SWEP:SecondaryAttack()
 
-	if self.canParry then return end
+	if self.kubikiribochoHolstered then
+		return
+	end
 
 	local ply = self.Owner
 	if not ply:IsOnGround() then
@@ -1077,10 +1081,50 @@ function SWEP:Holster()
 	self.DownSlashed = true
 	return true
 end
+hook.Add("PostPlayerDraw", "KubikiribochoModelInBack", function(ply)
+    local activeWeapon = ply:GetActiveWeapon()
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_kubikiribocho_nrp" then return end
 
+    if activeWeapon.kubikiribochoHolstered then
+        if not IsValid(ply.kubikiribochoModelHolster) then
+            local model = ClientsideModel("models/naruto/unique/unique8/foc_nr_unique8_bane.mdl")
+            if IsValid(model) then
+                model:SetNoDraw(true)
+                ply.kubikiribochoModelHolster = model
+            end
+        end
+
+        local bone = ply:LookupBone("ValveBiped.Bip01_Spine2")
+        if not bone then return end
+
+        local matrix = ply:GetBoneMatrix(bone)
+        if not matrix then return end
+
+        local pos = matrix:GetTranslation()
+        local ang = matrix:GetAngles()
+
+        pos = pos + ang:Forward() * 40 + ang:Up() * 5 + ang:Right() * -23
+        ang:RotateAroundAxis(ang:Forward(), 150)
+        ang:RotateAroundAxis(ang:Right(), 30)
+        ang:RotateAroundAxis(ang:Up(), 170)
+
+        if IsValid(ply.kubikiribochoModelHolster) then
+            ply.kubikiribochoModelHolster:SetRenderOrigin(pos)
+            ply.kubikiribochoModelHolster:SetRenderAngles(ang)
+            ply.kubikiribochoModelHolster:DrawModel()
+        end
+    else
+        if IsValid(ply.kubikiribochoModelHolster) then
+            ply.kubikiribochoModelHolster:Remove()
+        end
+    end
+end)
 
 
 function SWEP:Reload()
+	if self.kubikiribochoHolstered then
+		return
+	end
     local ply = self.Owner
 
     if CurTime() < self.NextSpecialMove then return end
@@ -1097,6 +1141,56 @@ function SWEP:Reload()
         self:DoCombo(AttackHit1, 11, 250, 0, 0.16, "weapon_art", Angle(3, -3, 0), 0, 0, Combo1, 0.14, false, false, 0, 0, false, true, true, true)
 
 
+    end)
+end
+
+hook.Add("PlayerButtonDown", "kubikiribochoSweps", function(ply, button)
+
+	local activeWeapon = ply:GetActiveWeapon()
+
+    if not IsValid(activeWeapon) or activeWeapon:GetClass() ~= "weapon_kubikiribocho_nrp" then
+        return
+    end
+
+    if button == MOUSE_MIDDLE then
+
+        if CurTime() < activeWeapon.NextHolsterWeapon then return end
+        activeWeapon.NextHolsterWeapon = CurTime() + 0.5
+
+        activeWeapon.kubikiribochoHolstered = not activeWeapon.kubikiribochoHolstered
+
+        if SERVER then
+            net.Start("Kubikiribocho_State")
+            net.WriteEntity(ply)
+            net.WriteBool(activeWeapon.kubikiribochoHolstered)
+            net.Broadcast()
+        end
+    
+	end
+
+	
+end)
+
+if CLIENT then
+    net.Receive("Kubikiribocho_State", function()
+        local ply = net.ReadEntity()
+        local holstered = net.ReadBool()
+
+        if not IsValid(ply) or not ply:IsPlayer() then return end
+        local activeWeapon = ply:GetActiveWeapon()
+
+        if IsValid(activeWeapon) and activeWeapon:GetClass() == "weapon_kubikiribocho_nrp" then
+            activeWeapon.kubikiribochoHolstered = holstered
+
+            if holstered then
+                activeWeapon:SetHoldType("none")
+                activeWeapon:SetNoDraw(true)
+            else
+                activeWeapon:SetHoldType("g_combo1")
+                activeWeapon:SetNoDraw(false)
+
+            end
+        end
     end)
 end
 
