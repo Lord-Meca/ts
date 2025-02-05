@@ -1163,7 +1163,7 @@ local function grapPlayers(ply,self)
 		if IsValid(entity) and (entity:IsPlayer() or entity:IsNPC()) and entity ~= ply then
 			
 
-			local entityAttachPos = Vector(0, 0, 10)
+			local entityAttachPos = Vector(0, 0, 40)
 		
 			local rope = constraint.Rope(
 				entity,

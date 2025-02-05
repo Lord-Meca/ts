@@ -302,18 +302,19 @@ function SWEP:Reload()
         if not IsValid(self.targetPlayer) then return end
        
   
-
+        self:SetHoldType("anim_invoke")
+        ply:SetAnimation(PLAYER_RELOAD)
+        timer.Simple(1, function()
+            self:SetHoldType("anim_invoke")
+            ply:SetAnimation(PLAYER_ATTACK1)
+        end)
+    
 
         if SERVER then
 
             util.AddNetworkString("DisplayDamage")
-            self:SetHoldType("anim_invoke")
-            ply:SetAnimation(PLAYER_RELOAD)
-            timer.Simple(1, function()
-                self:SetHoldType("anim_invoke")
-                ply:SetAnimation(PLAYER_ATTACK1)
-            end)
-    
+   
+        
             timer.Simple(1.5, function()
                 ply:SetNWBool("freezePlayer", true)
                 ply:EmitSound("ambient/explosions/explode_9.wav")
@@ -324,12 +325,12 @@ function SWEP:Reload()
 
                 local modelEntity = ents.Create("prop_physics")
                 if IsValid(modelEntity) then
-                    modelEntity:SetModel("models/foc_props_jutsu/jutsu_sceau_piege/foc_jutsu_sceau_piege.mdl")
-                    
-                    modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 0)) 
-                    modelEntity:SetAngles(Angle(0, 0, 0))
+                    modelEntity:SetModel("models/foc_props_jutsu/jutsu_invocation/foc_jutsu_invocation.mdl")
+				
+                    modelEntity:SetPos(ply:GetPos() + Vector(0, 0, 4)) 
+                    modelEntity:SetAngles(Angle(180, 0, 0))
                     modelEntity:SetColor(Color(0,0,0,255))
-                    modelEntity:SetModelScale(4)
+                    modelEntity:SetModelScale(1)
                     modelEntity:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE) 
                     modelEntity:SetRenderMode(RENDERMODE_TRANSCOLOR)
                     modelEntity:SetKeyValue("solid", "0")

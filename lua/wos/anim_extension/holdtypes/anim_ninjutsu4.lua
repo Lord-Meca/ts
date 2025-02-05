@@ -29,11 +29,11 @@ DATA.HoldType = "anim_ninjutsu4"
 DATA.BaseHoldType = "melee2"
 DATA.Translations = {}
 
-DATA.Translations[ ACT_MP_STAND_IDLE ]					= "idle_all_01"
-DATA.Translations[ ACT_MP_WALK ]						= "walk_all"
-DATA.Translations[ ACT_MP_RUN ]							= "run_all_01"
-DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "cidle_all"
-DATA.Translations[ ACT_MP_CROUCHWALK ]					= "cwalk_all"
+DATA.Translations[ ACT_MP_STAND_IDLE ]					= "foc_customman_bee_handseal_recoverychakra_loop"
+DATA.Translations[ ACT_MP_WALK ]						= "foc_customman_bee_handseal_recoverychakra_loop"
+DATA.Translations[ ACT_MP_RUN ]							= "foc_customman_bee_handseal_recoverychakra_loop"
+DATA.Translations[ ACT_MP_CROUCH_IDLE ]					= "foc_customman_bee_handseal_recoverychakra_loop"
+DATA.Translations[ ACT_MP_CROUCHWALK ]					= "foc_customman_bee_handseal_recoverychakra_loop"
 DATA.Translations[ ACT_MP_ATTACK_STAND_PRIMARYFIRE ]	= "foc_kunai"
 DATA.Translations[ ACT_MP_RELOAD_STAND ]				= "foc_customman_ay_etc_win_type01_start"
 
